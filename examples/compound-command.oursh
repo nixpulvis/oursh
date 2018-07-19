@@ -1,0 +1,3 @@
+2.9.4 Compound Commands
+
+(@! /usr/bin/env ruby -e "puts 1")

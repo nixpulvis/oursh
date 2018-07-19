@@ -1,0 +1,19 @@
+fib() {@lang /usr/bin/env elixir
+    defmodule Math do
+      def fibfast(n) do fib_acc(1, 0, n) end
+      def fib_acc(a, b, 0) do a + b end
+      def fib_acc(a, b, n) do fib_acc(b, a+b, n-1) end
+
+      def fibslow(0) do 1 end
+      def fibslow(1) do 1 end
+      def fibslow(n) do fibslow(n-1) + fibslow(n-2) end
+    end
+
+    print_fib = fn(n) ->
+      n |> Math.fibfast() |> IO.puts()
+    end
+
+    print_fib.($1)
+}
+
+fib $((RANDOM % 10))

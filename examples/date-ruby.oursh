@@ -1,0 +1,3 @@
+{@! /usr/env/ruby
+    puts Date.today.iso8601
+}
