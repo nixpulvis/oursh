@@ -1,6 +1,13 @@
-use std::io::{self, Read, Write};
+extern crate nix;
+extern crate termion;
+
+use std::io::{self, Read, Write, Stdout};
 use std::process::{Command, Output};
 use std::str;
+use nix::Result;
+use nix::sys::signal;
+use nix::libc::c_int;
+use termion::raw::IntoRawMode;
 
 // Our shell, for the greater good. Ready and waiting.
 fn main() {
@@ -16,14 +23,16 @@ fn main() {
     // TODO: Full fledged parser will be neato.
     let mut input = [0; 24];
 
+    // Block exits via `SIGINT`, generally triggered with ctrl-c.
+    trap_sigint();
+
     loop {
         // XXX: Blindly drop the contents of input, again this will be better
         // with a real parser.
         input = [0; 24];
 
         // Print a boring static prompt.
-        print!("oursh> ");
-        stdout.lock().flush();
+        prompt(&stdout);
 
         loop {
             // TODO: Enable raw access to STDIN, so we can read as the user
@@ -48,6 +57,31 @@ fn main() {
             }
         }
     }
+}
+
+fn prompt(stdout: &Stdout) {
+    let red = termion::color::Fg(termion::color::Red);
+    let reset = termion::color::Fg(termion::color::Reset);
+    print!("{}oursh{} $ ", red, reset);
+    stdout.lock().flush();
+}
+
+fn trap_sigint() -> Result<signal::SigAction>  {
+    let action = signal::SigAction::new(signal::SigHandler::Handler(handle_ctrl_c),
+                                        signal::SaFlags::all(),
+                                        signal::SigSet::all());
+    unsafe {
+        signal::sigaction(signal::SIGINT, &action)
+    }
+}
+
+extern fn handle_ctrl_c(i: c_int) {
+    let stdout = io::stdout();
+
+    // Clear
+    print!("{}\r", termion::clear::CurrentLine);
+    prompt(&stdout);
+    trap_sigint();
 }
 
 // Obviously very wrong. Most notably this blocks until the command completes.
