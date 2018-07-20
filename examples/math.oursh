@@ -1,4 +1,4 @@
-fib() {@lang /usr/bin/env elixir
+fib() {@! /usr/bin/env elixir
     defmodule Math do
       def fibfast(n) do fib_acc(1, 0, n) end
       def fib_acc(a, b, 0) do a + b end

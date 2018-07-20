@@ -24,6 +24,12 @@ programs, the language this will be written in.
 - Sane defaults
 - Fast
 
+## Setup
+
+```sh
+rustup update
+```
+
 ## Usage
 
 While this project is in early stages, there are no OS packages to use. However,
