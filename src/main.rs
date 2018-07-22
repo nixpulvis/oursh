@@ -24,8 +24,8 @@ fn main() {
     // TODO: Full fledged parser will be neato.
     let mut input: [u8; 24];
 
-    // Block exits via `SIGINT`, generally triggered with ctrl-c.
-    trap_sigint().expect("error trapping sigint");
+    // // Block exits via `SIGINT`, generally triggered with ctrl-c.
+    // trap_sigint().expect("error trapping sigint");
 
     loop {
         // XXX: Blindly drop the contents of input, again this will be better

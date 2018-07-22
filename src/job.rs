@@ -42,7 +42,7 @@ impl Job {
     // TODO: Return result.
     pub fn run(&mut self) {
         // TODO: Proper builtins, in program module.
-        if self.argv[0].to_bytes() == b"exit" {
+        if self.argv.len() > 0 && self.argv[0].to_bytes() == b"exit" {
             exit(0);
         }
 
@@ -79,6 +79,11 @@ impl Job {
     }
 
     fn exec(&self) {
+        // TODO: Where should we handle empty commands?
+        if self.argv.len() == 0 {
+            return;
+        }
+
         match execvp(&self.argv[0], &self.argv) {
             Ok(_) => unreachable!(),
             Err(Error::Sys(e @ _)) => println!("error: {}", e.desc()),
@@ -104,7 +109,13 @@ impl Job {
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
 
-    // TODO
+    // TODO: Should this work?
+    #[test]
+    fn test_empty_program() {
+        let program = Program::parse(b"" as &[u8]);
+        let mut job = Job::new(&program);
+        job.run();
+    }
 }

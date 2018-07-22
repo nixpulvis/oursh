@@ -49,7 +49,11 @@ impl Program {
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
 
-    // TODO
+    // TODO: Should this work?
+    #[test]
+    fn test_empty_program() {
+        let program = Program::parse(b"" as &[u8]);
+    }
 }
