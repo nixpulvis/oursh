@@ -1,21 +1,38 @@
+//! Subprocess execution management.
+//!
+//! All commands (both foreground and background) are created and executed as
+//! a *job*. This helps manage the commands the shell runs.
+
 use std::ffi::CString;
 use std::process::exit;
 use nix::unistd::{execvp, fork, Pid, ForkResult};
 use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
 use nix::Error;
 use nix::errno::Errno;
+use program::Program;
 
+/// A command to be executed by various means.
+///
+/// The shell's main job (pun intended) is to run jobs. Each job has various
+/// arguments, and rules about what things should be done.
+///
+/// TODO: Redirection example.
+/// TODO: Background example.
+/// TODO: Environment example?
 pub struct Job {
     // TODO: Use a program type.
     argv: Vec<CString>,
+    // TODO: Call this pid?
     child: Option<Pid>,
 }
 
 impl Job {
+    /// Create a new job from a program, obtained from the input file which is
+    /// typically STDIN.
     // TODO: Return result.
-    pub fn new(args: &str) -> Self {
+    pub fn new(program: &Program) -> Self {
         // TODO: Proper parsing needed, as this will take a `Program`.
-        let vec = args.split_whitespace().map(|a| {
+        let vec = program.source.split_whitespace().map(|a| {
             CString::new(a).expect("error reading string argument")
         }).collect();
 
@@ -25,6 +42,9 @@ impl Job {
         }
     }
 
+    /// Run a shell job, waiting for the command to finish.
+    ///
+    /// This function also does a simple lookup for builtin functions.
     // TODO: Return result.
     pub fn run(&mut self) {
         // TODO: Proper builtins, in program module.

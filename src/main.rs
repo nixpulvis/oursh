@@ -2,7 +2,7 @@ extern crate nix;
 extern crate termion;
 extern crate oursh;
 
-use std::io::{self, Read, Write, Stdout};
+use std::io::{self, Read, BufRead, Write, Stdout};
 use std::process::{Command, Output};
 use std::str;
 use nix::Result;
@@ -10,6 +10,7 @@ use nix::sys::signal;
 use nix::libc::c_int;
 use termion::raw::IntoRawMode;
 use oursh::job::Job;
+use oursh::program::Program;
 
 // Our shell, for the greater good. Ready and waiting.
 fn main() {
@@ -50,8 +51,8 @@ fn main() {
             let vec: Vec<&[u8]> = input.splitn(2, |b| *b == '\n' as u8).collect();
             match &vec[..] {
                 [line, rest] => {
-                    let program = str::from_utf8(&line).expect("error reading utf8");
-                    Job::new(program).run();
+                    let program = Program::parse(*line);
+                    Job::new(&program).run();
                     break
                 }
                 _ => {},
