@@ -2,13 +2,11 @@ extern crate nix;
 extern crate termion;
 extern crate oursh;
 
-use std::io::{self, Read, BufRead, Write, Stdout};
-use std::process::{Command, Output};
-use std::str;
+use std::io::{self, Read, Write, Stdout};
 use nix::Result;
 use nix::sys::signal;
 use nix::libc::c_int;
-use termion::raw::IntoRawMode;
+// use termion::raw::IntoRawMode;
 use oursh::job::Job;
 use oursh::program::Program;
 
@@ -20,14 +18,14 @@ fn main() {
 
     // Standard output file descriptor (1), used to display program output to
     // the user of the shell.
-    let mut stdout = io::stdout();
+    let stdout = io::stdout();
 
     // STDIN, input buffer, used to `read` text into for further processing.
     // TODO: Full fledged parser will be neato.
-    let mut input = [0; 24];
+    let mut input: [u8; 24];
 
     // Block exits via `SIGINT`, generally triggered with ctrl-c.
-    trap_sigint();
+    trap_sigint().expect("error trapping sigint");
 
     loop {
         // XXX: Blindly drop the contents of input, again this will be better
@@ -50,7 +48,7 @@ fn main() {
             // wont look like a huge hack.
             let vec: Vec<&[u8]> = input.splitn(2, |b| *b == '\n' as u8).collect();
             match &vec[..] {
-                [line, rest] => {
+                [line, _rest] => {
                     let program = Program::parse(*line);
                     Job::new(&program).run();
                     break
@@ -65,7 +63,7 @@ fn prompt(stdout: &Stdout) {
     let red = termion::color::Fg(termion::color::Red);
     let reset = termion::color::Fg(termion::color::Reset);
     print!("{}oursh{} $ ", red, reset);
-    stdout.lock().flush();
+    stdout.lock().flush().expect("error flushing STDOUT");
 }
 
 fn trap_sigint() -> Result<signal::SigAction>  {
@@ -77,18 +75,12 @@ fn trap_sigint() -> Result<signal::SigAction>  {
     }
 }
 
-extern fn handle_ctrl_c(i: c_int) {
+extern fn handle_ctrl_c(_: c_int) {
     let stdout = io::stdout();
 
     // Clear
     print!("{}\r", termion::clear::CurrentLine);
     prompt(&stdout);
-    trap_sigint();
+    trap_sigint().expect("error trapping sigint");
 }
 
-// Obviously very wrong. Most notably this blocks until the command completes.
-fn handle_program(program: &str) -> Output {
-    Command::new(program)
-        .output()
-        .expect("error executing program")
-}

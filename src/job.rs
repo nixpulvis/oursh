@@ -6,9 +6,8 @@
 use std::ffi::CString;
 use std::process::exit;
 use nix::unistd::{execvp, fork, Pid, ForkResult};
-use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
+use nix::sys::wait::{waitpid, WaitStatus};
 use nix::Error;
-use nix::errno::Errno;
 use program::Program;
 
 /// A command to be executed by various means.
@@ -110,7 +109,7 @@ impl Job {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // use super::*;
 
     // TODO
 }
