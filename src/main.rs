@@ -1,5 +1,6 @@
 extern crate nix;
 extern crate termion;
+extern crate oursh;
 
 use std::io::{self, Read, Write, Stdout};
 use std::process::{Command, Output};
@@ -8,6 +9,7 @@ use nix::Result;
 use nix::sys::signal;
 use nix::libc::c_int;
 use termion::raw::IntoRawMode;
+use oursh::job::Job;
 
 // Our shell, for the greater good. Ready and waiting.
 fn main() {
@@ -49,8 +51,7 @@ fn main() {
             match &vec[..] {
                 [line, rest] => {
                     let program = str::from_utf8(&line).expect("error reading utf8");
-                    let mut output = handle_program(program);
-                    stdout.write(&output.stdout).expect("error writing to STDOUT");
+                    Job::new(program).run();
                     break
                 }
                 _ => {},
