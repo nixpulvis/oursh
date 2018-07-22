@@ -7,6 +7,7 @@
 //! ### Modern Syntax Extensions
 
 use std::io::Read;
+use std::ffi::CString;
 
 /// Source program representation, used mainly for parsing.
 ///
@@ -33,6 +34,14 @@ impl Program {
         Program {
             source: source,
         }
+    }
+
+    /// Return an `exec` style argv vector for this program.
+    // TODO: Proper parsing should have already collected this.
+    pub fn argv(&self) -> Vec<CString> {
+        self.source.split_whitespace().map(|a| {
+            CString::new(a).expect("error reading string argument")
+        }).collect()
     }
 }
 

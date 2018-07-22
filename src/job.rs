@@ -30,13 +30,8 @@ impl Job {
     /// typically STDIN.
     // TODO: Return result.
     pub fn new(program: &Program) -> Self {
-        // TODO: Proper parsing needed, as this will take a `Program`.
-        let vec = program.source.split_whitespace().map(|a| {
-            CString::new(a).expect("error reading string argument")
-        }).collect();
-
         Job {
-            argv: vec,
+            argv: program.argv(),
             child: None,
         }
     }
