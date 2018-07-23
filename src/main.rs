@@ -1,6 +1,7 @@
 extern crate oursh;
 
 use std::io::{self, Read};
+use std::process::exit;
 use oursh::job::Job;
 use oursh::program::Program;
 use oursh::repl;
@@ -36,7 +37,9 @@ fn main() {
             // will allow us to process history, syntax, and more!
 
             // Read what's avalible to us.
-            stdin.read(&mut input).expect("error reading STDIN");
+            if stdin.read(&mut input).expect("error reading STDIN") == 0 {
+                exit(0);
+            }
 
             // Once we've read a complete "program" (§2.10.2) we handle it,
             // until then we keep reading. Once we have a proper parser this
