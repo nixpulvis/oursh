@@ -7,7 +7,6 @@ use std::ffi::CString;
 use std::process::exit;
 use nix::unistd::{execvp, fork, Pid, ForkResult};
 use nix::sys::wait::{waitpid, WaitStatus};
-use nix::Error;
 use program::Program;
 
 /// A command to be executed by various means.

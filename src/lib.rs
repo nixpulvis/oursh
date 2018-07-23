@@ -50,6 +50,8 @@
 //! [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
 extern crate nix;
+extern crate termion;
 
 pub mod job;
 pub mod program;
+pub mod repl;

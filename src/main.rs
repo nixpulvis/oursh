@@ -1,14 +1,9 @@
-extern crate nix;
-extern crate termion;
 extern crate oursh;
 
-use std::io::{self, Read, Write, Stdout};
-use nix::Result;
-use nix::sys::signal;
-use nix::libc::c_int;
-// use termion::raw::IntoRawMode;
+use std::io::{self, Read};
 use oursh::job::Job;
 use oursh::program::Program;
+use oursh::repl;
 
 // Our shell, for the greater good. Ready and waiting.
 fn main() {
@@ -25,7 +20,7 @@ fn main() {
     let mut input: [u8; 24];
 
     // Block exits via `SIGINT`, generally triggered with ctrl-c.
-    trap_sigint().expect("error trapping sigint");
+    repl::trap_sigint().expect("error trapping sigint");
 
     loop {
         // XXX: Blindly drop the contents of input, again this will be better
@@ -33,7 +28,7 @@ fn main() {
         input = [0; 24];
 
         // Print a boring static prompt.
-        prompt(&stdout);
+        repl::prompt(&stdout);
 
         loop {
             // TODO: Enable raw access to STDIN, so we can read as the user
@@ -58,29 +53,3 @@ fn main() {
         }
     }
 }
-
-fn prompt(stdout: &Stdout) {
-    let red = termion::color::Fg(termion::color::Red);
-    let reset = termion::color::Fg(termion::color::Reset);
-    print!("{}oursh{} $ ", red, reset);
-    stdout.lock().flush().expect("error flushing STDOUT");
-}
-
-fn trap_sigint() -> Result<signal::SigAction>  {
-    let action = signal::SigAction::new(signal::SigHandler::Handler(handle_ctrl_c),
-                                        signal::SaFlags::all(),
-                                        signal::SigSet::all());
-    unsafe {
-        signal::sigaction(signal::SIGINT, &action)
-    }
-}
-
-extern fn handle_ctrl_c(_: c_int) {
-    let stdout = io::stdout();
-
-    // Clear
-    print!("{}\r", termion::clear::CurrentLine);
-    prompt(&stdout);
-    trap_sigint().expect("error trapping sigint");
-}
-
