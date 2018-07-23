@@ -1,5 +1,5 @@
 # oursh
-![](https://api.travis-ci.org/nixpulvis/oursh.svg)
+[![Build Status](https://travis-ci.org/nixpulvis/oursh.svg?branch=master)](https://travis-ci.org/nixpulvis/oursh)
 
 This shell should be both POSIX compatible and yet modern and exciting. Fancy
 features should not be prevented by POSIX compatibility. This will effect the
