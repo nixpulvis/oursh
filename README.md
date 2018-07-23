@@ -1,4 +1,5 @@
 # oursh
+![](https://api.travis-ci.org/nixpulvis/oursh.svg)
 
 This shell should be both POSIX compatible and yet modern and exciting. Fancy
 features should not be prevented by POSIX compatibility. This will effect the
@@ -9,6 +10,7 @@ It's also a nice name to play with pseudo-satirical themes... right comrade?
 It's short (ish) and sneakily fits `rs` in it, which is the extension of Rust
 programs, the language this will be written in.
 
+- [Documentation][documentation]
 
 ## Features
 
@@ -98,6 +100,7 @@ We will want to create a few internal modules for the shell.
 - `package` - simplistic package manager support (builtin function).
 
 
+[documentation]: https://nixpulvis.com/oursh/oursh
 [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
 [termios]: https://crates.io/crates/termios
 [libc]: https://crates.io/crates/libc
