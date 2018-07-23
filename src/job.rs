@@ -45,7 +45,13 @@ impl Job {
             exit(0);
         }
 
-        self.fork_and_wait();
+        // TODO: This is a awful background parse :P
+        if self.argv.last().map(|s| s.to_bytes()) == Some(b"&") {
+            self.argv.pop();
+            self.fork();
+        } else {
+            self.fork_and_wait();
+        }
     }
 
     fn fork(&mut self) {
