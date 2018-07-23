@@ -93,7 +93,7 @@ impl Job {
             Ok(_) => unreachable!(),
             Err(e @ _) => {
                 println!("{}", e);
-                exit(127) ;
+                exit(127);
             }
         }
     }
