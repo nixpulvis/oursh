@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Program","Source program representation, used mainly for parsing."]]});
