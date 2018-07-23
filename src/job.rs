@@ -86,8 +86,10 @@ impl Job {
 
         match execvp(&self.argv[0], &self.argv) {
             Ok(_) => unreachable!(),
-            Err(Error::Sys(e @ _)) => println!("error: {}", e.desc()),
-            _ => {}
+            Err(e @ _) => {
+                println!("{}", e);
+                exit(127) ;
+            }
         }
     }
 
