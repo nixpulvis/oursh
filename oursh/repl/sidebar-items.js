@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["prompt",""],["trap_sigint",""]]});
