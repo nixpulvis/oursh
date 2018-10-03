@@ -25,6 +25,7 @@ programs, the language this will be written in.
 - Package manager
 - Sane defaults
 - Fast
+- Pipe old commands without rerunning
 
 ## Setup
 
