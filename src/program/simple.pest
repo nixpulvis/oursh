@@ -4,7 +4,7 @@ commands = _{ (command ~ SEPARATOR) ~ commands
             | command }
 command  = { word* }
 
-word       = _{ (ASCII_ALPHANUMERIC | "_" | "-" | ".")+ }
+word       = _{ (ASCII_ALPHANUMERIC | "_" | "-" | "." | "&")+ }
 linebreaks = _{ (NEWLINE)* }
 
 SEPARATOR  = _{ ";" }

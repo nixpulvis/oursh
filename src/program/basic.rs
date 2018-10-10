@@ -1,24 +1,18 @@
+//! Hand-parsed program syntax.
 use std::io::Read;
 use std::ffi::CString;
 
 /// Source program representation, used mainly for parsing.
-///
-/// TODO: Build AST instead of String?
-/// TODO: Parse sequence of programs from stream.
-/// TODO: POSIX and Modern varients.
 pub struct BasicProgram {
-    /// TODO: This should be removed, and/or made private.
-    pub source: String,
+    source: String,
 }
 
-impl super::Parser for BasicProgram {
-    type Target = BasicProgram;
-
-    /// Create a new program from a line of the given reader.
+impl super::Program for BasicProgram {
+    /// Create a new program from the given reader.
     ///
     /// ```
+    /// use oursh::program::Program;
     /// use oursh::program::basic::BasicProgram;
-    /// use oursh::program::Parser;
     ///
     /// let program = BasicProgram::parse(b"ls" as &[u8]);
     /// ```
@@ -30,15 +24,12 @@ impl super::Parser for BasicProgram {
             source: source,
         }
     }
-}
 
-impl super::Program for BasicProgram {
-    /// Return an `exec` style argv vector for this program.
-    // TODO: Proper parsing should have already collected this.
-    fn argv(&self) -> Vec<CString> {
-        self.source.split_whitespace().map(|a| {
+    /// Return the single parsed command.
+    fn commands(&self) -> Vec<super::Command> {
+        vec![self.source.split_whitespace().map(|a| {
             CString::new(a).expect("error reading string argument")
-        }).collect()
+        }).collect()]
     }
 }
 
@@ -49,7 +40,7 @@ impl super::Program for BasicProgram {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use program::Parser;
+    use program::Program;
 
     // TODO: Should this work?
     #[test]

@@ -7,30 +7,28 @@ use std::ffi::CString;
 use std::process::exit;
 use nix::unistd::{execvp, fork, Pid, ForkResult};
 use nix::sys::wait::{waitpid, WaitStatus};
-use program::Program;
+use program::Command;
 
-/// A command to be executed by various means.
+/// A job to be executed by various means.
 ///
-/// The shell's main job (pun intended) is to run jobs. Each job has various
-/// arguments, and rules about what things should be done.
+/// The shell's main job (pun intended) is to run commands. Each job has various arguments, and
+/// rules about what things should be done.
 ///
-/// TODO: Redirection example.
-/// TODO: Background example.
-/// TODO: Environment example?
+/// - TODO: Redirection example.
+/// - TODO: Background example.
+/// - TODO: Environment example?
 pub struct Job {
-    // TODO: Use a program type.
-    argv: Vec<CString>,
+    command: Command,
     // TODO: Call this pid?
     child: Option<Pid>,
 }
 
 impl Job {
-    /// Create a new job from a program, obtained from the input file which is
-    /// typically STDIN.
+    /// Create a new job from the given command.
     // TODO: Return result.
-    pub fn new(program: &Program) -> Self {
+    pub fn new(command: &Command) -> Self {
         Job {
-            argv: program.argv(),
+            command: command.to_owned(),
             child: None,
         }
     }
@@ -41,13 +39,13 @@ impl Job {
     // TODO: Return result.
     pub fn run(&mut self) {
         // TODO: Proper builtins, in program module.
-        if self.argv.len() > 0 && self.argv[0].to_bytes() == b"exit" {
+        if self.command.len() > 0 && self.command[0].to_bytes() == b"exit" {
             exit(0);
         }
 
         // TODO: This is a awful background parse :P
-        if self.argv.last().map(|s| s.to_bytes()) == Some(b"&") {
-            self.argv.pop();
+        if self.command.last().map(|s| s.to_bytes()) == Some(b"&") {
+            self.command.pop();
             self.fork();
         } else {
             self.fork_and_wait();
@@ -85,11 +83,11 @@ impl Job {
 
     fn exec(&self) {
         // TODO: Where should we handle empty commands?
-        if self.argv.len() == 0 {
+        if self.command.len() == 0 {
             return;
         }
 
-        match execvp(&self.argv[0], &self.argv) {
+        match execvp(&self.command[0], &self.command) {
             Ok(_) => unreachable!(),
             Err(e @ _) => {
                 println!("{}", e);
@@ -117,13 +115,11 @@ impl Job {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use program::parse;
 
     // TODO: Should this work?
     #[test]
     fn test_empty_program() {
-        let program = parse(b"" as &[u8]);
-        let mut job = Job::new(&program);
+        let mut job = Job::new(&vec![]);
         job.run();
     }
 }
