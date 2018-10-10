@@ -13,7 +13,7 @@ struct Command(String);
 impl super::Program for SimpleProgram {
     fn parse<R: Read>(mut reader: R) -> Self {
         let mut string = String::new();
-        reader.read_to_string(&mut string);
+        reader.read_to_string(&mut string).unwrap();
         println!("input: {:?}", string);
         let parsed = SimpleParser::parse(Rule::program, &string)
             .unwrap().next().unwrap();
