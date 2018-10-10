@@ -56,6 +56,9 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
+#[macro_use]
+extern crate lalrpop_util;
+
 pub mod job;
 pub mod program;
 pub mod repl;

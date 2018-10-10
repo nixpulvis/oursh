@@ -35,7 +35,8 @@ pub trait Program {
 
 /// The default program type, used for unannotated blocks.
 // pub type DefaultProgram = self::basic::BasicProgram;
-pub type DefaultProgram = self::simple::SimpleProgram;
+// pub type DefaultProgram = self::simple::SimpleProgram;
+pub type DefaultProgram = self::posix::PosixProgram;
 
 /// Parse a program of the default type.
 ///
@@ -71,3 +72,5 @@ pub mod basic;
 pub use self::basic::BasicProgram;
 pub mod simple;
 pub use self::simple::SimpleProgram;
+pub mod posix;
+pub use self::posix::PosixProgram;
