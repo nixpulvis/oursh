@@ -117,11 +117,12 @@ impl Job {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use program::parse;
 
     // TODO: Should this work?
     #[test]
     fn test_empty_program() {
-        let program = Program::parse(b"" as &[u8]);
+        let program = parse(b"" as &[u8]);
         let mut job = Job::new(&program);
         job.run();
     }

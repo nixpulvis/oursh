@@ -3,7 +3,7 @@ extern crate oursh;
 use std::io::{self, Read};
 use std::process::exit;
 use oursh::job::Job;
-use oursh::program::Program;
+use oursh::program::parse;
 use oursh::repl;
 
 // Our shell, for the greater good. Ready and waiting.
@@ -47,7 +47,7 @@ fn main() {
             let vec: Vec<&[u8]> = input.splitn(2, |b| *b == '\n' as u8).collect();
             match &vec[..] {
                 [line, _rest] => {
-                    let program = Program::parse(*line);
+                    let program = parse(*line);
                     Job::new(&program).run();
                     break
                 }

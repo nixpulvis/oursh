@@ -1,0 +1,4 @@
+program = { bool }
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+bool = { "true" | "false" }

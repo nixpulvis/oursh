@@ -52,6 +52,10 @@
 extern crate nix;
 extern crate termion;
 
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
+
 pub mod job;
 pub mod program;
 pub mod repl;
