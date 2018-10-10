@@ -1,4 +1,12 @@
-program = { bool }
+program  = { commands ~ linebreaks }
 
-WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
-bool = { "true" | "false" }
+commands = _{ (command ~ SEPARATOR) ~ commands
+            | command }
+command  = { word* }
+
+word       = _{ (ASCII_ALPHANUMERIC | "_" | "-" | ".")+ }
+linebreaks = _{ (NEWLINE)* }
+
+SEPARATOR  = _{ ";" }
+NEWLINE    = _{ "\n" }
+WHITESPACE = _{ " " | "\t" }

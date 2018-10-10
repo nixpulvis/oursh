@@ -16,6 +16,7 @@ pub trait Parser {
 }
 
 pub trait Program {
+    // TODO: This makes little sense, a program can have multiple commands.
     fn argv(&self) -> Vec<CString>;
 }
 
@@ -27,8 +28,8 @@ pub use self::simple::SimpleProgram;
 
 // Some conveniant definitions.
 
-pub type DefaultProgram = self::basic::BasicProgram;
-// pub type DefaultProgram = self::simple::SimpleProgram;
+// pub type DefaultProgram = self::basic::BasicProgram;
+pub type DefaultProgram = self::simple::SimpleProgram;
 
 pub fn parse<R: Read>(reader: R) -> DefaultProgram {
     DefaultProgram::parse(reader)
