@@ -4,6 +4,7 @@
 //! a *job*. This helps manage the commands the shell runs.
 
 use std::process::exit;
+use std::ffi::CString;
 use nix::unistd::{execvp, fork, Pid, ForkResult};
 use nix::sys::wait::{waitpid, WaitStatus};
 use program::Command;
@@ -17,7 +18,7 @@ use program::Command;
 /// - TODO: Background example.
 /// - TODO: Environment example?
 pub struct Job {
-    command: Command,
+    argv: Vec<CString>,
     // TODO: Call this pid?
     child: Option<Pid>,
 }
@@ -27,7 +28,7 @@ impl Job {
     // TODO: Return result.
     pub fn new(command: &Command) -> Self {
         Job {
-            command: command.to_owned(),
+            argv: command.argv(),
             child: None,
         }
     }
@@ -38,13 +39,13 @@ impl Job {
     // TODO: Return result.
     pub fn run(&mut self) {
         // TODO: Proper builtins, in program module.
-        if self.command.len() > 0 && self.command[0].to_bytes() == b"exit" {
+        if self.argv.len() > 0 && self.argv[0].to_bytes() == b"exit" {
             exit(0);
         }
 
         // TODO: This is a awful background parse :P
-        if self.command.last().map(|s| s.to_bytes()) == Some(b"&") {
-            self.command.pop();
+        if self.argv.last().map(|s| s.to_bytes()) == Some(b"&") {
+            self.argv.pop();
             self.fork();
         } else {
             self.fork_and_wait();
@@ -82,11 +83,11 @@ impl Job {
 
     fn exec(&self) {
         // TODO: Where should we handle empty commands?
-        if self.command.len() == 0 {
+        if self.argv.len() == 0 {
             return;
         }
 
-        match execvp(&self.command[0], &self.command) {
+        match execvp(&self.argv[0], &self.argv) {
             Ok(_) => unreachable!(),
             Err(e @ _) => {
                 println!("{}", e);

@@ -106,12 +106,15 @@
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
 use std::io::Read;
+use std::ffi::CString;
 
-lalrpop_mod!(pub lalrpop, "/program/posix.rs");
+lalrpop_mod!(lalrpop, "/program/posix.rs");
 
 pub struct PosixProgram;
 
 impl super::Program for PosixProgram {
+    type Command = Vec<CString>;
+
     fn parse<R: Read>(mut reader: R) -> Self {
         let mut string = String::new();
         reader.read_to_string(&mut string).unwrap();
@@ -121,7 +124,7 @@ impl super::Program for PosixProgram {
         PosixProgram
     }
 
-    fn commands(&self) -> Vec<super::Command> {
+    fn commands(&self) -> Vec<Self::Command> {
         vec![]
     }
 }

@@ -8,6 +8,8 @@ pub struct BasicProgram {
 }
 
 impl super::Program for BasicProgram {
+    type Command = Vec<CString>;
+
     /// Create a new program from the given reader.
     ///
     /// ```
@@ -26,7 +28,7 @@ impl super::Program for BasicProgram {
     }
 
     /// Return the single parsed command.
-    fn commands(&self) -> Vec<super::Command> {
+    fn commands(&self) -> Vec<Self::Command> {
         vec![self.source.split_whitespace().map(|a| {
             CString::new(a).expect("error reading string argument")
         }).collect()]

@@ -4,7 +4,6 @@
 //! *programs*, and are parsed and handled by this module.
 //!
 //! - TODO: Parse sequence of programs from stream.
-//! - TODO: POSIX and Modern varients.
 //!
 //! ### POSIX Syntax
 //! ### Modern Syntax
@@ -17,17 +16,27 @@ use std::ffi::CString;
 /// Each command is handled by a `Job`. A single command may be run
 /// multiple times each as a new `Job` but as the same `Command`.
 // TODO: Make this a trait too.
-pub type Command = Vec<CString>;
+pub trait Command {
+    fn argv(&self) -> Vec<CString>;
+}
 
+// TODO: Remove this, we won't be using bare Vec<CString>s for long.
+impl Command for Vec<CString> {
+    fn argv(&self) -> Vec<CString> {
+        self.clone()
+    }
+}
 
 /// A program is a collection of commands given by the user.
 pub trait Program {
+    type Command: Command;
+
     /// Parse a whole program from the given `reader`.
     fn parse<R: Read>(reader: R) -> Self;
 
     /// Return a list of all the commands in this program.
     // NOTE: Execution should *not* simply be running each in order.
-    fn commands(&self) -> Vec<Command>;
+    fn commands(&self) -> Vec<Self::Command>;
 }
 
 
