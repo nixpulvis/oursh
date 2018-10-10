@@ -15,7 +15,6 @@ use std::ffi::CString;
 ///
 /// Each command is handled by a `Job`. A single command may be run
 /// multiple times each as a new `Job` but as the same `Command`.
-// TODO: Make this a trait too.
 pub trait Command {
     fn argv(&self) -> Vec<CString>;
 }
