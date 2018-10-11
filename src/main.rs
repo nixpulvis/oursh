@@ -54,7 +54,7 @@ fn main() {
                     let program = parse_default(*line);
                     // TODO: Proper program execution.
                     for command in program.commands().iter() {
-                        Job::new(command).run();
+                        Job::new(&**command).run();
                     }
                     break
                 }

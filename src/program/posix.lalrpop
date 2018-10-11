@@ -1,54 +1,57 @@
+use program::posix::ast;
+
 grammar;
 
-pub Program: Vec<Vec<String>> = {
+pub Program: ast::Program = {
+    "{@" <p: Program> "}" => {
+        println!("bridge to alt lang");
+        p
+    },
     <p: Program> "\n"+ <c: Commands> => {
-        let (mut p, mut c) = (p, c);
-        p.append(&mut c);
+        let (mut p, c) = (p, c);
+        p.0.push(box c);
         p
     },
     <p: Program> ";" <c: Commands> => {
-        let (mut p, mut c) = (p, c);
-        p.append(&mut c);
+        let (mut p, c) = (p, c);
+        p.0.push(box c);
         p
     },
     <p: Program> "&" <c: Commands> => {
-        let (mut p, mut c) = (p, c);
-        p.append(&mut c);
+        let (mut p, c) = (p, c);
+        p.0.push(box c);
         p
     },
     <p: Program> ";" => p,
     <p: Program> "&" => p,
-    <c: Commands> => c,
+    Commands => ast::Program(vec![box <>]),
 }
 
-Commands: Vec<Vec<String>> = {
+Commands: ast::Command = {
+    "(" <p: Program> ")" => {
+        ast::Command::Subshell(box p)
+    },
     <cs: Commands> "&&" <p: Pipeline> => {
-        let mut cs = cs;
-        cs.push(p);
-        cs
+        ast::Command::And(box cs, box p)
     },
     <cs: Commands> "||" <p: Pipeline> => {
-        let mut cs = cs;
-        cs.push(p);
-        cs
+        ast::Command::Or(box cs, box p)
     },
-    <p: Pipeline> => vec![p]
+    Pipeline => <>,
 }
 
-Pipeline: Vec<String> = {
-    "!" <ps: PipelineSeq> => ps,
+Pipeline: ast::Command = {
+    "!" <ps: PipelineSeq> => ast::Command::Not(box ps),
     <ps: PipelineSeq> => ps,
 }
 
-PipelineSeq: Vec<String> = {
+PipelineSeq: ast::Command = {
     <ps: PipelineSeq> "|" "\n"* <c: Command> => {
-        let mut ps = ps;
-        ps.push(c.join(" "));
-        ps
+        ast::Command::Pipeline(box ps, box c)
     },
-    <c: Command> => vec![c.join(" ")],
+    <c: Command> => c,
 }
 
-Command: Vec<&'input str> = Word+;
+pub Command: ast::Command = Word+ => ast::Command::Simple(<>);
 
-Word: &'input str = r"[a-zA-Z0-9-_]+" => <>;
+pub Word: ast::Word = r"[a-zA-Z0-9-_]+" => ast::Word(<>.into());

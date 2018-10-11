@@ -124,13 +124,13 @@ pub trait Program {
     fn parse<R: Read>(reader: R) -> Self;
 
     /// Return a list of all the commands in this program.
-    fn commands(&self) -> Vec<Self::Command>;
+    fn commands(&self) -> &[Box<Self::Command>];
 }
 
 
 /// The default program type, used for unannotated blocks.
-pub type DefaultProgram = self::basic::BasicProgram;
-// pub type DefaultProgram = self::posix::PosixProgram;
+// pub type DefaultProgram = BasicProgram;
+pub type DefaultProgram = PosixProgram;
 
 /// Parse a program of the default type.
 ///
@@ -164,4 +164,4 @@ pub fn parse<P: Program, R: Read>(reader: R) -> P {
 pub mod basic;
 pub use self::basic::BasicProgram;
 pub mod posix;
-pub use self::posix::PosixProgram;
+pub use self::posix::Program as PosixProgram;

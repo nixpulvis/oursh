@@ -108,29 +108,124 @@
 use std::io::Read;
 use std::ffi::CString;
 
-lalrpop_mod!(lalrpop, "/program/posix.rs");
+pub use self::ast::Program;
+pub use self::ast::Command;
 
-pub struct PosixProgram;
-
-impl super::Program for PosixProgram {
-    type Command = Vec<CString>;
+impl super::Program for Program {
+    type Command = Command;
 
     fn parse<R: Read>(mut reader: R) -> Self {
         let mut string = String::new();
         reader.read_to_string(&mut string).unwrap();
         let parsed = lalrpop::ProgramParser::new().parse(&string).unwrap();
         println!("{:#?}", parsed);
-
-        PosixProgram
+        parsed
     }
 
-    fn commands(&self) -> Vec<Self::Command> {
-        vec![]
+    fn commands(&self) -> &[Box<Self::Command>] {
+        &self.0[..]
     }
 }
 
-impl super::Command for Vec<CString> {
+impl super::Command for Command {
     fn argv(&self) -> Vec<CString> {
-        self.clone()
+        match *self {
+            Command::Simple(ref words) => {
+                words.iter().map(|w| {
+                    CString::new(&w.0 as &str).unwrap()
+                }).collect()
+            },
+            _ => unimplemented!(),
+        }
     }
 }
+
+/// Abstract Syntax Tree for the POSIX language.
+pub mod ast {
+    // enum Interpreter {
+    //     Posix,
+    //     Modern,
+    //     Other(String),
+    // }
+
+    /// A program is the result of parsing a sequence of commands.
+    #[derive(Debug)]
+    pub struct Program(pub Vec<Box<Command>>);
+
+    /// A command is a highly recursive node with the main features
+    /// of the POSIX language.
+    #[derive(Debug)]
+    pub enum Command {
+        /// Performs boolean negation to the status code of the inner
+        /// command.
+        ///
+        /// ### Examples
+        ///
+        /// ```sh
+        /// ! grep 'password' data.txt
+        /// ```
+        Not(Box<Command>),
+        /// Perform the first command, conditionally running the next
+        /// upon success.
+        ///
+        /// ### Examples
+        ///
+        /// ```sh
+        /// mkdir tmp && cd tmp
+        /// ```
+        And(Box<Command>, Box<Command>),
+        /// Perform the first command, conditionally running the next
+        /// upon failure.
+        ///
+        /// ### Examples
+        ///
+        /// ```sh
+        /// kill $1 || kill -9 $1
+        /// ```
+        Or(Box<Command>, Box<Command>),
+        /// Run the inner **program** in a sub-shell environment.
+        ///
+        /// ### Examples
+        ///
+        /// ```sh
+        /// DATE=(date)
+        /// ```
+        Subshell(Box<Program>),
+        /// Run a command's output through to the input of another.
+        ///
+        /// ### Examples
+        ///
+        /// ```sh
+        /// cat $1 | wc -l
+        /// ```
+        Pipeline(Box<Command>, Box<Command>),
+        /// Run a command in the background.
+        ///
+        /// ### Examples
+        ///
+        /// ```sh
+        /// while true; do
+        ///   sleep 1; echo "ping";
+        /// done &
+        /// ```
+        Background(Box<Command>),
+        /// Just a single command, with it's arguments.
+        ///
+        /// ### Examples
+        ///
+        /// ```sh
+        /// date --iso-8601
+        /// ```
+        // TODO: Simple should not just be a vec of words.
+        Simple(Vec<Word>),
+    }
+
+    /// A parsed word, already having gone through expansion.
+    // TODO: How can we expand things like $1 or $? from the lexer?
+    // TODO: This needs to handle escapes and all kinds of fun. We first
+    //       need to decide on our custom Tokens and lexer.
+    #[derive(Debug)]
+    pub struct Word(pub String);
+}
+
+lalrpop_mod!(lalrpop, "/program/posix.rs");

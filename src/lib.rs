@@ -48,6 +48,7 @@
 //!
 //!
 //! [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
+#![feature(box_syntax)]
 
 extern crate nix;
 extern crate termion;
