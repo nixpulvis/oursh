@@ -1,52 +1,43 @@
-//! Hand-parsed program syntax.
+//! Single command programs with no features.
 use std::io::Read;
 use std::ffi::CString;
 
-/// Source program representation, used mainly for parsing.
-pub struct BasicProgram {
-    source: String,
-}
+
+/// A basic program with only a single command.
+pub struct BasicProgram(BasicCommand);
 
 impl super::Program for BasicProgram {
-    type Command = Vec<CString>;
+    type Command = BasicCommand;
 
     /// Create a new program from the given reader.
     ///
     /// ```
-    /// use oursh::program::Program;
-    /// use oursh::program::basic::BasicProgram;
+    /// use oursh::program::{Program, BasicProgram};
     ///
-    /// let program = BasicProgram::parse(b"ls" as &[u8]);
+    /// BasicProgram::parse(b"ls" as &[u8]);
     /// ```
     fn parse<R: Read>(mut reader: R) -> Self {
-        let mut source = String::new();
-        reader.read_to_string(&mut source).expect("TODO");
-
-        BasicProgram {
-            source: source,
-        }
+        let mut command = String::new();
+        reader.read_to_string(&mut command).expect("error reading");
+        BasicProgram(BasicCommand(command))
     }
 
     /// Return the single parsed command.
     fn commands(&self) -> Vec<Self::Command> {
-        vec![self.source.split_whitespace().map(|a| {
-            CString::new(a).expect("error reading string argument")
-        }).collect()]
+        vec![self.0.clone()]
     }
 }
 
 
-// TODO: impl Iterator<Item=R: Read> for BasicProgram?
+/// A single poorly parsed command.
+#[derive(Clone)]
+pub struct BasicCommand(String);
 
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use program::Program;
-
-    // TODO: Should this work?
-    #[test]
-    fn test_empty_program() {
-        BasicProgram::parse(b"" as &[u8]);
+impl super::Command for BasicCommand {
+    /// Treat each space blindly as an argument delimiter.
+    fn argv(&self) -> Vec<CString> {
+        self.0.split_whitespace().map(|a| {
+            CString::new(a).expect("error reading argument")
+        }).collect()
     }
 }
