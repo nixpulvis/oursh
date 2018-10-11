@@ -111,15 +111,3 @@ impl Job {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    // TODO: Should this work?
-    #[test]
-    fn test_empty_program() {
-        let mut job = Job::new(&vec![]);
-        job.run();
-    }
-}
