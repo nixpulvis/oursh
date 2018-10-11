@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["job","Subprocess execution management."],["program","Parsing and handling program syntax(es) of the shell."],["repl",""]]});
+initSidebarItems({"mod":[["job","Subprocess execution management."],["program","Parsing and handling program syntax(es) of the shell."],["repl","..."]]});
