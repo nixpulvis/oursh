@@ -32,7 +32,7 @@ fn main() {
 
         // Print a boring static prompt.
         if repl::is_tty(&stdin) {
-            repl::prompt(&stdout);
+            repl::Prompt::new().display(&stdout);
         }
 
         loop {
