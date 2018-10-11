@@ -10,9 +10,6 @@ nix = "*"
 
 # Parsing
 
-pest = "*"
-pest_derive = "*"
-
 lalrpop-util = "0.16.0"
 regex = "*"
 

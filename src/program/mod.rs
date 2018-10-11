@@ -43,7 +43,6 @@ pub trait Program {
 
 /// The default program type, used for unannotated blocks.
 // pub type DefaultProgram = self::basic::BasicProgram;
-// pub type DefaultProgram = self::simple::SimpleProgram;
 pub type DefaultProgram = self::posix::PosixProgram;
 
 /// Parse a program of the default type.
@@ -65,9 +64,9 @@ pub fn parse_default<R: Read>(reader: R) -> DefaultProgram {
 ///
 /// ```
 /// use oursh::program::parse;
-/// use oursh::program::simple::SimpleProgram;
+/// use oursh::program::basic::BasicProgram;
 ///
-/// let program = parse::<SimpleProgram, &[u8]>(b"ls" as &[u8]);
+/// let program = parse::<BasicProgram, &[u8]>(b"ls" as &[u8]);
 /// ```
 pub fn parse<P: Program, R: Read>(reader: R) -> P {
     P::parse(reader)
@@ -78,7 +77,5 @@ pub fn parse<P: Program, R: Read>(reader: R) -> P {
 
 pub mod basic;
 pub use self::basic::BasicProgram;
-pub mod simple;
-pub use self::simple::SimpleProgram;
 pub mod posix;
 pub use self::posix::PosixProgram;

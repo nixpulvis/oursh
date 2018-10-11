@@ -47,6 +47,6 @@ mod tests {
     // TODO: Should this work?
     #[test]
     fn test_empty_program() {
-        let program = BasicProgram::parse(b"" as &[u8]);
+        BasicProgram::parse(b"" as &[u8]);
     }
 }
