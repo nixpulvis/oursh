@@ -78,13 +78,13 @@ language, and interactive terminal based REPL.
 ## Implementation
 
 This shell will be written in Rust with minimal dependencies. Notably
-[termios][termios] and [libc][libc] will likely be used. A crate for parsing
-should also be decided on, but there are a few options and it's unclear at this
-point what to use.
+[termios][termios] and [libc][libc] will likely be used. The parsing library
+will be [lalrpop][lalrpop], which should support the syntax we want somewhat
+easily, though grammar's in general can be a tricky beast.
 
 We will want to create a few internal modules for the shell.
 
-**This design is highly subject to change.**
+**This design is subject to change.**
 
 - `job` - sub-process execution management.
 - `program` - parser and interpreter for the syntax of the shell.
