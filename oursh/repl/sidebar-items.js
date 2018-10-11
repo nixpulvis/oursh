@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["prompt",""],["trap_sigint",""]]});
+initSidebarItems({"fn":[["is_tty","Is this stream a TTY?"],["prompt",""],["trap_sigint",""]]});
