@@ -5,6 +5,9 @@ use nix::libc::c_int;
 // use termion::raw::IntoRawMode;
 use termion::{color, clear};
 
+// HACK
+pub use termion::is_tty;
+
 pub fn prompt(stdout: &Stdout) {
     let red = color::Fg(color::Red);
     let reset = color::Fg(color::Reset);

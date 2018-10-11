@@ -21,7 +21,9 @@ fn main() {
     let mut input: [u8; 24];
 
     // Block exits via `SIGINT`, generally triggered with ctrl-c.
-    repl::trap_sigint().expect("error trapping sigint");
+    if repl::is_tty(&stdin) {
+        repl::trap_sigint().expect("error trapping sigint");
+    }
 
     loop {
         // XXX: Blindly drop the contents of input, again this will be better
@@ -29,7 +31,9 @@ fn main() {
         input = [0; 24];
 
         // Print a boring static prompt.
-        repl::prompt(&stdout);
+        if repl::is_tty(&stdin) {
+            repl::prompt(&stdout);
+        }
 
         loop {
             // TODO: Enable raw access to STDIN, so we can read as the user
