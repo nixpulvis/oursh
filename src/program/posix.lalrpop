@@ -3,10 +3,6 @@ use program::posix::ast;
 grammar;
 
 pub Program: ast::Program = {
-    "{@" <p: Program> "}" => {
-        println!("bridge to alt lang");
-        p
-    },
     <p: Program> "\n"+ <c: Commands> => {
         let (mut p, c) = (p, c);
         p.0.push(box c);
@@ -31,6 +27,7 @@ Commands: ast::Command = {
     "(" <p: Program> ")" => {
         ast::Command::Subshell(box p)
     },
+    // BridgedProgram => <>,
     <cs: Commands> "&&" <p: Pipeline> => {
         ast::Command::And(box cs, box p)
     },

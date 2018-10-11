@@ -29,7 +29,7 @@
 //!
 //! ### Default Syntax
 //!
-//! Our shell has a `DefaultProgram` which is in charge of parsing programs
+//! Our shell has a `PrimaryProgram` which is in charge of parsing programs
 //! which are not passed in via a `{@}` language block. This can be configured
 //! to your preference. This does not effect the shell when launched in
 //! POSIX compatibility mode, or when a specific default language is passed
@@ -79,7 +79,7 @@
 use std::io::Read;
 use std::ffi::CString;
 
-/// A command is a task given by the user as part of a [`Program`](program).
+/// A command is a task given by the user as part of a [`Program`](Program).
 ///
 /// Each command is handled by a `Job`, and a single command may be run multiple
 /// times each as a new `Job`. Each time a command is run, the conditions
@@ -129,8 +129,10 @@ pub trait Program {
 
 
 /// The default program type, used for unannotated blocks.
-// pub type DefaultProgram = BasicProgram;
-pub type DefaultProgram = PosixProgram;
+pub type PrimaryProgram = PosixProgram;
+
+/// TODO: alt explain
+pub type AlternateProgram = BasicProgram;
 
 /// Parse a program of the default type.
 ///
@@ -141,8 +143,8 @@ pub type DefaultProgram = PosixProgram;
 ///
 /// parse_default(b"ls" as &[u8]);
 /// ```
-pub fn parse_default<R: Read>(reader: R) -> DefaultProgram {
-    DefaultProgram::parse(reader)
+pub fn parse_default<R: Read>(reader: R) -> PrimaryProgram {
+    PrimaryProgram::parse(reader)
 }
 
 /// Parse a program of the given type.
@@ -158,6 +160,33 @@ pub fn parse<P: Program, R: Read>(reader: R) -> P {
     P::parse(reader)
 }
 
+
+/// Abstract Syntax Tree for programs between multiple languages.
+pub mod ast {
+    /// Either explicit or implicit declaration of the interperator for
+    /// a bridged program.
+    ///
+    /// ### Examples
+    ///
+    /// ```sh
+    /// {@ ...}
+    /// {@ruby ...}
+    /// ```
+    #[derive(Debug)]
+    pub enum Interpreter {
+        Primary,
+        Alternate,
+        Other(String),
+    }
+
+    /// A program's text and the interperator to be used.
+    // TODO: Include grammar seperate from interperator?
+    #[derive(Debug)]
+    pub struct BridgedProgram(pub Interpreter, pub String);
+}
+
+// Language bridge grammar macro.
+lalrpop_mod!(lalrpop, "/program/mod.rs");
 
 // The various program grammars.
 

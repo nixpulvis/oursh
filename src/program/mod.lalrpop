@@ -1,0 +1,10 @@
+use program::ast;
+
+grammar;
+
+pub BridgedProgram: ast::BridgedProgram = {
+    "{@" <t: r".*"> "}" => {
+        ast::BridgedProgram(ast::Interpreter::Alternate, t.into())
+    },
+}
+

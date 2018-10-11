@@ -142,12 +142,6 @@ impl super::Command for Command {
 
 /// Abstract Syntax Tree for the POSIX language.
 pub mod ast {
-    // enum Interpreter {
-    //     Posix,
-    //     Modern,
-    //     Other(String),
-    // }
-
     /// A program is the result of parsing a sequence of commands.
     #[derive(Debug)]
     pub struct Program(pub Vec<Box<Command>>);
