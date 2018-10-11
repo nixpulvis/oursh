@@ -1,10 +1,65 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `program` mod in crate `oursh`."><meta name="keywords" content="rust, rustlang, rust-lang, program"><title>oursh::program - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Module program</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class='location'><a href='../index.html'>oursh</a></p><script>window.sidebarCurrent = {name: 'program', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../src/oursh/program/mod.rs.html#1-81' title='goto source code'>[src]</a></span><span class='in-band'>Module <a href='../index.html'>oursh</a>::<wbr><a class="mod" href=''>program</a></span></h1><div class='docblock'><p>Parser and interpreter for the syntax(es) of the shell.</p>
-<p>Both commands entered to the shell through STDIN and read from a file are
-<em>programs</em>, and are parsed and handled by this module.</p>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `program` mod in crate `oursh`."><meta name="keywords" content="rust, rustlang, rust-lang, program"><title>oursh::program - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Module program</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class='location'><a href='../index.html'>oursh</a></p><script>window.sidebarCurrent = {name: 'program', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../src/oursh/program/mod.rs.html#1-167' title='goto source code'>[src]</a></span><span class='in-band'>Module <a href='../index.html'>oursh</a>::<wbr><a class="mod" href=''>program</a></span></h1><div class='docblock'><p>Parsing and handling program syntax(es) of the shell.</p>
+<p>Both, commands entered to the shell interactively through STDIN, and read
+from a file, are <em>programs</em>. Our shell provides multiple discrete languages
+to write programs in, each with a corresponding implementation of this
+module's <code>Program</code> trait.</p>
+<h3 id="-language-blocks" class="section-header"><a href="#-language-blocks"><code>{@}</code> Language Blocks</a></h3>
+<p>Both the <a href="posix"><code>posix</code></a> and <a href="modern"><code>modern</code></a> languages have support for
+a special expression which treats the body as a program from another
+language. This forms the basis of oursh's modern features, and backwards
+compatibility. While the primary goal of this syntax is to be able to mix
+both POSIX and non-POSIX shell scripts, the feature is much more powerful.
+Any interperator can be used, just like with <code>#!</code>.</p>
+<pre><code class="language-sh">date      # Call `date` in the default syntax.
+{@ date}  # Specifies the alternate syntax.
+
+# Use ruby, why not...
+{@!ruby
+    require 'date'
+    puts Date.today
+}
+</code></pre>
+<p>Strict POSIX compatibility can be enabled by removing this feature alone.</p>
+<h3 id="default-syntax" class="section-header"><a href="#default-syntax">Default Syntax</a></h3>
+<p>Our shell has a <code>DefaultProgram</code> which is in charge of parsing programs
+which are not passed in via a <code>{@}</code> language block. This can be configured
+to your preference. This does not effect the shell when launched in
+POSIX compatibility mode, or when a specific default language is passed
+as a flag.</p>
+<h3 id="posix-syntax" class="section-header"><a href="#posix-syntax">POSIX Syntax</a></h3>
+<p>The basic, portable POSIX shell language. For detailed information read the
+<a href="posix"><code>posix</code></a> module docs.</p>
+<pre><code class="language-sh">a=0
+b=1
+for ((i=0; i&lt;10; i++))
+do
+    echo -n &quot;$a &quot;
+    fn=$((a + b))
+    a=$b
+    b=$fn
+done
+echo
+</code></pre>
+<h3 id="modern-syntax" class="section-header"><a href="#modern-syntax">Modern Syntax</a></h3>
+<p>A more modern and ergonomic language. For more detailed information read
+the <a href="modern"><code>modern</code></a> module docs.</p>
+<pre><code class="language-sh"># WIP
+var a = 0
+var b = 1
+for i in 0..10 {
+    echo -n &quot;$a &quot;
+    let fn = $((a + b))
+    a = $b
+    b = $fn
+}
+echo
+</code></pre>
+<h3 id="todo" class="section-header"><a href="#todo">TODO</a></h3>
 <ul>
-<li>TODO: Parse sequence of programs from stream.</li>
+<li>Parse sequence of programs from stream.</li>
+<li>Partial parses for readline-ish / syntax highlighting.</li>
 </ul>
-<h3 id="posix-syntax" class="section-header"><a href="#posix-syntax">POSIX Syntax</a></h3><h3 id="modern-syntax" class="section-header"><a href="#modern-syntax">Modern Syntax</a></h3></div><h2 id='reexports' class='section-header'><a href="#reexports">Re-exports</a></h2>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Re-exports</a></h2>
 <table><tr><td><code>pub use self::basic::<a class="struct" href="../../oursh/program/basic/struct.BasicProgram.html" title="struct oursh::program::basic::BasicProgram">BasicProgram</a>;</code></td></tr><tr><td><code>pub use self::posix::<a class="struct" href="../../oursh/program/posix/struct.PosixProgram.html" title="struct oursh::program::posix::PosixProgram">PosixProgram</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
@@ -28,7 +83,7 @@
                            <td><a class="trait" href="trait.Command.html"
                                   title='trait oursh::program::Command'>Command</a></td>
                            <td class='docblock-short'>
-                                <p>A command is a task given by the user as part of a <code>Program</code>.</p>
+                                <p>A command is a task given by the user as part of a <a href="program"><code>Program</code></a>.</p>
 
                            </td>
                        </tr>
@@ -36,7 +91,7 @@
                            <td><a class="trait" href="trait.Program.html"
                                   title='trait oursh::program::Program'>Program</a></td>
                            <td class='docblock-short'>
-                                <p>A program is a collection of commands given by the user.</p>
+                                <p>A program is as large as a file or as small as a line.</p>
 
                            </td>
                        </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
