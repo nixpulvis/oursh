@@ -128,3 +128,9 @@ impl super::Program for PosixProgram {
         vec![]
     }
 }
+
+impl super::Command for Vec<CString> {
+    fn argv(&self) -> Vec<CString> {
+        self.clone()
+    }
+}
