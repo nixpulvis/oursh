@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Job","A command to be executed by various means."]]});
+initSidebarItems({"struct":[["Job","A job to be executed by various means."]]});

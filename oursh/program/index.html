@@ -1,13 +1,68 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `program` mod in crate `oursh`."><meta name="keywords" content="rust, rustlang, rust-lang, program"><title>oursh::program - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Module program</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li></ul></div><p class='location'><a href='../index.html'>oursh</a></p><script>window.sidebarCurrent = {name: 'program', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>oursh</a>::<wbr><a class="mod" href=''>program</a></span><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../src/oursh/program.rs.html#1-59' title='goto source code'>[src]</a></span></h1><div class='docblock'><p>Parser and interpreter for the syntax(es) of the shell.</p>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `program` mod in crate `oursh`."><meta name="keywords" content="rust, rustlang, rust-lang, program"><title>oursh::program - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Module program</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class='location'><a href='../index.html'>oursh</a></p><script>window.sidebarCurrent = {name: 'program', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>oursh</a>::<wbr><a class="mod" href=''>program</a></span><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../src/oursh/program/mod.rs.html#1-81' title='goto source code'>[src]</a></span></h1><div class='docblock'><p>Parser and interpreter for the syntax(es) of the shell.</p>
 <p>Both commands entered to the shell through STDIN and read from a file are
 <em>programs</em>, and are parsed and handled by this module.</p>
-<h3 id="posix-syntax" class="section-header"><a href="#posix-syntax">POSIX Syntax</a></h3><h3 id="modern-syntax-extensions" class="section-header"><a href="#modern-syntax-extensions">Modern Syntax Extensions</a></h3></div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<ul>
+<li>TODO: Parse sequence of programs from stream.</li>
+</ul>
+<h3 id="posix-syntax" class="section-header"><a href="#posix-syntax">POSIX Syntax</a></h3><h3 id="modern-syntax" class="section-header"><a href="#modern-syntax">Modern Syntax</a></h3></div><h2 id='reexports' class='section-header'><a href="#reexports">Re-exports</a></h2>
+<table><tr><td><code>pub use self::basic::<a class="struct" href="../../oursh/program/basic/struct.BasicProgram.html" title="struct oursh::program::basic::BasicProgram">BasicProgram</a>;</code></td></tr><tr><td><code>pub use self::posix::<a class="struct" href="../../oursh/program/posix/struct.PosixProgram.html" title="struct oursh::program::posix::PosixProgram">PosixProgram</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
-                           <td><a class="struct" href="struct.Program.html"
-                                  title='struct oursh::program::Program'>Program</a></td>
+                           <td><a class="mod" href="basic/index.html"
+                                  title='mod oursh::program::basic'>basic</a></td>
                            <td class='docblock-short'>
-                                <p>Source program representation, used mainly for parsing.</p>
+                                <p>Single command programs with no features.</p>
+
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="mod" href="posix/index.html"
+                                  title='mod oursh::program::posix'>posix</a></td>
+                           <td class='docblock-short'>
+                                <p>The ubiquitous POSIX shell command language.</p>
+
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="trait" href="trait.Command.html"
+                                  title='trait oursh::program::Command'>Command</a></td>
+                           <td class='docblock-short'>
+                                <p>A command is a task given by the user as part of a <code>Program</code>.</p>
+
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="trait" href="trait.Program.html"
+                                  title='trait oursh::program::Program'>Program</a></td>
+                           <td class='docblock-short'>
+                                <p>A program is a collection of commands given by the user.</p>
+
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.parse.html"
+                                  title='fn oursh::program::parse'>parse</a></td>
+                           <td class='docblock-short'>
+                                <p>Parse a program of the given type.</p>
+
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.parse_default.html"
+                                  title='fn oursh::program::parse_default'>parse_default</a></td>
+                           <td class='docblock-short'>
+                                <p>Parse a program of the default type.</p>
+
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="type" href="type.DefaultProgram.html"
+                                  title='type oursh::program::DefaultProgram'>DefaultProgram</a></td>
+                           <td class='docblock-short'>
+                                <p>The default program type, used for unannotated blocks.</p>
 
                            </td>
                        </tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../";window.currentCrate = "oursh";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `posix` mod in crate `oursh`."><meta name="keywords" content="rust, rustlang, rust-lang, posix"><title>oursh::program::posix - Rust</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Module posix</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li></ul></div><p class='location'><a href='../../index.html'>oursh</a>::<wbr><a href='../index.html'>program</a></p><script>window.sidebarCurrent = {name: 'posix', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>oursh</a>::<wbr><a href='../index.html'>program</a>::<wbr><a class="mod" href=''>posix</a></span><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../../src/oursh/program/posix.rs.html#1-130' title='goto source code'>[src]</a></span></h1><div class='docblock'><p>The ubiquitous POSIX shell command language.</p>
+<p>This shell language (often called <code>sh</code>) is at the heart of the most popular
+shells, namely <code>bash</code> and <code>zsh</code>. While shells typically implement many
+extensions to the POSIX standard we'll be implementing only the most basic
+set of functionality and offloading all extensions to the <code>modern</code> language.</p>
+<h1 id="compatibility" class="section-header"><a href="#compatibility">Compatibility</a></h1>
+<p>Shell languages like <code>bash</code> or <code>zsh</code> are <strong>supersets</strong> of the POSIX <code>sh</code>
+language. This means two things:</p>
+<ul>
+<li>All <code>sh</code> programs are valid <code>bash</code>, <code>zsh</code>, etc programs</li>
+<li>Not all <code>bash</code> programs, for example, are valid <code>sh</code> programs.</li>
+</ul>
+<p>This explains why some shell scripts will start with <code>#!/bin/sh</code> or
+<code>#!/bin/bash</code>, depending on what features of the language the script needs.</p>
+<h1 id="examples" class="section-header"><a href="#examples">Examples</a></h1>
+<p>There are more than enough examples of <code>sh</code> scripts out there, but here is a
+collection of examples tested in <strong>this</strong> shell's implementation of the
+POSIX standard. This section will not be a complete description of the
+syntax of the <code>sh</code> language, but will be updated with as many interesting
+cases as possible.</p>
+<p>Running a command (like <code>date</code>) in a shell script is the simplest thing
+you can do.</p>
+<pre><code class="language-sh">date
+date --iso-8601
+
+# You can even run programs from outside the $PATH.
+./a.out
+</code></pre>
+<p>All variables start with a <code>$</code> when referring to them, but when assigning
+you omit the <code>$</code>. It's also worth mentioning that the lack of whitespace
+around the <code>=</code> in assignment <strong>is required</strong>. It's often conventional to
+write your variable names in all caps, but this is not a limitation of the
+language.</p>
+<pre><code class="language-sh">NAME=&quot;Nathan Lilienthal&quot;
+i=0
+
+echo $NAME
+echo $i
+</code></pre>
+<p>In addition to variables beginning with a <code>$</code> being expanded to the value
+they were set to, other syntax can perform expansion. See section 3§2.6 for
+a complete description of word expansion.</p>
+<pre><code class="language-sh"># Same as echo $1.
+echo ${1}
+# Use a default.
+echo ${1:-default}
+# Assign and use a default.
+echo ${1:=default}
+# Fail with error if $1 is unset.
+echo ${1:?}
+# Replace if not null.
+echo ${1:+new}
+# String length of $1.
+echo ${#1}
+# Remove suffix/prefix strings.
+echo ${1%.*}
+echo ${1%%.*}
+echo ${1#prefix_}
+</code></pre>
+<p>In addition to running a program at the top level, programs can be run in
+a subshell with mechanisms to capture the output. This is called command
+substitution.</p>
+<pre><code class="language-sh"># Assign $files to be the output of ls.
+files=`ls`
+files=$(ls)  # Same as above.
+</code></pre>
+<p>Conditionals in the wild are often written with the non-POSIX <code>[[</code> syntax,
+traditional conditional checks use either <code>test</code> or <code>[</code>.</p>
+<pre><code class="language-sh"># Check if $1 is absent.
+if test -z &quot;$1&quot;; then
+    exit 1
+fi
+
+# Check if $1 is equal to &quot;foo&quot;.
+if [ &quot;$1&quot; -eq &quot;foo&quot; ]; then
+    echo &quot;bar&quot;
+fi
+</code></pre>
+<h1 id="specification" class="section-header"><a href="#specification">Specification</a></h1>
+<p>The syntax and semantics of this module are strictly defined by the POSIX
+(IEEE Std 1003.1) standard, in section 3§2 of &quot;The Open Group Base
+Specifications&quot; [<a href="http://pubs.opengroup.org/onlinepubs/9699919799/">1</a>].</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.PosixProgram.html"
+                                  title='struct oursh::program::posix::PosixProgram'>PosixProgram</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../../";window.currentCrate = "oursh";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script defer src="../../../search-index.js"></script></body></html>
