@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["PosixProgram",""]]});
+initSidebarItems({"mod":[["ast","Abstract Syntax Tree for the POSIX language."]]});

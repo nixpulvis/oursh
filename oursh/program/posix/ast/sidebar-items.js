@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Command","A command is a highly recursive node with the main features of the POSIX language."]],"struct":[["Program","A program is the result of parsing a sequence of commands."],["Word","A parsed word, already having gone through expansion."]]});
