@@ -1,0 +1,54 @@
+grammar;
+
+pub Program: Vec<Vec<String>> = {
+    <p: Program> "\n"+ <c: Commands> => {
+        let (mut p, mut c) = (p, c);
+        p.append(&mut c);
+        p
+    },
+    <p: Program> ";" <c: Commands> => {
+        let (mut p, mut c) = (p, c);
+        p.append(&mut c);
+        p
+    },
+    <p: Program> "&" <c: Commands> => {
+        let (mut p, mut c) = (p, c);
+        p.append(&mut c);
+        p
+    },
+    <p: Program> ";" => p,
+    <p: Program> "&" => p,
+    <c: Commands> => c,
+}
+
+Commands: Vec<Vec<String>> = {
+    <cs: Commands> "&&" <p: Pipeline> => {
+        let mut cs = cs;
+        cs.push(p);
+        cs
+    },
+    <cs: Commands> "||" <p: Pipeline> => {
+        let mut cs = cs;
+        cs.push(p);
+        cs
+    },
+    <p: Pipeline> => vec![p]
+}
+
+Pipeline: Vec<String> = {
+    "!" <ps: PipelineSeq> => ps,
+    <ps: PipelineSeq> => ps,
+}
+
+PipelineSeq: Vec<String> = {
+    <ps: PipelineSeq> "|" "\n"* <c: Command> => {
+        let mut ps = ps;
+        ps.push(c.join(" "));
+        ps
+    },
+    <c: Command> => vec![c.join(" ")],
+}
+
+Command: Vec<&'input str> = Word+;
+
+Word: &'input str = r"[a-zA-Z0-9-_]+" => <>;

@@ -52,6 +52,9 @@
 extern crate nix;
 extern crate termion;
 
+#[macro_use]
+extern crate lalrpop_util;
+
 pub mod job;
 pub mod program;
 pub mod repl;

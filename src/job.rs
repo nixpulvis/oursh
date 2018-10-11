@@ -3,34 +3,32 @@
 //! All commands (both foreground and background) are created and executed as
 //! a *job*. This helps manage the commands the shell runs.
 
-use std::ffi::CString;
 use std::process::exit;
+use std::ffi::CString;
 use nix::unistd::{execvp, fork, Pid, ForkResult};
 use nix::sys::wait::{waitpid, WaitStatus};
-use program::Program;
+use program::Command;
 
-/// A command to be executed by various means.
+/// A job to be executed by various means.
 ///
-/// The shell's main job (pun intended) is to run jobs. Each job has various
-/// arguments, and rules about what things should be done.
+/// The shell's main job (pun intended) is to run commands. Each job has various arguments, and
+/// rules about what things should be done.
 ///
-/// TODO: Redirection example.
-/// TODO: Background example.
-/// TODO: Environment example?
+/// - TODO: Redirection example.
+/// - TODO: Background example.
+/// - TODO: Environment example?
 pub struct Job {
-    // TODO: Use a program type.
     argv: Vec<CString>,
     // TODO: Call this pid?
     child: Option<Pid>,
 }
 
 impl Job {
-    /// Create a new job from a program, obtained from the input file which is
-    /// typically STDIN.
+    /// Create a new job from the given command.
     // TODO: Return result.
-    pub fn new(program: &Program) -> Self {
+    pub fn new(command: &Command) -> Self {
         Job {
-            argv: program.argv(),
+            argv: command.argv(),
             child: None,
         }
     }
@@ -121,8 +119,7 @@ mod tests {
     // TODO: Should this work?
     #[test]
     fn test_empty_program() {
-        let program = Program::parse(b"" as &[u8]);
-        let mut job = Job::new(&program);
+        let mut job = Job::new(&vec![]);
         job.run();
     }
 }
