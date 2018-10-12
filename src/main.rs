@@ -70,7 +70,7 @@ fn main() {
             stdout.flush().unwrap();
         }
     } else {
-        let (mut stdin, mut stdout) = (io::stdin(), io::stdout());
+        let stdin = io::stdin();
         let mut text = String::new();
         stdin.lock().read_to_string(&mut text).unwrap();
         parse_and_run(&text);

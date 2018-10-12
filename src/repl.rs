@@ -3,12 +3,8 @@
 //! There will be *absolutely no* blocking STDIN/OUT/ERR on things like tab
 //! completion or other potentially slow, or user defined behavior.
 
-use std::io::{self, Read, Write};
-use nix::Result;
-use nix::sys::signal;
-use nix::libc::c_int;
-use termion::raw::IntoRawMode;
-use termion::{color, clear};
+use std::io::Write;
+use termion::color;
 
 /// For now, we simple export the function from termion to allow main to
 /// decide when to use it without linking termion directly itself ;)
