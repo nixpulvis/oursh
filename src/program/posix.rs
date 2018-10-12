@@ -155,6 +155,28 @@ pub mod ast {
     /// of the POSIX language.
     #[derive(Debug)]
     pub enum Command {
+        /// Just a single command, with it's arguments.
+        ///
+        /// ### Examples
+        ///
+        /// ```sh
+        /// date --iso-8601
+        /// ```
+        // TODO: Simple should not just be a vec of words.
+        Simple(Vec<Word>),
+        /// Pair of commands, used to make AST sequences.
+        ///
+        /// ```sh
+        /// ```
+        Pair(Box<Command>, Box<Command>),
+        /// A full program embedded in a compound command.
+        ///
+        /// ```sh
+        /// { ls ; }
+        /// ```
+        // TODO: We are currently overpermissive here...
+        // `{ ls }` is happily accepted.
+        Compound(Box<Program>),
         /// Performs boolean negation to the status code of the inner
         /// command.
         ///
@@ -208,15 +230,6 @@ pub mod ast {
         /// done &
         /// ```
         Background(Box<Command>),
-        /// Just a single command, with it's arguments.
-        ///
-        /// ### Examples
-        ///
-        /// ```sh
-        /// date --iso-8601
-        /// ```
-        // TODO: Simple should not just be a vec of words.
-        Simple(Vec<Word>),
     }
 
     /// A parsed word, already having gone through expansion.

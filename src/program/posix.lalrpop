@@ -9,23 +9,37 @@ pub Program: ast::Program = {
     //     p.0.push(box c);
     //     p
     // },
-    <p: Program> ";" <c: Commands> => {
-        let (mut p, c) = (p, c);
-        p.0.push(box c);
-        p
-    },
-    <p: Program> ";" => p,
+    Compound<Job> => <>,
     Job => ast::Program(vec![box <>]),
 }
 
+Compound<Lower>: ast::Program = {
+    <p: Compound<Lower>> ";" <j: Lower> => {
+        let (mut p, j) = (p, j);
+        p.0.push(box j);
+        p
+    },
+    <p: Compound<Lower>> ";" => p,
+    <p: Lower> ";" => ast::Program(vec![box p]),
+}
+
 Job: ast::Command = {
-    <cs: Commands> "&" => ast::Command::Background(box cs),
+    <j: Job> "&" <cs: Commands> => {
+        let bg = ast::Command::Background(box j);
+        ast::Command::Pair(box bg, box cs)
+    },
+    <j: Job> "&" => ast::Command::Background(box j),
     Commands => <>,
- }
+}
+
+CommandCompound: ast::Program = Compound<Job>;
 
 Commands: ast::Command = {
     "(" <p: Program> ")" => {
         ast::Command::Subshell(box p)
+    },
+    "{" <p: CommandCompound> "}" => {
+        ast::Command::Compound(box p)
     },
     // BridgedProgram => <>,
     <cs: Commands> "&&" <p: Pipeline> => {
