@@ -54,12 +54,22 @@
 <span id="54">54</span>
 <span id="55">55</span>
 <span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! ...</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! There will be *absolutely no* blocking STDIN/OUT/ERR on things like tab</span>
 <span class="doccomment">//! completion or other potentially slow, or user defined behavior.</span>
 
+<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>;
 <span class="kw">use</span> <span class="ident">termion</span>::{<span class="ident">style</span>, <span class="ident">color</span>};
 
@@ -89,11 +99,19 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">long_style</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Prompt</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}{} oursh $ {} {} {}{} &quot;</span>,
-            <span class="ident">color</span>::<span class="ident">Fg</span>(<span class="ident">color</span>::<span class="ident">Red</span>),
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">64</span>];
+        <span class="kw">let</span> <span class="ident">hostname_cstr</span> <span class="op">=</span> <span class="ident">unistd</span>::<span class="ident">gethostname</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;error getting hostname&quot;</span>);
+        <span class="kw">let</span> <span class="ident">hostname</span> <span class="op">=</span> <span class="ident">hostname_cstr</span>.<span class="ident">to_str</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;hostname wasn&#39;t valid UTF-8&quot;</span>);
+        <span class="ident">Prompt</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}{} {} $ {} {} {} {} {}{} &quot;</span>,
             <span class="ident">style</span>::<span class="ident">Invert</span>,
-            <span class="ident">color</span>::<span class="ident">Fg</span>(<span class="ident">color</span>::<span class="ident">Blue</span>),
+            <span class="ident">color</span>::<span class="ident">Fg</span>(<span class="ident">color</span>::<span class="ident">Green</span>),
+            <span class="ident">hostname</span>,
             <span class="ident">color</span>::<span class="ident">Fg</span>(<span class="ident">color</span>::<span class="ident">Yellow</span>),
+            <span class="ident">color</span>::<span class="ident">Fg</span>(<span class="ident">color</span>::<span class="ident">Red</span>),
+            <span class="ident">color</span>::<span class="ident">Fg</span>(<span class="ident">color</span>::<span class="ident">Magenta</span>),
+            <span class="ident">color</span>::<span class="ident">Fg</span>(<span class="ident">color</span>::<span class="ident">Cyan</span>),
             <span class="ident">color</span>::<span class="ident">Fg</span>(<span class="ident">color</span>::<span class="ident">Reset</span>),
             <span class="ident">style</span>::<span class="ident">Reset</span>))
     }
