@@ -36,19 +36,6 @@ impl<'a> From<&'a Prompt> for String {
     }
 }
 
-pub fn raw_io() -> (impl Read, impl Write) {
-    // Standard input file descriptor (0), used for user input from the user
-    // of the shell.
-    let stdin = io::stdin();
-
-    // Standard output file descriptor (1), used to display program output to
-    // the user of the shell.
-    let stdout = io::stdout().into_raw_mode()
-        .expect("error opening raw mode");
-
-    (stdin, stdout)
-}
-
 pub fn trap_sigint() -> Result<signal::SigAction>  {
     let action = signal::SigAction::new(signal::SigHandler::Handler(handle_ctrl_c),
                                         signal::SaFlags::all(),
