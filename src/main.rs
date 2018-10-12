@@ -13,23 +13,21 @@ use termion::raw::IntoRawMode;
 
 // Our shell, for the greater good. Ready and waiting.
 fn main() {
-    // Block exits via `SIGINT`, generally triggered with ctrl-c.
+    // Process text in raw mode style if we're attached to a tty.
     if is_tty(&io::stdin()) {
-        // Standard input file descriptor (0), used for user input from the user
-        // of the shell.
+        // Standard input file descriptor (0), used for user input from the
+        // user of the shell.
         let stdin = io::stdin();
 
-        // Standard output file descriptor (1), used to display program output to
-        // the user of the shell.
+        // Standard output file descriptor (1), used to display program output
+        // to the user of the shell.
         let mut stdout = io::stdout().into_raw_mode()
             .expect("error opening raw mode");
 
         // TODO: Move all this gross logic into a clean repl API.
         // Print a boring static prompt.
-        if is_tty(&io::stdin()) {
-            repl::Prompt::new().display(&mut stdout);
-            stdout.flush().unwrap();
-        }
+        repl::Prompt::new().display(&mut stdout);
+        stdout.flush().unwrap();
 
         let mut text = String::new();
         for c in stdin.keys() {
