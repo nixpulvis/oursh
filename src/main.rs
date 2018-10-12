@@ -53,7 +53,15 @@ fn main() {
                     print!("{}", c);
                     text.push(c);
                 },
-                Key::Alt(c)  => print!("Alt-{}", c),
+                Key::Backspace => {
+                    if !text.is_empty() {
+                        text.pop();
+                        print!("{}{}",
+                               termion::cursor::Left(1),
+                               termion::clear::UntilNewline);
+                        stdout.flush().unwrap();
+                    }
+                }
                 Key::Ctrl('c') => {
                     text.clear();
                     print!("\n\r");
@@ -62,6 +70,7 @@ fn main() {
                     repl::Prompt::new().display(&mut stdout);
                 },
                 Key::Ctrl(c) => print!("Ctrl-{}", c),
+                Key::Alt(c)  => print!("Alt-{}", c),
                 Key::Left    => print!("<left>"),
                 Key::Right   => print!("<right>"),
                 Key::Up      => print!("<up>"),
