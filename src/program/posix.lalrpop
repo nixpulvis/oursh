@@ -14,15 +14,14 @@ pub Program: ast::Program = {
         p.0.push(box c);
         p
     },
-    <p: Program> "&" <c: Commands> => {
-        let (mut p, c) = (p, c);
-        p.0.push(box c);
-        p
-    },
     <p: Program> ";" => p,
-    <p: Program> "&" => p,
-    Commands => ast::Program(vec![box <>]),
+    Job => ast::Program(vec![box <>]),
 }
+
+Job: ast::Command = {
+    <cs: Commands> "&" => ast::Command::Background(box cs),
+    Commands => <>,
+ }
 
 Commands: ast::Command = {
     "(" <p: Program> ")" => {
