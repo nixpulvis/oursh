@@ -24,10 +24,11 @@ fn main() {
         let mut stdout = io::stdout().into_raw_mode()
             .expect("error opening raw mode");
 
-        // TODO: Move all this gross logic into a clean repl API.
-        // Print a boring static prompt.
-        repl::Prompt::new().display(&mut stdout);
-        stdout.flush().unwrap();
+        // A styled static (for now) prompt.
+        let prompt = repl::Prompt::new()
+            .long_style();
+
+        prompt.display(&mut stdout);
 
         let mut text = String::new();
         for c in stdin.keys() {
@@ -45,11 +46,12 @@ fn main() {
                     text.clear();
 
                     // Print a boring static prompt.
-                    repl::Prompt::new().display(&mut stdout);
+                    prompt.display(&mut stdout);
                 },
                 Key::Char(c) => {
-                    print!("{}", c);
                     text.push(c);
+                    print!("{}", c);
+                    stdout.flush().unwrap();
                 },
                 Key::Backspace => {
                     if !text.is_empty() {
@@ -63,19 +65,10 @@ fn main() {
                 Key::Ctrl('c') => {
                     text.clear();
                     print!("\n\r");
-
-                    // Print a boring static prompt.
-                    repl::Prompt::new().display(&mut stdout);
+                    prompt.display(&mut stdout);
                 },
-                Key::Ctrl(c) => print!("Ctrl-{}", c),
-                Key::Alt(c)  => print!("Alt-{}", c),
-                Key::Left    => print!("<left>"),
-                Key::Right   => print!("<right>"),
-                Key::Up      => print!("<up>"),
-                Key::Down    => print!("<down>"),
-                k            => print!("{:?}", k),
+                _ => {}
             }
-            stdout.flush().unwrap();
         }
     } else {
         let stdin = io::stdin();
