@@ -27,35 +27,26 @@ programs, the language this will be written in.
 - Fast
 - Pipe old commands without rerunning
 
-## Setup
-
-```sh
-rustup update
-```
 
 ## Usage
 
-While this project is in early stages, there are no OS packages to use. However,
-you can compile and run directly from source easily.
-
-```sh
-cargo run
-```
-
-
-## Building
+While this project is in early stages, there are no OS packages to use.
+However, you can compile and run directly from source easily. Just ensure you
+have [`rustup`][rustup] installed.
 
 ```sh
 cargo build
-cargo build --release
+cargo run
 ```
 
 
 ## Testing
 
-TODO
+We have four kinds of tests in this program. Crate unit tests, Executable unit
+tests, subprocess based integration tests, and documentation tests.
 
 ```sh
+# Run all tests.
 cargo test
 ```
 
@@ -102,6 +93,7 @@ We will want to create a few internal modules for the shell.
 
 
 [documentation]: https://nixpulvis.com/oursh/oursh
+[rustup]: https://github.com/rust-lang-nursery/rustup.rs
 [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
 [termios]: https://crates.io/crates/termios
 [libc]: https://crates.io/crates/libc

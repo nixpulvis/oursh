@@ -1,11 +1,11 @@
-//! This shell should be both POSIX compatible and yet modern and exciting. Fancy
-//! features should not be prevented by POSIX compatibility. This will effect the
-//! design of the shell.
+//! This shell should be both POSIX compatible and yet modern and exciting.
+//! Fancy features should not be prevented by POSIX compatibility. This will
+//! effect the design of the shell.
 //!
-//! The name of the shell is `oursh` which is both somewhat unique, and memorable.
-//! It's also a nice name to play with pseudo-satirical themes... right comrade?
-//! It's short (ish) and sneakily fits `rs` in it, which is the extension of Rust
-//! programs, the language this will be written in.
+//! The name of the shell is `oursh` which is both somewhat unique, and
+//! memorable.  It's also a nice name to play with pseudo-satirical themes...
+//! right comrade?  It's short (ish) and sneakily fits `rs` in it, which is the
+//! extension of Rust programs, the language this will be written in.
 //!
 //!
 //! ## Features
@@ -24,8 +24,9 @@
 //!
 //! ## Usage
 //!
-//! While this project is in early stages, there are no OS packages to use. However,
-//! you can compile and run directly from source easily.
+//! While this project is in early stages, there are no OS packages to use.
+//! However, you can compile and run directly from source easily. Just ensure
+//! you have [`rustup`][rustup] installed.
 //!
 //! ```sh
 //! cargo run
@@ -48,6 +49,7 @@
 //!
 //!
 //! [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
+//! [rustup]: https://github.com/rust-lang-nursery/rustup.rs
 #![feature(box_syntax)]
 
 extern crate nix;
