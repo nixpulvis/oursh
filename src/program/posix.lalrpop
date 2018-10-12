@@ -65,4 +65,5 @@ PipelineSeq: ast::Command = {
 
 pub Command: ast::Command = Word+ => ast::Command::Simple(<>);
 
-pub Word: ast::Word = r"[a-zA-Z0-9-_]+" => ast::Word(<>.into());
+// TODO: Custom lexer plus proger rules needed.
+pub Word: ast::Word = r"[a-zA-Z0-9-_\.]+" => ast::Word(<>.into());
