@@ -41,6 +41,8 @@
 <span id="41">41</span>
 <span id="42">42</span>
 <span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Single command programs with no features.</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufRead</span>;
@@ -60,10 +62,12 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// BasicProgram::parse(b&quot;ls&quot; as &amp;[u8]);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, ()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">command</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
-        <span class="ident">reader</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">command</span>).<span class="ident">expect</span>(<span class="string">&quot;error reading&quot;</span>);
-        <span class="ident">Program</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">BasicCommand</span>(<span class="ident">command</span>)])
+        <span class="kw">if</span> <span class="ident">reader</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">command</span>).<span class="ident">is_err</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+        }
+        <span class="prelude-val">Ok</span>(<span class="ident">Program</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">BasicCommand</span>(<span class="ident">command</span>)]))
     }
 
     <span class="doccomment">/// Return the single parsed command.</span>
