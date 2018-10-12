@@ -228,6 +228,19 @@
 <span id="228">228</span>
 <span id="229">229</span>
 <span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -386,6 +399,28 @@
     <span class="doccomment">/// of the POSIX language.</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
     <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Command</span> {
+        <span class="doccomment">/// Just a single command, with it&#39;s arguments.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// ### Examples</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// ```sh</span>
+        <span class="doccomment">/// date --iso-8601</span>
+        <span class="doccomment">/// ```</span>
+        <span class="comment">// TODO: Simple should not just be a vec of words.</span>
+        <span class="ident">Simple</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Word</span><span class="op">&gt;</span>),
+        <span class="doccomment">/// Pair of commands, used to make AST sequences.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// ```sh</span>
+        <span class="doccomment">/// ```</span>
+        <span class="ident">Pair</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>),
+        <span class="doccomment">/// A full program embedded in a compound command.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// ```sh</span>
+        <span class="doccomment">/// { ls ; }</span>
+        <span class="doccomment">/// ```</span>
+        <span class="comment">// TODO: We are currently overpermissive here...</span>
+        <span class="comment">// `{ ls }` is happily accepted.</span>
+        <span class="ident">Compound</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Program</span><span class="op">&gt;</span>),
         <span class="doccomment">/// Performs boolean negation to the status code of the inner</span>
         <span class="doccomment">/// command.</span>
         <span class="doccomment">///</span>
@@ -439,15 +474,6 @@
         <span class="doccomment">/// done &amp;</span>
         <span class="doccomment">/// ```</span>
         <span class="ident">Background</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>),
-        <span class="doccomment">/// Just a single command, with it&#39;s arguments.</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">/// ### Examples</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">/// ```sh</span>
-        <span class="doccomment">/// date --iso-8601</span>
-        <span class="doccomment">/// ```</span>
-        <span class="comment">// TODO: Simple should not just be a vec of words.</span>
-        <span class="ident">Simple</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Word</span><span class="op">&gt;</span>),
     }
 
     <span class="doccomment">/// A parsed word, already having gone through expansion.</span>
