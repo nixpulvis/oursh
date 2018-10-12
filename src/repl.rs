@@ -3,6 +3,7 @@
 //! There will be *absolutely no* blocking STDIN/OUT/ERR on things like tab
 //! completion or other potentially slow, or user defined behavior.
 
+use nix::unistd;
 use std::io::Write;
 use termion::{style, color};
 
@@ -32,11 +33,19 @@ impl Prompt {
     }
 
     pub fn long_style(self) -> Self {
-        Prompt(format!("{}{} oursh $ {} {} {}{} ",
-            color::Fg(color::Red),
+        let mut buf = [0u8; 64];
+        let hostname_cstr = unistd::gethostname(&mut buf)
+            .expect("error getting hostname");
+        let hostname = hostname_cstr.to_str()
+            .expect("hostname wasn't valid UTF-8");
+        Prompt(format!("{}{} {} $ {} {} {} {} {}{} ",
             style::Invert,
-            color::Fg(color::Blue),
+            color::Fg(color::Green),
+            hostname,
             color::Fg(color::Yellow),
+            color::Fg(color::Red),
+            color::Fg(color::Magenta),
+            color::Fg(color::Cyan),
             color::Fg(color::Reset),
             style::Reset))
     }
