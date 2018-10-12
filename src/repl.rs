@@ -17,6 +17,20 @@ impl Prompt {
         Prompt(format!("{}", Self::DEFAULT_FORMAT))
     }
 
+    pub fn nixpulvis_style(self) -> Self {
+        Prompt(format!("{}{}{}@{}{}{}:{}{}{}{}$ ",
+            color::Fg(color::Red),
+            "nixpulvis",
+            color::Fg(color::Reset),
+            color::Fg(color::Blue),
+            "masva",
+            color::Fg(color::Reset),
+            color::Fg(color::Green),
+            "~/Code/oursh",
+            color::Fg(color::Reset),
+            ""))
+    }
+
     pub fn long_style(self) -> Self {
         Prompt(format!("{}{} oursh $ {} {} {}{} ",
             color::Fg(color::Red),
