@@ -37,6 +37,7 @@ Job: ast::Command = {
 }
 
 Commands: ast::Command = {
+    // BridgedProgram => <>,
     "(" <p: Program> ")" => {
         ast::Command::Subshell(box p)
     },
@@ -45,7 +46,6 @@ Commands: ast::Command = {
         let p = ast::Program(js);
         ast::Command::Compound(box p)
     },
-    // BridgedProgram => <>,
     <cs: Commands> "&&" <p: Pipeline> => {
         ast::Command::And(box cs, box p)
     },

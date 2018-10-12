@@ -78,6 +78,7 @@
 
 use std::io::BufRead;
 use std::ffi::CString;
+use job::Job;
 
 /// A command is a task given by the user as part of a [`Program`](Program).
 ///
@@ -125,6 +126,14 @@ pub trait Program: Sized {
 
     /// Return a list of all the commands in this program.
     fn commands(&self) -> &[Box<Self::Command>];
+
+    /// Run the program sequentially.
+    fn run(&self) -> Result<(), ()> {
+        for command in self.commands().iter() {
+            Job::new(&**command).run();
+        }
+        Ok(())
+    }
 }
 
 

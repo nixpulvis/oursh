@@ -89,9 +89,8 @@ fn parse_and_run(text: &String) {
                 }
             }
 
-            for command in program.commands().iter() {
-                Job::new(&**command).run();
-            }
+            program.run()
+                .expect(&format!("error running program: {:?}", program));
         },
         Err(()) => {
             println!("error parsing text: {}", text);
