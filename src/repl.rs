@@ -35,23 +35,3 @@ impl<'a> From<&'a Prompt> for String {
         prompt.0.clone()
     }
 }
-
-pub fn trap_sigint() -> Result<signal::SigAction>  {
-    let action = signal::SigAction::new(signal::SigHandler::Handler(handle_ctrl_c),
-                                        signal::SaFlags::all(),
-                                        signal::SigSet::all());
-    unsafe {
-        signal::sigaction(signal::SIGINT, &action)
-    }
-}
-
-extern fn handle_ctrl_c(_: c_int) {
-    use std::process::exit;
-    exit(1);
-    let mut stdout = io::stdout();
-
-    // Clear
-    print!("{}\r", clear::CurrentLine);
-    Prompt::new().display(&mut stdout);
-    trap_sigint().expect("error trapping sigint");
-}

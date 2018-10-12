@@ -53,6 +53,13 @@ fn main() {
                     text.push(c);
                 },
                 Key::Alt(c)  => print!("Alt-{}", c),
+                Key::Ctrl('c') => {
+                    text.clear();
+                    print!("\n\r");
+
+                    // Print a boring static prompt.
+                    repl::Prompt::new().display(&mut stdout);
+                },
                 Key::Ctrl(c) => print!("Ctrl-{}", c),
                 Key::Left    => print!("<left>"),
                 Key::Right   => print!("<right>"),
