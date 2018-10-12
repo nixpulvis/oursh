@@ -3705,7 +3705,7 @@
 <span id="3705">3705</span>
 </pre><pre class="rust ">
 <span class="comment">// auto-generated: &quot;lalrpop 0.16.0&quot;</span>
-<span class="comment">// sha256: 97094d1655ac722c506f3b8d32a2cf71fed77b2a6460ae57f24731a55b493</span>
+<span class="comment">// sha256: 0b6e75011511663d6c92973decee19cbf3ae7d1e2548ddd407711fd4a8b3f</span>
 <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">posix</span>::<span class="ident">ast</span>;
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_extern_crates</span>)]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">lalrpop_util</span> <span class="kw">as</span> <span class="ident">__lalrpop_util</span>;
@@ -3783,7 +3783,7 @@
             <span class="string">r###&quot;&quot;|&quot;&quot;###</span>,
             <span class="string">r###&quot;&quot;||&quot;&quot;###</span>,
             <span class="string">r###&quot;&quot;}&quot;&quot;###</span>,
-            <span class="string">r###&quot;r#&quot;[a-zA-Z0-9-_]+&quot;#&quot;###</span>,
+            <span class="string">r###&quot;r#&quot;[a-zA-Z0-9-_\\.]+&quot;#&quot;###</span>,
         ];
         <span class="ident">__ACTION</span>[(<span class="ident">__state</span> <span class="op">*</span> <span class="number">12</span>)..].<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">__TERMINAL</span>).<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>, <span class="ident">terminal</span>)<span class="op">|</span> {
             <span class="kw">if</span> <span class="ident">state</span> <span class="op">==</span> <span class="number">0</span> {
@@ -4618,7 +4618,7 @@
         <span class="kw">_</span>: ::<span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
     ) <span class="op">-&gt;</span> (<span class="ident">usize</span>, (<span class="ident">usize</span>,<span class="ident">__Symbol</span><span class="op">&lt;</span><span class="lifetime">&#39;input</span><span class="op">&gt;</span>,<span class="ident">usize</span>), <span class="ident">usize</span>)
     {
-        <span class="comment">// Word = r#&quot;[a-zA-Z0-9-_]+&quot;# =&gt; ActionFn(19);</span>
+        <span class="comment">// Word = r#&quot;[a-zA-Z0-9-_\\.]+&quot;# =&gt; ActionFn(19);</span>
         <span class="kw">let</span> <span class="ident">__sym0</span> <span class="op">=</span> <span class="ident">__pop_Variant0</span>(<span class="ident">__symbols</span>);
         <span class="kw">let</span> <span class="ident">__start</span> <span class="op">=</span> <span class="ident">__sym0</span>.<span class="number">0</span>.<span class="ident">clone</span>();
         <span class="kw">let</span> <span class="ident">__end</span> <span class="op">=</span> <span class="ident">__sym0</span>.<span class="number">2</span>.<span class="ident">clone</span>();
@@ -4965,7 +4965,7 @@
             <span class="string">r###&quot;&quot;|&quot;&quot;###</span>,
             <span class="string">r###&quot;&quot;||&quot;&quot;###</span>,
             <span class="string">r###&quot;&quot;}&quot;&quot;###</span>,
-            <span class="string">r###&quot;r#&quot;[a-zA-Z0-9-_]+&quot;#&quot;###</span>,
+            <span class="string">r###&quot;r#&quot;[a-zA-Z0-9-_\\.]+&quot;#&quot;###</span>,
         ];
         <span class="ident">__ACTION</span>[(<span class="ident">__state</span> <span class="op">*</span> <span class="number">12</span>)..].<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">__TERMINAL</span>).<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>, <span class="ident">terminal</span>)<span class="op">|</span> {
             <span class="kw">if</span> <span class="ident">state</span> <span class="op">==</span> <span class="number">0</span> {
@@ -5800,7 +5800,7 @@
         <span class="kw">_</span>: ::<span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
     ) <span class="op">-&gt;</span> (<span class="ident">usize</span>, (<span class="ident">usize</span>,<span class="ident">__Symbol</span><span class="op">&lt;</span><span class="lifetime">&#39;input</span><span class="op">&gt;</span>,<span class="ident">usize</span>), <span class="ident">usize</span>)
     {
-        <span class="comment">// Word = r#&quot;[a-zA-Z0-9-_]+&quot;# =&gt; ActionFn(19);</span>
+        <span class="comment">// Word = r#&quot;[a-zA-Z0-9-_\\.]+&quot;# =&gt; ActionFn(19);</span>
         <span class="kw">let</span> <span class="ident">__sym0</span> <span class="op">=</span> <span class="ident">__pop_Variant0</span>(<span class="ident">__symbols</span>);
         <span class="kw">let</span> <span class="ident">__start</span> <span class="op">=</span> <span class="ident">__sym0</span>.<span class="number">0</span>.<span class="ident">clone</span>();
         <span class="kw">let</span> <span class="ident">__end</span> <span class="op">=</span> <span class="ident">__sym0</span>.<span class="number">2</span>.<span class="ident">clone</span>();
@@ -5943,7 +5943,7 @@
             <span class="string">r###&quot;&quot;|&quot;&quot;###</span>,
             <span class="string">r###&quot;&quot;||&quot;&quot;###</span>,
             <span class="string">r###&quot;&quot;}&quot;&quot;###</span>,
-            <span class="string">r###&quot;r#&quot;[a-zA-Z0-9-_]+&quot;#&quot;###</span>,
+            <span class="string">r###&quot;r#&quot;[a-zA-Z0-9-_\\.]+&quot;#&quot;###</span>,
         ];
         <span class="ident">__ACTION</span>[(<span class="ident">__state</span> <span class="op">*</span> <span class="number">12</span>)..].<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">__TERMINAL</span>).<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>, <span class="ident">terminal</span>)<span class="op">|</span> {
             <span class="kw">if</span> <span class="ident">state</span> <span class="op">==</span> <span class="number">0</span> {
@@ -6778,7 +6778,7 @@
         <span class="kw">_</span>: ::<span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
     ) <span class="op">-&gt;</span> (<span class="ident">usize</span>, (<span class="ident">usize</span>,<span class="ident">__Symbol</span><span class="op">&lt;</span><span class="lifetime">&#39;input</span><span class="op">&gt;</span>,<span class="ident">usize</span>), <span class="ident">usize</span>)
     {
-        <span class="comment">// Word = r#&quot;[a-zA-Z0-9-_]+&quot;# =&gt; ActionFn(19);</span>
+        <span class="comment">// Word = r#&quot;[a-zA-Z0-9-_\\.]+&quot;# =&gt; ActionFn(19);</span>
         <span class="kw">let</span> <span class="ident">__sym0</span> <span class="op">=</span> <span class="ident">__pop_Variant0</span>(<span class="ident">__symbols</span>);
         <span class="kw">let</span> <span class="ident">__start</span> <span class="op">=</span> <span class="ident">__sym0</span>.<span class="number">0</span>.<span class="ident">clone</span>();
         <span class="kw">let</span> <span class="ident">__end</span> <span class="op">=</span> <span class="ident">__sym0</span>.<span class="number">2</span>.<span class="ident">clone</span>();
@@ -6890,7 +6890,7 @@
     <span class="kw">impl</span> <span class="ident">__MatcherBuilder</span> {
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="ident">__MatcherBuilder</span> {
             <span class="kw">let</span> <span class="ident">__strs</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
-                <span class="string">&quot;^([\\-0-9A-Z_a-z]+)&quot;</span>,
+                <span class="string">&quot;^([\\--\\.0-9A-Z_a-z]+)&quot;</span>,
                 <span class="string">&quot;^(!)&quot;</span>,
                 <span class="string">&quot;^(\\&amp;)&quot;</span>,
                 <span class="string">&quot;^(\\&amp;\\&amp;)&quot;</span>,
@@ -6905,7 +6905,7 @@
             ];
             <span class="kw">let</span> <span class="ident">__regex_set</span> <span class="op">=</span> <span class="ident">__regex</span>::<span class="ident">RegexSet</span>::<span class="ident">new</span>(<span class="ident">__strs</span>).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">__regex_vec</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[
-                <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^([\\-0-9A-Z_a-z]+)&quot;</span>).<span class="ident">unwrap</span>(),
+                <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^([\\--\\.0-9A-Z_a-z]+)&quot;</span>).<span class="ident">unwrap</span>(),
                 <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^(!)&quot;</span>).<span class="ident">unwrap</span>(),
                 <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^(\\&amp;)&quot;</span>).<span class="ident">unwrap</span>(),
                 <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^(\\&amp;\\&amp;)&quot;</span>).<span class="ident">unwrap</span>(),
