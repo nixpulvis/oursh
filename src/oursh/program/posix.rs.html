@@ -223,12 +223,6 @@
 <span id="223">223</span>
 <span id="224">224</span>
 <span id="225">225</span>
-<span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
-<span id="230">230</span>
-<span id="231">231</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -374,12 +368,6 @@
 
 <span class="doccomment">/// Abstract Syntax Tree for the POSIX language.</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ast</span> {
-    <span class="comment">// enum Interpreter {</span>
-    <span class="comment">//     Posix,</span>
-    <span class="comment">//     Modern,</span>
-    <span class="comment">//     Other(String),</span>
-    <span class="comment">// }</span>
-
     <span class="doccomment">/// A program is the result of parsing a sequence of commands.</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Program</span>(<span class="kw">pub</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;&gt;</span>);

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `program` mod in crate `oursh`."><meta name="keywords" content="rust, rustlang, rust-lang, program"><title>oursh::program - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Module program</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class='location'><a href='../index.html'>oursh</a></p><script>window.sidebarCurrent = {name: 'program', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../src/oursh/program/mod.rs.html#1-167' title='goto source code'>[src]</a></span><span class='in-band'>Module <a href='../index.html'>oursh</a>::<wbr><a class="mod" href=''>program</a></span></h1><div class='docblock'><p>Parsing and handling program syntax(es) of the shell.</p>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `program` mod in crate `oursh`."><meta name="keywords" content="rust, rustlang, rust-lang, program"><title>oursh::program - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Module program</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class='location'><a href='../index.html'>oursh</a></p><script>window.sidebarCurrent = {name: 'program', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../src/oursh/program/mod.rs.html#1-196' title='goto source code'>[src]</a></span><span class='in-band'>Module <a href='../index.html'>oursh</a>::<wbr><a class="mod" href=''>program</a></span></h1><div class='docblock'><p>Parsing and handling program syntax(es) of the shell.</p>
 <p>Both, commands entered to the shell interactively through STDIN, and read
 from a file, are <em>programs</em>. Our shell provides multiple discrete languages
 to write programs in, each with a corresponding implementation of this
@@ -21,7 +21,7 @@ Any interperator can be used, just like with <code>#!</code>.</p>
 </code></pre>
 <p>Strict POSIX compatibility can be enabled by removing this feature alone.</p>
 <h3 id="default-syntax" class="section-header"><a href="#default-syntax">Default Syntax</a></h3>
-<p>Our shell has a <code>DefaultProgram</code> which is in charge of parsing programs
+<p>Our shell has a <code>PrimaryProgram</code> which is in charge of parsing programs
 which are not passed in via a <code>{@}</code> language block. This can be configured
 to your preference. This does not effect the shell when launched in
 POSIX compatibility mode, or when a specific default language is passed
@@ -63,6 +63,14 @@ echo
 <table><tr><td><code>pub use self::basic::<a class="struct" href="../../oursh/program/basic/struct.BasicProgram.html" title="struct oursh::program::basic::BasicProgram">BasicProgram</a>;</code></td></tr><tr><td><code>pub use self::posix::<a class="struct" href="../../oursh/program/posix/ast/struct.Program.html" title="struct oursh::program::posix::ast::Program">Program</a> as PosixProgram;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
+                           <td><a class="mod" href="ast/index.html"
+                                  title='mod oursh::program::ast'>ast</a></td>
+                           <td class='docblock-short'>
+                                <p>Abstract Syntax Tree for programs between multiple languages.</p>
+
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
                            <td><a class="mod" href="basic/index.html"
                                   title='mod oursh::program::basic'>basic</a></td>
                            <td class='docblock-short'>
@@ -83,7 +91,7 @@ echo
                            <td><a class="trait" href="trait.Command.html"
                                   title='trait oursh::program::Command'>Command</a></td>
                            <td class='docblock-short'>
-                                <p>A command is a task given by the user as part of a <a href="program"><code>Program</code></a>.</p>
+                                <p>A command is a task given by the user as part of a <a href="../../oursh/program/trait.Program.html"><code>Program</code></a>.</p>
 
                            </td>
                        </tr>
@@ -114,8 +122,16 @@ echo
                        </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
 <table>
                        <tr class=' module-item'>
-                           <td><a class="type" href="type.DefaultProgram.html"
-                                  title='type oursh::program::DefaultProgram'>DefaultProgram</a></td>
+                           <td><a class="type" href="type.AlternateProgram.html"
+                                  title='type oursh::program::AlternateProgram'>AlternateProgram</a></td>
+                           <td class='docblock-short'>
+                                <p>TODO: alt explain</p>
+
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="type" href="type.PrimaryProgram.html"
+                                  title='type oursh::program::PrimaryProgram'>PrimaryProgram</a></td>
                            <td class='docblock-short'>
                                 <p>The default program type, used for unannotated blocks.</p>
 

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Interpreter","Either explicit or implicit declaration of the interperator for a bridged program."]],"struct":[["BridgedProgram","A program's text and the interperator to be used."]]});
