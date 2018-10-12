@@ -76,7 +76,7 @@
 //! - Parse sequence of programs from stream.
 //! - Partial parses for readline-ish / syntax highlighting.
 
-use std::io::Read;
+use std::io::BufRead;
 use std::ffi::CString;
 
 /// A command is a task given by the user as part of a [`Program`](Program).
@@ -121,7 +121,7 @@ pub trait Program {
     type Command: Command;
 
     /// Parse a whole program from the given `reader`.
-    fn parse<R: Read>(reader: R) -> Self;
+    fn parse<R: BufRead>(reader: R) -> Self;
 
     /// Return a list of all the commands in this program.
     fn commands(&self) -> &[Box<Self::Command>];
@@ -143,7 +143,7 @@ pub type AlternateProgram = BasicProgram;
 ///
 /// parse_default(b"ls" as &[u8]);
 /// ```
-pub fn parse_default<R: Read>(reader: R) -> PrimaryProgram {
+pub fn parse_default<R: BufRead>(reader: R) -> PrimaryProgram {
     PrimaryProgram::parse(reader)
 }
 
@@ -156,7 +156,7 @@ pub fn parse_default<R: Read>(reader: R) -> PrimaryProgram {
 ///
 /// parse::<BasicProgram, &[u8]>(b"ls");
 /// ```
-pub fn parse<P: Program, R: Read>(reader: R) -> P {
+pub fn parse<P: Program, R: BufRead>(reader: R) -> P {
     P::parse(reader)
 }
 

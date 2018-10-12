@@ -1,5 +1,5 @@
 //! Single command programs with no features.
-use std::io::Read;
+use std::io::BufRead;
 use std::ffi::CString;
 
 
@@ -16,7 +16,7 @@ impl super::Program for BasicProgram {
     ///
     /// BasicProgram::parse(b"ls" as &[u8]);
     /// ```
-    fn parse<R: Read>(mut reader: R) -> Self {
+    fn parse<R: BufRead>(mut reader: R) -> Self {
         let mut command = String::new();
         reader.read_to_string(&mut command).expect("error reading");
         BasicProgram(vec![box BasicCommand(command)])

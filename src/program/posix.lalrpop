@@ -3,11 +3,12 @@ use program::posix::ast;
 grammar;
 
 pub Program: ast::Program = {
-    <p: Program> "\n"+ <c: Commands> => {
-        let (mut p, c) = (p, c);
-        p.0.push(box c);
-        p
-    },
+    // TODO: We need our own lexer to make this rule work.
+    // <p: Program> "\n"+ <c: Commands> => {
+    //     let (mut p, c) = (p, c);
+    //     p.0.push(box c);
+    //     p
+    // },
     <p: Program> ";" <c: Commands> => {
         let (mut p, c) = (p, c);
         p.0.push(box c);

@@ -105,7 +105,7 @@
 //!
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
-use std::io::Read;
+use std::io::BufRead;
 use std::ffi::CString;
 
 pub use self::ast::Program;
@@ -114,11 +114,10 @@ pub use self::ast::Command;
 impl super::Program for Program {
     type Command = Command;
 
-    fn parse<R: Read>(mut reader: R) -> Self {
+    fn parse<R: BufRead>(mut reader: R) -> Self {
         let mut string = String::new();
         reader.read_to_string(&mut string).unwrap();
         let parsed = lalrpop::ProgramParser::new().parse(&string).unwrap();
-        println!("{:#?}", parsed);
         parsed
     }
 
