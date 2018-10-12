@@ -129,9 +129,11 @@ pub trait Program {
 
 
 /// The default program type, used for unannotated blocks.
+// TODO: This should be `ModernProgram`.
 pub type PrimaryProgram = PosixProgram;
 
 /// TODO: alt explain
+// TODO: This should be `PosixProgram`.
 pub type AlternateProgram = BasicProgram;
 
 /// Parse a program of the default type.
@@ -191,6 +193,6 @@ lalrpop_mod!(lalrpop, "/program/mod.rs");
 // The various program grammars.
 
 pub mod basic;
-pub use self::basic::BasicProgram;
+pub use self::basic::Program as BasicProgram;
 pub mod posix;
 pub use self::posix::Program as PosixProgram;

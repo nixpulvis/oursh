@@ -4,9 +4,9 @@ use std::ffi::CString;
 
 
 /// A basic program with only a single command.
-pub struct BasicProgram(Vec<Box<BasicCommand>>);
+pub struct Program(Vec<Box<BasicCommand>>);
 
-impl super::Program for BasicProgram {
+impl super::Program for Program {
     type Command = BasicCommand;
 
     /// Create a new program from the given reader.
@@ -19,7 +19,7 @@ impl super::Program for BasicProgram {
     fn parse<R: BufRead>(mut reader: R) -> Self {
         let mut command = String::new();
         reader.read_to_string(&mut command).expect("error reading");
-        BasicProgram(vec![box BasicCommand(command)])
+        Program(vec![box BasicCommand(command)])
     }
 
     /// Return the single parsed command.
