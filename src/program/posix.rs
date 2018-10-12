@@ -114,11 +114,17 @@ pub use self::ast::Command;
 impl super::Program for Program {
     type Command = Command;
 
-    fn parse<R: BufRead>(mut reader: R) -> Self {
+    fn parse<R: BufRead>(mut reader: R) -> Result<Self, ()> {
         let mut string = String::new();
-        reader.read_to_string(&mut string).unwrap();
-        let parsed = lalrpop::ProgramParser::new().parse(&string).unwrap();
-        parsed
+        if reader.read_to_string(&mut string).is_err() {
+            return Err(());
+        }
+
+        if let Ok(parsed) = lalrpop::ProgramParser::new().parse(&string) {
+            Ok(parsed)
+        } else {
+            Err(())
+        }
     }
 
     fn commands(&self) -> &[Box<Self::Command>] {

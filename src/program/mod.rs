@@ -15,7 +15,7 @@
 //! Any interperator can be used, just like with `#!`.
 //!
 //! ```sh
-//! date      # Call `date` in the default syntax.
+//! date      # Call `date` in the primary syntax.
 //! {@ date}  # Specifies the alternate syntax.
 //!
 //! # Use ruby, why not...
@@ -116,19 +116,19 @@ pub trait Command {
 /// - Is simply iterating a collection of `commands` really the correct
 /// semantics for all the types of programs we want?
 /// - What language information do we still need to store?
-pub trait Program {
+pub trait Program: Sized {
     /// The type of each of this program's commands.
     type Command: Command;
 
     /// Parse a whole program from the given `reader`.
-    fn parse<R: BufRead>(reader: R) -> Self;
+    fn parse<R: BufRead>(reader: R) -> Result<Self, ()>;
 
     /// Return a list of all the commands in this program.
     fn commands(&self) -> &[Box<Self::Command>];
 }
 
 
-/// The default program type, used for unannotated blocks.
+/// The primary program type, used for unannotated blocks.
 // TODO: This should be `ModernProgram`.
 pub type PrimaryProgram = PosixProgram;
 
@@ -136,16 +136,16 @@ pub type PrimaryProgram = PosixProgram;
 // TODO: This should be `PosixProgram`.
 pub type AlternateProgram = BasicProgram;
 
-/// Parse a program of the default type.
+/// Parse a program of the primary type.
 ///
 /// # Examples
 ///
 /// ```
-/// use oursh::program::parse_default;
+/// use oursh::program::parse_primary;
 ///
-/// parse_default(b"ls" as &[u8]);
+/// parse_primary(b"ls" as &[u8]);
 /// ```
-pub fn parse_default<R: BufRead>(reader: R) -> PrimaryProgram {
+pub fn parse_primary<R: BufRead>(reader: R) -> Result<PrimaryProgram, ()> {
     PrimaryProgram::parse(reader)
 }
 
@@ -158,7 +158,7 @@ pub fn parse_default<R: BufRead>(reader: R) -> PrimaryProgram {
 ///
 /// parse::<BasicProgram, &[u8]>(b"ls");
 /// ```
-pub fn parse<P: Program, R: BufRead>(reader: R) -> P {
+pub fn parse<P: Program, R: BufRead>(reader: R) -> Result<P, ()> {
     P::parse(reader)
 }
 

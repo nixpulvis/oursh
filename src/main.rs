@@ -4,7 +4,7 @@ extern crate termion;
 use std::process::exit;
 use std::io::{self, Read, Write};
 use oursh::job::Job;
-use oursh::program::{parse_default, Program};
+use oursh::program::{parse_primary, Program};
 use oursh::repl;
 use termion::is_tty;
 use termion::event::Key;
@@ -88,12 +88,18 @@ fn main() {
 }
 
 fn parse_and_run(text: &String) {
-    // Parse with the default grammar and run each command in order.
-    let program = parse_default(text.as_bytes());
-    for command in program.commands().iter() {
-        // TODO: Can we disable raw mode for the program being
-        // run?
-        Job::new(&**command).run();
+    // Parse with the primary grammar and run each command in order.
+    match parse_primary(text.as_bytes()) {
+        Ok(program) => {
+            for command in program.commands().iter() {
+                // TODO: Can we disable raw mode for the program being
+                // run?
+                Job::new(&**command).run();
+            }
+        },
+        Err(()) => {
+            println!("error parsing text: {}", text);
+        }
     }
 }
 

@@ -16,10 +16,12 @@ impl super::Program for Program {
     ///
     /// BasicProgram::parse(b"ls" as &[u8]);
     /// ```
-    fn parse<R: BufRead>(mut reader: R) -> Self {
+    fn parse<R: BufRead>(mut reader: R) -> Result<Self, ()> {
         let mut command = String::new();
-        reader.read_to_string(&mut command).expect("error reading");
-        Program(vec![box BasicCommand(command)])
+        if reader.read_to_string(&mut command).is_err() {
+            return Err(());
+        }
+        Ok(Program(vec![box BasicCommand(command)]))
     }
 
     /// Return the single parsed command.
