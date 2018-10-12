@@ -1,6 +1,7 @@
 extern crate oursh;
 extern crate termion;
 
+use std::env;
 use std::process::exit;
 use std::io::{self, Read, Write};
 use oursh::job::Job;
@@ -82,9 +83,13 @@ fn parse_and_run(text: &String) {
     // Parse with the primary grammar and run each command in order.
     match parse_primary(text.as_bytes()) {
         Ok(program) => {
+            if let Some(arg1) = env::args().nth(1) {
+                if arg1 == "-v" || arg1 == "--verbose" {
+                    println!("{:#?}", program);
+                }
+            }
+
             for command in program.commands().iter() {
-                // TODO: Can we disable raw mode for the program being
-                // run?
                 Job::new(&**command).run();
             }
         },
