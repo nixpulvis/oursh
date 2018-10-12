@@ -6,6 +6,7 @@ use std::io::{self, Read, Write};
 use oursh::job::Job;
 use oursh::program::{parse_default, Program};
 use oursh::repl;
+use termion::is_tty;
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
@@ -13,7 +14,7 @@ use termion::raw::IntoRawMode;
 // Our shell, for the greater good. Ready and waiting.
 fn main() {
     // Block exits via `SIGINT`, generally triggered with ctrl-c.
-    if repl::is_tty(&io::stdin()) {
+    if is_tty(&io::stdin()) {
         // Standard input file descriptor (0), used for user input from the user
         // of the shell.
         let stdin = io::stdin();
@@ -25,7 +26,7 @@ fn main() {
 
         // TODO: Move all this gross logic into a clean repl API.
         // Print a boring static prompt.
-        if repl::is_tty(&io::stdin()) {
+        if is_tty(&io::stdin()) {
             repl::Prompt::new().display(&mut stdout);
             stdout.flush().unwrap();
         }

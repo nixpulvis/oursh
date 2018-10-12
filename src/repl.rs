@@ -6,10 +6,6 @@
 use std::io::Write;
 use termion::color;
 
-/// For now, we simple export the function from termion to allow main to
-/// decide when to use it without linking termion directly itself ;)
-pub use termion::is_tty;
-
 /// A status prompt to be displayed in interactive sessions before each
 /// program.
 pub struct Prompt(String);
