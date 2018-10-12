@@ -59,3 +59,10 @@ extern crate lalrpop_util;
 pub mod job;
 pub mod program;
 pub mod repl;
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_has_a_test() {}
+}

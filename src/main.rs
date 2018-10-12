@@ -63,3 +63,10 @@ fn main() {
         }
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_has_a_test() {}
+}
