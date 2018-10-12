@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["is_tty","Is this stream a TTY?"],["trap_sigint",""]],"struct":[["Prompt","A status prompt to be displayed in interactive sessions before each program."]]});
+initSidebarItems({"fn":[["is_tty","Is this stream a TTY?"],["raw_io",""],["trap_sigint",""]],"struct":[["Prompt","A status prompt to be displayed in interactive sessions before each program."]]});
