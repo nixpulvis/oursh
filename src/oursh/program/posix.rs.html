@@ -325,6 +325,39 @@
 <span id="325">325</span>
 <span id="326">326</span>
 <span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -439,6 +472,7 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">thread</span>;
 <span class="kw">use</span> <span class="ident">job</span>::<span class="ident">Job</span>;
 <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">Program</span> <span class="kw">as</span> <span class="ident">ProgramTrait</span>;
+<span class="kw">use</span> <span class="ident">program</span>::<span class="ident">ast</span>::<span class="ident">Interpreter</span>;
 
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">ast</span>::<span class="ident">Program</span>;
@@ -553,6 +587,29 @@
                 }).<span class="ident">expect</span>(<span class="string">&quot;error spawning thread&quot;</span>);
                 <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;[{:?}]&quot;</span>, <span class="ident">handle</span>.<span class="ident">thread</span>().<span class="ident">name</span>());
             },
+            <span class="ident">Command</span>::<span class="ident">Bridgeshell</span>(<span class="kw-2">ref</span> <span class="ident">bridged_program</span>) <span class="op">=&gt;</span> {
+                <span class="comment">// TODO: Pass text off to another parser.</span>
+                <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::{<span class="self">self</span>, <span class="ident">File</span>};
+                <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">unix</span>::<span class="ident">fs</span>::<span class="ident">PermissionsExt</span>;
+                <span class="kw">let</span> <span class="ident">bridgefile</span> <span class="op">=</span> <span class="string">&quot;./bridge&quot;</span>;
+                {
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">bridgefile</span>).<span class="ident">unwrap</span>();
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Interpreter</span>::<span class="ident">Other</span>(<span class="kw-2">ref</span> <span class="ident">interp</span>) <span class="op">=</span> <span class="ident">bridged_program</span>.<span class="number">0</span> {
+                        <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="ident">interp</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>();
+                        <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="string">b&quot;\n&quot;</span>).<span class="ident">unwrap</span>();
+                    }
+                    <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="ident">bridged_program</span>.<span class="number">1</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>();
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">perms</span> <span class="op">=</span> <span class="ident">fs</span>::<span class="ident">metadata</span>(<span class="ident">bridgefile</span>).<span class="ident">unwrap</span>().<span class="ident">permissions</span>();
+                    <span class="ident">perms</span>.<span class="ident">set_mode</span>(<span class="number">0o777</span>);
+                    <span class="ident">fs</span>::<span class="ident">set_permissions</span>(<span class="ident">bridgefile</span>, <span class="ident">perms</span>).<span class="ident">unwrap</span>();
+                }
+                <span class="comment">// TODO #4: Suspend and restore raw mode.</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">process</span>::<span class="ident">Command</span>::<span class="ident">new</span>(<span class="ident">bridgefile</span>)
+                    .<span class="ident">spawn</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error swawning bridge process&quot;</span>);
+                <span class="ident">child</span>.<span class="ident">wait</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error waiting for bridge process&quot;</span>);
+            },
         };
         <span class="prelude-val">Ok</span>(())
     }
@@ -560,9 +617,16 @@
 
 <span class="doccomment">/// Abstract Syntax Tree for the POSIX language.</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ast</span> {
+    <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">ast</span>::<span class="ident">Interpreter</span>;
+
     <span class="doccomment">/// A program is the result of parsing a sequence of commands.</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Program</span>(<span class="kw">pub</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;&gt;</span>);
+
+    <span class="doccomment">/// A program&#39;s text and the interperator to be used.</span>
+    <span class="comment">// TODO #8: Include grammar seperate from interperator?</span>
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BridgedProgram</span>(<span class="kw">pub</span> <span class="ident">Interpreter</span>, <span class="kw">pub</span> <span class="ident">String</span>);
 
     <span class="doccomment">/// A command is a highly recursive node with the main features</span>
     <span class="doccomment">/// of the POSIX language.</span>
@@ -642,6 +706,8 @@
         <span class="doccomment">/// done &amp;</span>
         <span class="doccomment">/// ```</span>
         <span class="ident">Background</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Program</span><span class="op">&gt;</span>),
+        <span class="doccomment">/// NOTE: *NON-POSIX*</span>
+        <span class="ident">Bridgeshell</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">BridgedProgram</span><span class="op">&gt;</span>),
     }
 
     <span class="doccomment">/// A parsed word, already having gone through expansion.</span>
