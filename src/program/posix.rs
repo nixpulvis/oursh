@@ -219,6 +219,7 @@ impl super::Command for Command {
                     .name(format!("{:?}", command))
                     .spawn(move ||
                 {
+                    // TODO: Suspend and restore raw mode.
                     (*command).run()
                         .expect("error running command in background");
                 }).expect("error spawning thread");
