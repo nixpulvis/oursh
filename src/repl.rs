@@ -3,10 +3,120 @@
 //! There will be *absolutely no* blocking STDIN/OUT/ERR on things like tab
 //! completion or other potentially slow, or user defined behavior.
 
+use std::io::{Write, Stdin};
+use std::process::exit;
 use nix::unistd;
 use pwd::Passwd;
-use std::io::Write;
+use termion::event::Key;
+use termion::input::TermRead;
+use termion::raw::RawTerminal;
 use termion::{style, color};
+
+pub fn start<W, F>(mut stdin: Stdin, mut stdout: RawTerminal<W>, runner: F)
+    where W: Write,
+          F: Fn(&String),
+{
+    // Load history from file in $HOME.
+    let mut history = History::load();
+
+    // A styled static (for now) prompt.
+    let prompt = Prompt::new().nixpulvis_style();
+
+    prompt.display(&mut stdout);
+
+    let mut text = String::new();
+    let mut cursor = 0usize;
+    for c in stdin.keys() {
+        match c.unwrap() {
+            Key::Esc => {
+                // Load history from file in $HOME.
+                history.save();
+                exit(0)
+            },
+            Key::Char('\n') => {
+                print!("\n\r");
+                stdout.flush().unwrap();
+
+                stdout.suspend_raw_mode().unwrap();
+                history.add(&text);
+                runner(&text);
+                history.reset_index();
+                stdout.activate_raw_mode().unwrap();
+
+                // Reset the text for the next program.
+                text.clear();
+
+                // Reset the cursor.
+                cursor = 0;
+
+                // Print a boring static prompt.
+                prompt.display(&mut stdout);
+            },
+            Key::Up => {
+                print!("{}{}",
+                       termion::clear::CurrentLine,
+                       termion::cursor::Left(prompt.len() as u16));
+                prompt.display(&mut stdout);
+                if let Some(history_text) = history.get_up() {
+                    cursor = history_text.len();
+                    text = history_text;
+                    print!("{}", text);
+                }
+                stdout.flush().unwrap();
+            },
+            Key::Down => {
+                print!("{}{}",
+                       termion::clear::CurrentLine,
+                       termion::cursor::Left(prompt.len() as u16));
+                prompt.display(&mut stdout);
+
+                match history.get_down() {
+                    Some(history_text) => {
+                        cursor = history_text.len();
+                        text = history_text;
+                        print!("{}", text);
+                    },
+                    None => text = String::new(),
+                }
+                stdout.flush().unwrap();
+            },
+            Key::Left => {
+                cursor = cursor.saturating_sub(1);
+                print!("{}", termion::cursor::Left(1));
+                stdout.flush().unwrap();
+            },
+            Key::Right => {
+                cursor = cursor.saturating_add(1);
+                print!("{}", termion::cursor::Right(1));
+                stdout.flush().unwrap();
+            },
+            Key::Char(c) => {
+                cursor = cursor.saturating_add(1);
+                text.push(c);
+                print!("{}", c);
+                stdout.flush().unwrap();
+            },
+            Key::Backspace => {
+                if !text.is_empty() {
+                    cursor = cursor.saturating_sub(1);
+                    print!("{}{}",
+                           termion::cursor::Left(1),
+                           termion::clear::UntilNewline);
+                    text.remove(cursor);
+                    print!("{}", &text[cursor..]);
+                    print!("{}", termion::cursor::Left((text.len() - cursor) as u16));
+                    stdout.flush().unwrap();
+                }
+            }
+            Key::Ctrl('c') => {
+                text.clear();
+                print!("\n\r");
+                prompt.display(&mut stdout);
+            },
+            _ => {}
+        }
+    }
+}
 
 /// A status prompt to be displayed in interactive sessions before each
 /// program.
