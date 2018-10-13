@@ -53,6 +53,21 @@ cargo test
 ```
 
 
+## Previous Work
+
+I've been using [`fish`][fish] as my main shell for a few years now. Fish
+inspires a lot of the modern syntax.
+
+POSIX compatibility comes from my desire to use this shell as my `chsh -s ...`
+shell on [Arch Linux][arch]. See the full POSIX reference for more information.
+
+I've built and wrote a few things about shells before:
+
+- [`rush`][rush] A glorified homework assignment for computer architecture.
+- [`myshell.py`][myshell.py] My submission for computer organization a8.
+- [Building a Shell -- Part 1][basp1] Start of this project.
+
+
 ## [POSIX Reference][posix]
 
 See the following sections for building the POSIX `sh` compliant program
@@ -99,3 +114,8 @@ We will want to create a few internal modules for the shell.
 [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
 [termios]: https://crates.io/crates/termios
 [libc]: https://crates.io/crates/libc
+[fish]: https://github.com/fish-shell/fish-shell
+[arch]: https://www.archlinux.org/
+[rush]: https://github.com/nixpulvis/rush
+[myshell.py]: /doc/cs2600-a8-myshell.py
+[basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
