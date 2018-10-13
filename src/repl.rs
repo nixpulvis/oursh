@@ -20,7 +20,7 @@ pub fn start<W, F>(stdin: Stdin, mut stdout: RawTerminal<W>, runner: F)
     let mut history = History::load();
 
     // A styled static (for now) prompt.
-    let prompt = Prompt::new().short_style();
+    let prompt = Prompt::new().sh_style();
 
     // Display the inital prompt.
     prompt.display(&mut stdout);
@@ -136,6 +136,11 @@ impl Prompt {
 
     pub fn len(&self) -> usize {
         self.0.len()
+    }
+
+    pub fn sh_style(self) -> Self {
+        let version = "4.4";
+        Prompt(format!("sh-{}$ ", version))
     }
 
     pub fn nixpulvis_style(self) -> Self {
