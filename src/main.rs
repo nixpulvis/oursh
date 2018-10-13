@@ -47,7 +47,7 @@ fn parse_and_run(text: &String) {
         Ok(program) => {
             // TODO #9: Proper arg parsing.
             if let Some(arg1) = env::args().nth(1) {
-                if arg1 == "-v" || arg1 == "--verbose" {
+                if arg1 == "-#" || arg1 == "--ast" {
                     debug!(program);
                 }
             }
