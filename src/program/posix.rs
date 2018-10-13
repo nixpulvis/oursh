@@ -147,12 +147,12 @@ impl super::Command for Command {
                 }).collect();
                 Job::new(argv).run();
             },
-            Command::Pair(ref left, ref right) => {
-                left.run()
-                    .expect("error running command");
-                right.run()
-                    .expect("error running command");
-            },
+            // Command::Pair(ref left, ref right) => {
+            //     left.run()
+            //         .expect("error running command");
+            //     right.run()
+            //         .expect("error running command");
+            // },
             Command::Compound(ref program) => {
                 for command in program.0.iter() {
                     command.run()
@@ -248,11 +248,11 @@ pub mod ast {
         /// ```
         // TODO: Simple should not just be a vec of words.
         Simple(Vec<Word>),
-        /// Pair of commands, used to make AST sequences.
-        ///
-        /// ```sh
-        /// ```
-        Pair(Box<Command>, Box<Command>),
+        ///// Pair of commands, used to make AST sequences.
+        /////
+        ///// ```sh
+        ///// ```
+        //Pair(Box<Command>, Box<Command>),
         /// A full program embedded in a compound command.
         ///
         /// ```sh
