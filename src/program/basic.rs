@@ -1,13 +1,15 @@
 //! Single command programs with no features.
 use std::io::BufRead;
 use std::ffi::CString;
+use job::Job;
 
 
 /// A basic program with only a single command.
-pub struct Program(Vec<Box<BasicCommand>>);
+#[derive(Debug)]
+pub struct Program(Vec<Box<Command>>);
 
 impl super::Program for Program {
-    type Command = BasicCommand;
+    type Command = Command;
 
     /// Create a new program from the given reader.
     ///
@@ -21,7 +23,7 @@ impl super::Program for Program {
         if reader.read_to_string(&mut command).is_err() {
             return Err(());
         }
-        Ok(Program(vec![box BasicCommand(command)]))
+        Ok(Program(vec![box Command(command)]))
     }
 
     /// Return the single parsed command.
@@ -32,14 +34,15 @@ impl super::Program for Program {
 
 
 /// A single poorly parsed command.
-#[derive(Clone)]
-pub struct BasicCommand(String);
+#[derive(Debug)]
+pub struct Command(String);
 
-impl super::Command for BasicCommand {
+impl super::Command for Command {
     /// Treat each space blindly as an argument delimiter.
-    fn argv(&self) -> Vec<CString> {
-        self.0.split_whitespace().map(|a| {
+    fn run(&self) -> Result<(), ()> {
+        Job::new(self.0.split_whitespace().map(|a| {
             CString::new(a).expect("error reading argument")
-        }).collect()
+        }).collect()).run();
+        Ok(())
     }
 }

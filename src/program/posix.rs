@@ -105,8 +105,11 @@
 //!
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
-use std::io::BufRead;
 use std::ffi::CString;
+use std::io::BufRead;
+use std::thread;
+use job::Job;
+use program::Program as ProgramTrait;
 
 pub use self::ast::Program;
 pub use self::ast::Command;
@@ -133,27 +136,45 @@ impl super::Program for Program {
 }
 
 impl super::Command for Command {
-    fn argv(&self) -> Vec<CString> {
+    fn run(&self) -> Result<(), ()> {
         match *self {
             Command::Simple(ref words) => {
-                words.iter().map(|w| {
-                    CString::new(&w.0 as &str).unwrap()
-                }).collect()
+                let argv = words.iter().map(|w| {
+                    CString::new(&w.0 as &str)
+                        .expect("error in word UTF-8")
+                }).collect();
+                Job::new(argv).run();
+            },
+            Command::Pair(ref left, ref right) => {
+                left.run();
+                right.run();
+            },
+            Command::Compound(ref program) => {
+                for command in program.0.iter() {
+                    command.run();
+                }
+            },
+            Command::Background(ref command) => {
+                let command = command.clone();
+                thread::spawn(move || {
+                    (*command).run();
+                });
             },
             _ => unimplemented!(),
-        }
+        };
+        Ok(())
     }
 }
 
 /// Abstract Syntax Tree for the POSIX language.
 pub mod ast {
     /// A program is the result of parsing a sequence of commands.
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     pub struct Program(pub Vec<Box<Command>>);
 
     /// A command is a highly recursive node with the main features
     /// of the POSIX language.
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     pub enum Command {
         /// Just a single command, with it's arguments.
         ///
@@ -229,14 +250,14 @@ pub mod ast {
         ///   sleep 1; echo "ping";
         /// done &
         /// ```
-        Background(Box<Command>),
+        Background(Box<Program>),
     }
 
     /// A parsed word, already having gone through expansion.
     // TODO: How can we expand things like $1 or $? from the lexer?
     // TODO: This needs to handle escapes and all kinds of fun. We first
     //       need to decide on our custom Tokens and lexer.
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     pub struct Word(pub String);
 }
 

@@ -26,9 +26,9 @@ pub struct Job {
 impl Job {
     /// Create a new job from the given command.
     // TODO: Return result.
-    pub fn new(command: &Command) -> Self {
+    pub fn new(argv: Vec<CString>) -> Self {
         Job {
-            argv: command.argv(),
+            argv: argv,
             child: None,
         }
     }

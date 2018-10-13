@@ -9,31 +9,42 @@ pub Program: ast::Program = {
     //     p.0.push(box c);
     //     p
     // },
-    <p: Program> ";" <j: Job> => {
-        let (mut p, j) = (p, j);
-        p.0.push(box j);
-        p
+    Complete => <>,
+}
+
+Complete: ast::Program = {
+    <l: List> ";" => l,
+    <l: List> "&" => {
+        let bg = ast::Command::Background(box l);
+        ast::Program(vec![box bg])
     },
-    Job => ast::Program(vec![box <>]),
+    List => <>,
+}
+
+List: ast::Program = {
+    <l: List> ";" <cs: Commands> => {
+        let (mut l, j) = (l, cs.clone());
+        l.0.push(box cs);
+        l
+    },
+    <l: List> "&" <cs: Commands> => {
+        let bg = ast::Command::Background(box l);
+        ast::Program(vec![box bg, box cs])
+    },
+    Commands => ast::Program(vec![box <>]),
 }
 
 Compound: ast::Program = {
-    <p: Compound> ";" <j: Job> => {
-        let (mut p, j) = (p, j);
-        p.0.push(box j);
-        p
+    <c: Compound> ";" <cs: Commands> => {
+        let (mut c, j) = (c, cs.clone());
+        c.0.push(box cs);
+        c
     },
-    <p: Compound> ";" => p,
-    <p: Job> ";" => ast::Program(vec![box p]),
-}
+    // TODO: Why doesn't this work?
+    // <cs: Commands> ";" => ast::Program(vec![box cs]),
 
-Job: ast::Command = {
-    <j: Job> "&" <cs: Commands> => {
-        let bg = ast::Command::Background(box j);
-        ast::Command::Pair(box bg, box cs)
-    },
-    <j: Job> "&" => ast::Command::Background(box j),
-    Commands => <>,
+    // XXX
+    Commands => ast::Program(vec![box <>]),
 }
 
 Commands: ast::Command = {
@@ -41,10 +52,8 @@ Commands: ast::Command = {
     "(" <p: Program> ")" => {
         ast::Command::Subshell(box p)
     },
-    "{" <js: (Job ";")+> "}" => {
-        let js = js.into_iter().map(|t| box t.0).collect();
-        let p = ast::Program(js);
-        ast::Command::Compound(box p)
+    "{" <c: Compound> "}" => {
+        ast::Command::Compound(box c)
     },
     <cs: Commands> "&&" <p: Pipeline> => {
         ast::Command::And(box cs, box p)

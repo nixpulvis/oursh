@@ -76,8 +76,9 @@
 //! - Parse sequence of programs from stream.
 //! - Partial parses for readline-ish / syntax highlighting.
 
-use std::io::BufRead;
 use std::ffi::CString;
+use std::fmt::Debug;
+use std::io::BufRead;
 use job::Job;
 
 /// A command is a task given by the user as part of a [`Program`](Program).
@@ -89,19 +90,20 @@ use job::Job;
 ///
 // TODO: We can reasonably reproduce the redirects, pwd... but is it
 // sane to try this with ENV too?
-pub trait Command {
+pub trait Command: Debug {
     /// Return the command's arguments (including it's name).
     ///
     /// This function returns a vector as expected by the `exec(3)` family of
     /// functions.
-    fn argv(&self) -> Vec<CString>;
+    fn run(&self) -> Result<(), ()>;
 
     /// Return the name of this command.
     ///
     /// This name *may* not be the same as the name given to the process by
     /// the running `Job`.
     fn name(&self) -> CString {
-        self.argv()[0].clone()
+        CString::new(format!("{:?}", self))
+            .expect("error in UTF-8 of format")
     }
 }
 
@@ -130,7 +132,8 @@ pub trait Program: Sized {
     /// Run the program sequentially.
     fn run(&self) -> Result<(), ()> {
         for command in self.commands().iter() {
-            Job::new(&**command).run();
+            command.run();
+            // Job::new(&**command).run();
         }
         Ok(())
     }
