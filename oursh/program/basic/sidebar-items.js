@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["BasicCommand","A single poorly parsed command."],["Program","A basic program with only a single command."]]});
+initSidebarItems({"struct":[["Command","A single poorly parsed command."],["Program","A basic program with only a single command."]]});

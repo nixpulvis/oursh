@@ -43,17 +43,22 @@
 <span id="43">43</span>
 <span id="44">44</span>
 <span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Single command programs with no features.</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufRead</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
+<span class="kw">use</span> <span class="ident">job</span>::<span class="ident">Job</span>;
 
 
 <span class="doccomment">/// A basic program with only a single command.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Program</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">BasicCommand</span><span class="op">&gt;&gt;</span>);
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Program</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;&gt;</span>);
 
 <span class="kw">impl</span> <span class="kw">super</span>::<span class="ident">Program</span> <span class="kw">for</span> <span class="ident">Program</span> {
-    <span class="kw">type</span> <span class="ident">Command</span> <span class="op">=</span> <span class="ident">BasicCommand</span>;
+    <span class="kw">type</span> <span class="ident">Command</span> <span class="op">=</span> <span class="ident">Command</span>;
 
     <span class="doccomment">/// Create a new program from the given reader.</span>
     <span class="doccomment">///</span>
@@ -67,7 +72,7 @@
         <span class="kw">if</span> <span class="ident">reader</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">command</span>).<span class="ident">is_err</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(());
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">Program</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">BasicCommand</span>(<span class="ident">command</span>)]))
+        <span class="prelude-val">Ok</span>(<span class="ident">Program</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">Command</span>(<span class="ident">command</span>)]))
     }
 
     <span class="doccomment">/// Return the single parsed command.</span>
@@ -78,15 +83,16 @@
 
 
 <span class="doccomment">/// A single poorly parsed command.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BasicCommand</span>(<span class="ident">String</span>);
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Command</span>(<span class="ident">String</span>);
 
-<span class="kw">impl</span> <span class="kw">super</span>::<span class="ident">Command</span> <span class="kw">for</span> <span class="ident">BasicCommand</span> {
+<span class="kw">impl</span> <span class="kw">super</span>::<span class="ident">Command</span> <span class="kw">for</span> <span class="ident">Command</span> {
     <span class="doccomment">/// Treat each space blindly as an argument delimiter.</span>
-    <span class="kw">fn</span> <span class="ident">argv</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">split_whitespace</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
+    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+        <span class="ident">Job</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">split_whitespace</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
             <span class="ident">CString</span>::<span class="ident">new</span>(<span class="ident">a</span>).<span class="ident">expect</span>(<span class="string">&quot;error reading argument&quot;</span>)
-        }).<span class="ident">collect</span>()
+        }).<span class="ident">collect</span>()).<span class="ident">run</span>();
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </pre>
