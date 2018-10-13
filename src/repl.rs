@@ -9,7 +9,6 @@ use nix::unistd;
 use pwd::Passwd;
 use termion::event::Key;
 use termion::input::TermRead;
-use termion::raw::RawTerminal;
 use termion::raw::IntoRawMode;
 use termion::{style, color};
 
@@ -47,8 +46,8 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, mut stdout: Stdout, runner: F) {
 
                 // Run the command.
                 stdout.suspend_raw_mode().unwrap();
-                history.add(&text);
                 runner(&text);
+                history.add(&text, 1);
                 history.reset_index();
                 stdout.activate_raw_mode().unwrap();
 
@@ -213,7 +212,7 @@ impl History {
         self.0 = None;
     }
 
-    pub fn add(&mut self, text: &str) {
+    pub fn add(&mut self, text: &str, count: usize) {
         if text.is_empty() {
             return;
         }
@@ -224,10 +223,14 @@ impl History {
             index = *i;
             text == t
         }).is_some() {
-            self.1[index].1 += 1;
+            self.1[index].1 += count;
+            let text = self.1.remove(index);
+            self.1.insert(0, text);
         } else {
-            self.1.insert(0, (text.to_owned(), 0));
+            self.1.insert(0, (text.to_owned(), count));
         }
+
+        println!("adding history item: {:?}", self.1[0]);
     }
 
     pub fn get_up(&mut self) -> Option<String> {
@@ -272,9 +275,23 @@ impl History {
             let mut contents = String::new();
             f.read_to_string(&mut contents)
                 .expect("error reading history");
-            for text in contents.split("\n").map(|s| String::from(s)) {
-                history.add(&text);
+            // TODO: We really need something like serde or serde-json
+            //       for the pair if we want to have historical run counts.
+            // let hist = contents.split("\n").map(|s| {
+            //     String::from(s).split(" ").map(|s| {
+            //         println!("{:?}", s);
+            //     })
+            // }).collect::<Vec<String, usize>>();
+            let hist = contents.split("\n").map(|s| {
+                (String::from(s), 0)
+            });
+
+            // Add each entry to the history in order.
+            for (text, index) in hist {
+                history.add(&text, index);
             }
+
+            // Reverse the order so users get the most recent commands first.
             history.1 = history.1.into_iter().rev().collect();
         }
 

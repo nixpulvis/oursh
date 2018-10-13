@@ -17,7 +17,7 @@ fn main() {
     if is_tty(&stdin) {
         // Standard output file descriptor (1), used to display program output
         // to the user of the shell.
-        let mut stdout = io::stdout();
+        let stdout = io::stdout();
 
         // Start a program running repl.
         repl::start(stdin, stdout, parse_and_run);
