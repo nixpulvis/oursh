@@ -2,7 +2,7 @@ extern crate oursh;
 extern crate termion;
 
 use std::env;
-use std::io::{self, Read, Write};
+use std::io::{self, Read};
 use oursh::program::{parse_primary, Program};
 use oursh::repl;
 use termion::is_tty;
@@ -18,7 +18,7 @@ fn main() {
     if is_tty(&stdin) {
         // Standard output file descriptor (1), used to display program output
         // to the user of the shell.
-        let mut stdout = io::stdout().into_raw_mode()
+        let stdout = io::stdout().into_raw_mode()
             .expect("error opening raw mode");
 
         // Start a program running repl.

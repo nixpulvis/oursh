@@ -12,7 +12,7 @@ use termion::input::TermRead;
 use termion::raw::RawTerminal;
 use termion::{style, color};
 
-pub fn start<W, F>(mut stdin: Stdin, mut stdout: RawTerminal<W>, runner: F)
+pub fn start<W, F>(stdin: Stdin, mut stdout: RawTerminal<W>, runner: F)
     where W: Write,
           F: Fn(&String),
 {
@@ -22,10 +22,15 @@ pub fn start<W, F>(mut stdin: Stdin, mut stdout: RawTerminal<W>, runner: F)
     // A styled static (for now) prompt.
     let prompt = Prompt::new().nixpulvis_style();
 
+    // Display the inital prompt.
     prompt.display(&mut stdout);
 
+    // TODO: We need a better state object for these values.
     let mut text = String::new();
     let mut cursor = 0usize;
+
+    // Iterate the keys as a user presses them.
+    // TODO: Mouse?
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Esc => {
@@ -34,19 +39,19 @@ pub fn start<W, F>(mut stdin: Stdin, mut stdout: RawTerminal<W>, runner: F)
                 exit(0)
             },
             Key::Char('\n') => {
+                // Perform a raw mode line break.
                 print!("\n\r");
                 stdout.flush().unwrap();
 
+                // Run the command.
                 stdout.suspend_raw_mode().unwrap();
                 history.add(&text);
                 runner(&text);
                 history.reset_index();
                 stdout.activate_raw_mode().unwrap();
 
-                // Reset the text for the next program.
+                // Reset for the next program.
                 text.clear();
-
-                // Reset the cursor.
                 cursor = 0;
 
                 // Print a boring static prompt.
@@ -189,7 +194,6 @@ impl Prompt {
     }
 }
 
-use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -208,7 +212,7 @@ impl History {
 
         // HACK: There's got to be a cleaner way.
         let mut index = 0;
-        if self.1.iter().enumerate().find(|(i, (t, c))| {
+        if self.1.iter().enumerate().find(|(i, (t, _))| {
             index = *i;
             text == t
         }).is_some() {
@@ -268,7 +272,7 @@ impl History {
     pub fn save(&self) {
         let mut f = File::open("/home/nixpulvis/.oursh_history")
             .expect("error cannot find history");
-        f.write(self.1.iter().map(|(t, c)| t.to_owned()).collect::<Vec<String>>().join("\n").as_bytes())
+        f.write(self.1.iter().map(|(t, _)| t.to_owned()).collect::<Vec<String>>().join("\n").as_bytes())
             .expect("error reading history");
     }
 }
