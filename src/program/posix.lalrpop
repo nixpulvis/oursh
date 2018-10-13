@@ -1,4 +1,3 @@
-use program::ast::Interpreter;
 use program::posix::ast;
 
 grammar;
@@ -79,7 +78,7 @@ PipelineSeq: ast::Command = {
     <c: Command> => c,
 }
 
-pub Command: ast::Command = Word+ => ast::Command::Simple(<>);
+Command: ast::Command = Word+ => ast::Command::Simple(<>);
 
 // TODO #8: Custom lexer plus proger rules needed.
-pub Word: ast::Word = r"[a-zA-Z0-9-_\.]+" => ast::Word(<>.into());
+Word: ast::Word = r"[a-zA-Z0-9-_\.]+" => ast::Word(<>.into());

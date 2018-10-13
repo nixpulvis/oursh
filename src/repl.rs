@@ -12,7 +12,7 @@ use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::{style, color};
 
-pub fn start<F: Fn(&String)>(stdin: Stdin, mut stdout: Stdout, runner: F) {
+pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
     // Load history from file in $HOME.
     let mut history = History::load();
 
