@@ -46,16 +46,12 @@ Compound: ast::Program = {
     Commands => ast::Program(vec![box <>]),
 }
 
-// TODO #8: The leading '#' is just to avoid a ambiguity. I think the
-// custom lexer might help here.
-Interpreter: String = r"#![^}^;]*" => <>.into();
-Text: String = r";[^}]*" => <>.into();
-
 Commands: ast::Command = {
-    "{@" <i: Interpreter> <t: Text> "}" => {
-        let b = ast::BridgedProgram(Interpreter::Other(i), t);
-        ast::Command::Bridgeshell(box b)
-    },
+    // TODO: Hopefully in fixing #8 and #10 this can play nicely.
+    //"{@" <i: r"#![^}^;]*"> <t: r";[^}]*"> "}" => {
+    //    let b = ast::BridgedProgram(Interpreter::Other(i.into()), t.into());
+    //    ast::Command::Bridgeshell(box b)
+    //},
     "(" <p: Program> ")" => {
         ast::Command::Subshell(box p)
     },
