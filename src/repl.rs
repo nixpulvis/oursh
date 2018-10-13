@@ -25,12 +25,12 @@ pub fn start<W, F>(stdin: Stdin, mut stdout: RawTerminal<W>, runner: F)
     // Display the inital prompt.
     prompt.display(&mut stdout);
 
-    // TODO: We need a better state object for these values.
+    // TODO #5: We need a better state object for these values.
     let mut text = String::new();
     let mut cursor = 0usize;
 
     // Iterate the keys as a user presses them.
-    // TODO: Mouse?
+    // TODO #5: Mouse?
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Esc => {

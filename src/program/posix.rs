@@ -162,24 +162,24 @@ impl super::Command for Command {
             Command::Not(ref command) => {
                 command.run()
                     .expect("error running command");
-                // TODO: Flip status code.
+                // TODO #4: Flip status code.
             },
             Command::And(ref left, ref right) => {
                 left.run()
                     .expect("error running left command");
                 right.run()
                     .expect("error running right command");
-                // TODO: Status check.
+                // TODO #4: Status check.
             },
             Command::Or(ref left, ref right) => {
                 left.run()
                     .expect("error running left command");
                 right.run()
                     .expect("error running right command");
-                // TODO: Status check.
+                // TODO #4: Status check.
             },
             Command::Subshell(ref program) => {
-                // TODO: Run in a *subshell* ffs.
+                // TODO #4: Run in a *subshell* ffs.
                 program.run()
                     .expect("error running subshell program");
             },
@@ -219,7 +219,7 @@ impl super::Command for Command {
                     .name(format!("{:?}", command))
                     .spawn(move ||
                 {
-                    // TODO: Suspend and restore raw mode.
+                    // TODO #4: Suspend and restore raw mode.
                     (*command).run()
                         .expect("error running command in background");
                 }).expect("error spawning thread");
@@ -247,7 +247,7 @@ pub mod ast {
         /// ```sh
         /// date --iso-8601
         /// ```
-        // TODO: Simple should not just be a vec of words.
+        // TODO #8: Simple should not just be a vec of words.
         Simple(Vec<Word>),
         ///// Pair of commands, used to make AST sequences.
         /////
@@ -259,8 +259,7 @@ pub mod ast {
         /// ```sh
         /// { ls ; }
         /// ```
-        // TODO: We are currently overpermissive here...
-        // `{ ls }` is happily accepted.
+        // TODO #10: We are currently overpermissive here.
         Compound(Box<Program>),
         /// Performs boolean negation to the status code of the inner
         /// command.
@@ -318,8 +317,8 @@ pub mod ast {
     }
 
     /// A parsed word, already having gone through expansion.
-    // TODO: How can we expand things like $1 or $? from the lexer?
-    // TODO: This needs to handle escapes and all kinds of fun. We first
+    // TODO #8: How can we expand things like $1 or $? from the lexer?
+    // TODO #8: This needs to handle escapes and all kinds of fun. We first
     //       need to decide on our custom Tokens and lexer.
     #[derive(Debug, Clone)]
     pub struct Word(pub String);

@@ -71,10 +71,8 @@
 //! echo
 //! ```
 //!
-//! ### TODO
-//!
-//! - Parse sequence of programs from stream.
-//! - Partial parses for readline-ish / syntax highlighting.
+//! TODO #5: Parse sequence of programs from stream.
+//! TODO #5: Partial parses for readline-ish / syntax highlighting.
 
 use std::ffi::CString;
 use std::fmt::Debug;
@@ -87,7 +85,7 @@ use std::io::BufRead;
 /// within the control of the shell are reproduced; IO redirection, working
 /// directory, and even the environment are each faithfully preserved.
 ///
-// TODO: We can reasonably reproduce the redirects, pwd... but is it
+// TODO #4: We can reasonably reproduce the redirects, pwd... but is it
 // sane to try this with ENV too?
 pub trait Command: Debug {
     /// Return the command's arguments (including it's name).
@@ -194,7 +192,7 @@ pub mod ast {
     }
 
     /// A program's text and the interperator to be used.
-    // TODO: Include grammar seperate from interperator?
+    // TODO #8: Include grammar seperate from interperator?
     #[derive(Debug)]
     pub struct BridgedProgram(pub Interpreter, pub String);
 }

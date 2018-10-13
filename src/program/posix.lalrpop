@@ -3,7 +3,7 @@ use program::posix::ast;
 grammar;
 
 pub Program: ast::Program = {
-    // TODO: We need our own lexer to make this rule work.
+    // TODO #8: We need our own lexer to make this rule work.
     // <p: Program> "\n"+ <c: Commands> => {
     //     let (mut p, c) = (p, c);
     //     p.0.push(box c);
@@ -40,10 +40,8 @@ Compound: ast::Program = {
         c.0.push(box cs);
         c
     },
-    // TODO: Why doesn't this work?
+    // TODO #10: Why doesn't this work?
     // <cs: Commands> ";" => ast::Program(vec![box cs]),
-
-    // XXX
     Commands => ast::Program(vec![box <>]),
 }
 
@@ -78,5 +76,5 @@ PipelineSeq: ast::Command = {
 
 pub Command: ast::Command = Word+ => ast::Command::Simple(<>);
 
-// TODO: Custom lexer plus proger rules needed.
+// TODO #8: Custom lexer plus proger rules needed.
 pub Word: ast::Word = r"[a-zA-Z0-9-_\.]+" => ast::Word(<>.into());

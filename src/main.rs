@@ -37,7 +37,7 @@ fn parse_and_run(text: &String) {
     // Parse with the primary grammar and run each command in order.
     match parse_primary(text.as_bytes()) {
         Ok(program) => {
-            // TODO: Proper arg parsing.
+            // TODO #9: Proper arg parsing.
             if let Some(arg1) = env::args().nth(1) {
                 if arg1 == "-v" || arg1 == "--verbose" {
                     println!("{:#?}", program);

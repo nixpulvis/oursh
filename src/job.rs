@@ -13,9 +13,9 @@ use nix::sys::wait::{waitpid, WaitStatus};
 /// The shell's main job (pun intended) is to run commands. Each job has various arguments, and
 /// rules about what things should be done.
 ///
-/// - TODO: Redirection example.
-/// - TODO: Background example.
-/// - TODO: Environment example?
+/// - TODO #4: Redirection example.
+/// - TODO #6: Background example.
+/// - TODO #4: Environment example?
 pub struct Job {
     argv: Vec<CString>,
     // TODO: Call this pid?
@@ -24,7 +24,7 @@ pub struct Job {
 
 impl Job {
     /// Create a new job from the given command.
-    // TODO: Return result.
+    // TODO #4: Return result.
     pub fn new(argv: Vec<CString>) -> Self {
         Job {
             argv: argv,
@@ -35,14 +35,14 @@ impl Job {
     /// Run a shell job, waiting for the command to finish.
     ///
     /// This function also does a simple lookup for builtin functions.
-    // TODO: Return result.
+    // TODO #4: Return result.
     pub fn run(&mut self) {
-        // TODO: Proper builtins, in program module.
+        // TODO #4: Proper builtins, in program module.
         if self.argv.len() > 0 && self.argv[0].to_bytes() == b"exit" {
             exit(0);
         }
 
-        // TODO: This is a awful background parse :P
+        // TODO #4: This is a awful background parse :P
         if self.argv.last().map(|s| s.to_bytes()) == Some(b"&") {
             self.argv.pop();
             self.fork();
@@ -81,7 +81,7 @@ impl Job {
     }
 
     fn exec(&self) {
-        // TODO: Where should we handle empty commands?
+        // TODO #4: Where should we handle empty commands?
         if self.argv.len() == 0 {
             return;
         }
@@ -101,7 +101,7 @@ impl Job {
                 loop {
                     match waitpid(child, None) {
                         Ok(WaitStatus::StillAlive) => {},
-                        // TODO: Cover other cases?
+                        // TODO #4: Cover other cases?
                         _ => break,
                     }
                 }
