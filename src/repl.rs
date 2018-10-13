@@ -195,6 +195,7 @@ impl Prompt {
 }
 
 use std::fs::File;
+use std::path::Path;
 use std::io::prelude::*;
 
 #[derive(Debug)]
@@ -256,23 +257,28 @@ impl History {
     }
 
     pub fn load() -> Self {
-        let mut f = File::open("/home/nixpulvis/.oursh_history")
-            .expect("error cannot find history");
-        let mut contents = String::new();
-        f.read_to_string(&mut contents)
-            .expect("error reading history");
-
         let mut history = History(None, vec![]);
-        for text in contents.split("\n").map(|s| String::from(s)) {
-            history.add(&text);
+
+        if Path::new("/home/nixpulvis/.oursh_history").exists() {
+            let mut f = File::open("/home/nixpulvis/.oursh_history")
+                .expect("error cannot find history");
+            let mut contents = String::new();
+            f.read_to_string(&mut contents)
+                .expect("error reading history");
+            for text in contents.split("\n").map(|s| String::from(s)) {
+                history.add(&text);
+            }
+            history.1 = history.1.into_iter().rev().collect();
         }
+
         history
     }
 
     pub fn save(&self) {
-        let mut f = File::open("/home/nixpulvis/.oursh_history")
+        let mut f = File::create("/home/nixpulvis/.oursh_history")
             .expect("error cannot find history");
-        f.write(self.1.iter().map(|(t, _)| t.to_owned()).collect::<Vec<String>>().join("\n").as_bytes())
-            .expect("error reading history");
+        let text = self.1.iter().map(|(t, _)| t.to_owned()).collect::<Vec<String>>().join("\n");
+        f.write_all(text.as_bytes())
+            .expect("error writing history");
     }
 }
