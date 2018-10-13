@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["History",""],["Prompt","A status prompt to be displayed in interactive sessions before each program."]]});
+initSidebarItems({"fn":[["start",""]],"struct":[["History",""],["Prompt","A status prompt to be displayed in interactive sessions before each program."]]});
