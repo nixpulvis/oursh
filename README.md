@@ -14,18 +14,20 @@ programs, the language this will be written in.
 
 ## Features
 
-- POSIX compatibility w/ non-posix blocks (`{@lang ... }`)
-- bash/zsh autocomplete compatibility
-- `man` / `-h` / `--help` parsing
-- Multi-line input
-- Modern scripting language (types, higher-order functions, threading?, etc)
-- obfuscated strings (`!'password'!`)
-- mosh like remote session support
-- Smart history, sync'd across devices
-- Package manager
-- Sane defaults
+- [x] Basic command REPL
+- [ ] POSIX compatibility
+    - [ ] w/ non-posix blocks (`{@lang ... }`)
+- [ ] bash/zsh autocomplete compatibility
+- [ ] `man` / `-h` / `--help` parsing
+- [ ] Multi-line input
+- [ ] Modern scripting language (types, higher-order functions, threading?, etc)
+- [ ] obfuscated strings (`!'password'!`)
+- [ ] mosh like remote session support
+- [ ] Smart history, sync'd across devices
+- [ ] Pipe old commands without rerunning
+- [ ] Package manager
+-  Sane defaults
 - Fast
-- Pipe old commands without rerunning
 
 
 ## Usage

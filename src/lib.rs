@@ -10,6 +10,7 @@
 //!
 //! ## Features
 //!
+//! - Basic command REPL
 //! - POSIX compatibility w/ non-posix blocks (`{@lang ... }`)
 //! - bash/zsh autocomplete compatibility
 //! - `man` / `-h` / `--help` parsing
