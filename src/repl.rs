@@ -4,6 +4,7 @@
 //! completion or other potentially slow, or user defined behavior.
 
 use nix::unistd;
+use pwd::Passwd;
 use std::io::Write;
 use termion::{style, color};
 
@@ -23,17 +24,27 @@ impl Prompt {
     }
 
     pub fn nixpulvis_style(self) -> Self {
+        let mut buf = [0u8; 64];
+        let hostname_cstr = unistd::gethostname(&mut buf)
+            .expect("error getting hostname");
+        let hostname = hostname_cstr.to_str()
+            .expect("hostname wasn't valid UTF-8");
+        let passwd = Passwd::current_user()
+            .expect("error i don't exist, passwd validation failed!");
+        let whoami = passwd.name;
+        let cwd = unistd::getcwd()
+            .expect("error reading cwd");
         Prompt(format!("{}{}{}@{}{}{}:{}{}{}{}$ ",
             color::Fg(color::Red),
-            "nixpulvis",
+            whoami,
             color::Fg(color::Reset),
             color::Fg(color::Blue),
-            "masva",
+            hostname,
             color::Fg(color::Reset),
             color::Fg(color::Green),
-            "~/Code/oursh",
+            cwd.display(),
             color::Fg(color::Reset),
-            ""))
+            " "))
     }
 
     pub fn long_style(self) -> Self {

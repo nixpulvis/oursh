@@ -29,11 +29,12 @@ fn main() {
 
         // A styled static (for now) prompt.
         let prompt = repl::Prompt::new()
-            .long_style();
+            .nixpulvis_style();
 
         prompt.display(&mut stdout);
 
         let mut text = String::new();
+        let mut cursor = 0usize;
         for c in stdin.keys() {
             match c.unwrap() {
                 Key::Esc => {
@@ -54,6 +55,9 @@ fn main() {
                     // Reset the text for the next program.
                     text.clear();
 
+                    // Reset the cursor.
+                    cursor = 0;
+
                     // Print a boring static prompt.
                     prompt.display(&mut stdout);
                 },
@@ -63,12 +67,13 @@ fn main() {
                            termion::cursor::Left(prompt.len() as u16));
                     prompt.display(&mut stdout);
                     if let Some(history_text) = history.get_up() {
+                        cursor = history_text.len();
                         text = history_text;
                         print!("{}", text);
                     }
                     stdout.flush().unwrap();
-                }
-                Key::Down=> {
+                },
+                Key::Down => {
                     print!("{}{}",
                            termion::clear::CurrentLine,
                            termion::cursor::Left(prompt.len() as u16));
@@ -76,24 +81,39 @@ fn main() {
 
                     match history.get_down() {
                         Some(history_text) => {
+                            cursor = history_text.len();
                             text = history_text;
                             print!("{}", text);
                         },
                         None => text = String::new(),
                     }
                     stdout.flush().unwrap();
-                }
+                },
+                Key::Left => {
+                    cursor = cursor.saturating_sub(1);
+                    print!("{}", termion::cursor::Left(1));
+                    stdout.flush().unwrap();
+                },
+                Key::Right => {
+                    cursor = cursor.saturating_add(1);
+                    print!("{}", termion::cursor::Right(1));
+                    stdout.flush().unwrap();
+                },
                 Key::Char(c) => {
+                    cursor = cursor.saturating_add(1);
                     text.push(c);
                     print!("{}", c);
                     stdout.flush().unwrap();
                 },
                 Key::Backspace => {
                     if !text.is_empty() {
-                        text.pop();
+                        cursor = cursor.saturating_sub(1);
                         print!("{}{}",
                                termion::cursor::Left(1),
                                termion::clear::UntilNewline);
+                        text.remove(cursor);
+                        print!("{}", &text[cursor..]);
+                        print!("{}", termion::cursor::Left((text.len() - cursor) as u16));
                         stdout.flush().unwrap();
                     }
                 }

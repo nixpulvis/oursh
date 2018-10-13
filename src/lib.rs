@@ -53,6 +53,7 @@
 #![feature(box_syntax, box_patterns)]
 
 extern crate nix;
+extern crate pwd;
 extern crate termion;
 
 #[macro_use]
