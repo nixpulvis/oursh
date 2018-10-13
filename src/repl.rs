@@ -20,7 +20,7 @@ pub fn start<W, F>(stdin: Stdin, mut stdout: RawTerminal<W>, runner: F)
     let mut history = History::load();
 
     // A styled static (for now) prompt.
-    let prompt = Prompt::new().nixpulvis_style();
+    let prompt = Prompt::new().short_style();
 
     // Display the inital prompt.
     prompt.display(&mut stdout);
@@ -181,7 +181,7 @@ impl Prompt {
     }
 
     pub fn short_style(self) -> Self {
-        Prompt(format!("{}{}${}{} ",
+        Prompt(format!("{}{}our$h{}{} ",
             color::Fg(color::Red),
             style::Invert,
             color::Fg(color::Reset),
