@@ -154,6 +154,34 @@ impl super::Command for Command {
                     command.run();
                 }
             },
+            Command::Pipeline(ref left, ref right) => {
+                use std::process::{self, Stdio};
+                use std::io::Write;
+
+                if let box Command::Simple(left_words) = left {
+                    let mut child = process::Command::new(&left_words[0].0)
+                        .stdout(Stdio::piped())
+                        .spawn()
+                        .expect("error swawning pipeline process");
+
+                    let output = child.wait_with_output()
+                        .expect("error reading stdout");
+
+                    if let box Command::Simple(right_words) = right {
+                        let mut child = process::Command::new(&right_words[0].0)
+                            .stdin(Stdio::piped())
+                            .spawn()
+                            .expect("error swawning pipeline process");
+
+                        {
+                            let stdin = child.stdin.as_mut()
+                                .expect("error opening stdin");
+                            stdin.write_all("echo hello world".as_bytes())
+                                .expect("error writing to stdin");
+                        }
+                    }
+                }
+            },
             Command::Background(ref command) => {
                 let command = command.clone();
                 thread::spawn(move || {

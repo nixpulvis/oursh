@@ -50,7 +50,7 @@
 //!
 //! [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
 //! [rustup]: https://github.com/rust-lang-nursery/rustup.rs
-#![feature(box_syntax)]
+#![feature(box_syntax, box_patterns)]
 
 extern crate nix;
 extern crate termion;
