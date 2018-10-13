@@ -111,6 +111,7 @@ use std::process::{self, Stdio};
 use std::thread;
 use job::Job;
 use program::Program as ProgramTrait;
+use program::ast::Interpreter;
 
 
 pub use self::ast::Program;
@@ -225,6 +226,29 @@ impl super::Command for Command {
                 }).expect("error spawning thread");
                 println!("[{:?}]", handle.thread().name());
             },
+            Command::Bridgeshell(ref bridged_program) => {
+                // TODO: Pass text off to another parser.
+                use std::fs::{self, File};
+                use std::os::unix::fs::PermissionsExt;
+                let bridgefile = "./bridge";
+                {
+                    let mut file = File::create(bridgefile).unwrap();
+                    if let Interpreter::Other(ref interp) = bridged_program.0 {
+                        file.write_all(interp.as_bytes()).unwrap();
+                        file.write_all(b"\n").unwrap();
+                    }
+                    file.write_all(bridged_program.1.as_bytes()).unwrap();
+                    let mut perms = fs::metadata(bridgefile).unwrap().permissions();
+                    perms.set_mode(0o777);
+                    fs::set_permissions(bridgefile, perms).unwrap();
+                }
+                // TODO #4: Suspend and restore raw mode.
+                let mut child = process::Command::new(bridgefile)
+                    .spawn()
+                    .expect("error swawning bridge process");
+                child.wait()
+                    .expect("error waiting for bridge process");
+            },
         };
         Ok(())
     }
@@ -232,9 +256,16 @@ impl super::Command for Command {
 
 /// Abstract Syntax Tree for the POSIX language.
 pub mod ast {
+    use program::ast::Interpreter;
+
     /// A program is the result of parsing a sequence of commands.
     #[derive(Debug, Clone)]
     pub struct Program(pub Vec<Box<Command>>);
+
+    /// A program's text and the interperator to be used.
+    // TODO #8: Include grammar seperate from interperator?
+    #[derive(Debug, Clone)]
+    pub struct BridgedProgram(pub Interpreter, pub String);
 
     /// A command is a highly recursive node with the main features
     /// of the POSIX language.
@@ -314,6 +345,8 @@ pub mod ast {
         /// done &
         /// ```
         Background(Box<Program>),
+        /// NOTE: *NON-POSIX*
+        Bridgeshell(Box<BridgedProgram>),
     }
 
     /// A parsed word, already having gone through expansion.

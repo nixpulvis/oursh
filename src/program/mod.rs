@@ -184,21 +184,13 @@ pub mod ast {
     /// {@ ...}
     /// {@ruby ...}
     /// ```
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     pub enum Interpreter {
         Primary,
         Alternate,
         Other(String),
     }
-
-    /// A program's text and the interperator to be used.
-    // TODO #8: Include grammar seperate from interperator?
-    #[derive(Debug)]
-    pub struct BridgedProgram(pub Interpreter, pub String);
 }
-
-// Language bridge grammar macro.
-lalrpop_mod!(lalrpop, "/program/mod.rs");
 
 // The various program grammars.
 
