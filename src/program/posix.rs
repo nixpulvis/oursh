@@ -192,10 +192,16 @@ impl super::Command for Command {
             },
             Command::Background(ref command) => {
                 let command = command.clone();
-                thread::spawn(move || {
+                let handle = thread::Builder::new()
+                    .name(format!("{:?}", command))
+                    .spawn(move ||
+                {
                     (*command).run()
                         .expect("error running command in background");
-                });
+                }).expect("error spawning thread");
+                use std::hash::Hash;
+                use std::collections::hash_map::DefaultHasher;
+                println!("[{:?}]", handle.thread().name());
             },
             _ => unimplemented!(),
         };

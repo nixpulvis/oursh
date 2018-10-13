@@ -24,6 +24,9 @@ fn main() {
         let mut stdout = io::stdout().into_raw_mode()
             .expect("error opening raw mode");
 
+        // Load history from file in $HOME.
+        let mut history = repl::History::load();
+
         // A styled static (for now) prompt.
         let prompt = repl::Prompt::new()
             .long_style();
@@ -33,13 +36,19 @@ fn main() {
         let mut text = String::new();
         for c in stdin.keys() {
             match c.unwrap() {
-                Key::Esc => exit(0),
+                Key::Esc => {
+                    // Load history from file in $HOME.
+                    history.save();
+                    exit(0)
+                },
                 Key::Char('\n') => {
                     print!("\n\r");
                     stdout.flush().unwrap();
 
                     stdout.suspend_raw_mode().unwrap();
+                    history.add(&text);
                     parse_and_run(&text);
+                    history.reset_index();
                     stdout.activate_raw_mode().unwrap();
 
                     // Reset the text for the next program.
@@ -48,6 +57,32 @@ fn main() {
                     // Print a boring static prompt.
                     prompt.display(&mut stdout);
                 },
+                Key::Up => {
+                    print!("{}{}",
+                           termion::clear::CurrentLine,
+                           termion::cursor::Left(prompt.len() as u16));
+                    prompt.display(&mut stdout);
+                    if let Some(history_text) = history.get_up() {
+                        text = history_text;
+                        print!("{}", text);
+                    }
+                    stdout.flush().unwrap();
+                }
+                Key::Down=> {
+                    print!("{}{}",
+                           termion::clear::CurrentLine,
+                           termion::cursor::Left(prompt.len() as u16));
+                    prompt.display(&mut stdout);
+
+                    match history.get_down() {
+                        Some(history_text) => {
+                            text = history_text;
+                            print!("{}", text);
+                        },
+                        None => text = String::new(),
+                    }
+                    stdout.flush().unwrap();
+                }
                 Key::Char(c) => {
                     text.push(c);
                     print!("{}", c);
