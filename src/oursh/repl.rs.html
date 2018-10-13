@@ -282,6 +282,11 @@
 <span id="282">282</span>
 <span id="283">283</span>
 <span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! ...</span>
 <span class="doccomment">//!</span>
@@ -305,7 +310,7 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">history</span> <span class="op">=</span> <span class="ident">History</span>::<span class="ident">load</span>();
 
     <span class="comment">// A styled static (for now) prompt.</span>
-    <span class="kw">let</span> <span class="ident">prompt</span> <span class="op">=</span> <span class="ident">Prompt</span>::<span class="ident">new</span>().<span class="ident">short_style</span>();
+    <span class="kw">let</span> <span class="ident">prompt</span> <span class="op">=</span> <span class="ident">Prompt</span>::<span class="ident">new</span>().<span class="ident">sh_style</span>();
 
     <span class="comment">// Display the inital prompt.</span>
     <span class="ident">prompt</span>.<span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stdout</span>);
@@ -421,6 +426,11 @@
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">len</span>()
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sh_style</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">version</span> <span class="op">=</span> <span class="string">&quot;4.4&quot;</span>;
+        <span class="ident">Prompt</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;sh-{}$ &quot;</span>, <span class="ident">version</span>))
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">nixpulvis_style</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
