@@ -7,7 +7,6 @@ use std::process::exit;
 use std::ffi::CString;
 use nix::unistd::{execvp, fork, Pid, ForkResult};
 use nix::sys::wait::{waitpid, WaitStatus};
-use program::Command;
 
 /// A job to be executed by various means.
 ///

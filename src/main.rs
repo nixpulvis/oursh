@@ -4,7 +4,6 @@ extern crate termion;
 use std::env;
 use std::process::exit;
 use std::io::{self, Read, Write};
-use oursh::job::Job;
 use oursh::program::{parse_primary, Program};
 use oursh::repl;
 use termion::is_tty;

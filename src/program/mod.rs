@@ -79,7 +79,6 @@
 use std::ffi::CString;
 use std::fmt::Debug;
 use std::io::BufRead;
-use job::Job;
 
 /// A command is a task given by the user as part of a [`Program`](Program).
 ///
@@ -132,7 +131,8 @@ pub trait Program: Sized {
     /// Run the program sequentially.
     fn run(&self) -> Result<(), ()> {
         for command in self.commands().iter() {
-            command.run();
+            command.run()
+                .expect("error running command");
             // Job::new(&**command).run();
         }
         Ok(())
