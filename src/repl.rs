@@ -3,24 +3,26 @@
 //! There will be *absolutely no* blocking STDIN/OUT/ERR on things like tab
 //! completion or other potentially slow, or user defined behavior.
 
-use std::io::{Write, Stdin};
+use std::io::{Write, Stdin, Stdout};
 use std::process::exit;
 use nix::unistd;
 use pwd::Passwd;
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::RawTerminal;
+use termion::raw::IntoRawMode;
 use termion::{style, color};
 
-pub fn start<W, F>(stdin: Stdin, mut stdout: RawTerminal<W>, runner: F)
-    where W: Write,
-          F: Fn(&String),
-{
+pub fn start<F: Fn(&String)>(stdin: Stdin, mut stdout: Stdout, runner: F) {
     // Load history from file in $HOME.
     let mut history = History::load();
 
     // A styled static (for now) prompt.
     let prompt = Prompt::new().sh_style();
+
+    // Convert the tty's stdout into raw mode.
+    let mut stdout = stdout.into_raw_mode()
+        .expect("error opening raw mode");
 
     // Display the inital prompt.
     prompt.display(&mut stdout);

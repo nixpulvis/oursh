@@ -6,7 +6,6 @@ use std::io::{self, Read};
 use oursh::program::{parse_primary, Program};
 use oursh::repl;
 use termion::is_tty;
-use termion::raw::IntoRawMode;
 
 // Our shell, for the greater good. Ready and waiting.
 fn main() {
@@ -18,8 +17,7 @@ fn main() {
     if is_tty(&stdin) {
         // Standard output file descriptor (1), used to display program output
         // to the user of the shell.
-        let stdout = io::stdout().into_raw_mode()
-            .expect("error opening raw mode");
+        let mut stdout = io::stdout();
 
         // Start a program running repl.
         repl::start(stdin, stdout, parse_and_run);
