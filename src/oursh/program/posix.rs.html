@@ -262,6 +262,43 @@
 <span id="262">262</span>
 <span id="263">263</span>
 <span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -411,18 +448,55 @@
                 <span class="ident">Job</span>::<span class="ident">new</span>(<span class="ident">argv</span>).<span class="ident">run</span>();
             },
             <span class="ident">Command</span>::<span class="ident">Pair</span>(<span class="kw-2">ref</span> <span class="ident">left</span>, <span class="kw-2">ref</span> <span class="ident">right</span>) <span class="op">=&gt;</span> {
-                <span class="ident">left</span>.<span class="ident">run</span>();
-                <span class="ident">right</span>.<span class="ident">run</span>();
+                <span class="ident">left</span>.<span class="ident">run</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error running command&quot;</span>);
+                <span class="ident">right</span>.<span class="ident">run</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error running command&quot;</span>);
             },
             <span class="ident">Command</span>::<span class="ident">Compound</span>(<span class="kw-2">ref</span> <span class="ident">program</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">command</span> <span class="kw">in</span> <span class="ident">program</span>.<span class="number">0</span>.<span class="ident">iter</span>() {
-                    <span class="ident">command</span>.<span class="ident">run</span>();
+                    <span class="ident">command</span>.<span class="ident">run</span>()
+                        .<span class="ident">expect</span>(<span class="string">&quot;error running command&quot;</span>);
+                }
+            },
+            <span class="ident">Command</span>::<span class="ident">Pipeline</span>(<span class="kw-2">ref</span> <span class="ident">left</span>, <span class="kw-2">ref</span> <span class="ident">right</span>) <span class="op">=&gt;</span> {
+                <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>::{<span class="self">self</span>, <span class="ident">Stdio</span>};
+                <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>;
+
+                <span class="kw">if</span> <span class="kw">let</span> <span class="kw">box</span> <span class="ident">Command</span>::<span class="ident">Simple</span>(<span class="ident">left_words</span>) <span class="op">=</span> <span class="ident">left</span> {
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">process</span>::<span class="ident">Command</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">left_words</span>[<span class="number">0</span>].<span class="number">0</span>)
+                        .<span class="ident">args</span>(<span class="ident">left_words</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">w</span>.<span class="number">0</span>))
+                        .<span class="ident">stdout</span>(<span class="ident">Stdio</span>::<span class="ident">piped</span>())
+                        .<span class="ident">spawn</span>()
+                        .<span class="ident">expect</span>(<span class="string">&quot;error swawning pipeline process&quot;</span>);
+
+                    <span class="kw">let</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">wait_with_output</span>()
+                        .<span class="ident">expect</span>(<span class="string">&quot;error reading stdout&quot;</span>);
+
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="kw">box</span> <span class="ident">Command</span>::<span class="ident">Simple</span>(<span class="ident">right_words</span>) <span class="op">=</span> <span class="ident">right</span> {
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">process</span>::<span class="ident">Command</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">right_words</span>[<span class="number">0</span>].<span class="number">0</span>)
+                            .<span class="ident">args</span>(<span class="ident">right_words</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">w</span>.<span class="number">0</span>))
+                            .<span class="ident">stdin</span>(<span class="ident">Stdio</span>::<span class="ident">piped</span>())
+                            .<span class="ident">spawn</span>()
+                            .<span class="ident">expect</span>(<span class="string">&quot;error swawning pipeline process&quot;</span>);
+
+                        {
+                            <span class="kw">let</span> <span class="ident">stdin</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">stdin</span>.<span class="ident">as_mut</span>()
+                                .<span class="ident">expect</span>(<span class="string">&quot;error opening stdin&quot;</span>);
+                            <span class="ident">stdin</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">output</span>.<span class="ident">stdout</span>)
+                                .<span class="ident">expect</span>(<span class="string">&quot;error writing to stdin&quot;</span>);
+                        }
+
+                        <span class="ident">child</span>.<span class="ident">wait</span>()
+                            .<span class="ident">expect</span>(<span class="string">&quot;error waiting for piped command&quot;</span>);
+                    }
                 }
             },
             <span class="ident">Command</span>::<span class="ident">Background</span>(<span class="kw-2">ref</span> <span class="ident">command</span>) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">command</span> <span class="op">=</span> <span class="ident">command</span>.<span class="ident">clone</span>();
                 <span class="ident">thread</span>::<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">||</span> {
-                    (<span class="kw-2">*</span><span class="ident">command</span>).<span class="ident">run</span>();
+                    (<span class="kw-2">*</span><span class="ident">command</span>).<span class="ident">run</span>()
+                        .<span class="ident">expect</span>(<span class="string">&quot;error running command in background&quot;</span>);
                 });
             },
             <span class="kw">_</span> <span class="op">=&gt;</span> <span class="macro">unimplemented</span><span class="macro">!</span>(),

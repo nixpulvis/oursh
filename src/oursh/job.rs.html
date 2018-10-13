@@ -110,7 +110,6 @@
 <span id="110">110</span>
 <span id="111">111</span>
 <span id="112">112</span>
-<span id="113">113</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Subprocess execution management.</span>
 <span class="doccomment">//!</span>
@@ -121,7 +120,6 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::{<span class="ident">execvp</span>, <span class="ident">fork</span>, <span class="ident">Pid</span>, <span class="ident">ForkResult</span>};
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::{<span class="ident">waitpid</span>, <span class="ident">WaitStatus</span>};
-<span class="kw">use</span> <span class="ident">program</span>::<span class="ident">Command</span>;
 
 <span class="doccomment">/// A job to be executed by various means.</span>
 <span class="doccomment">///</span>
