@@ -206,8 +206,6 @@
 <span id="206">206</span>
 <span id="207">207</span>
 <span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Parsing and handling program syntax(es) of the shell.</span>
 <span class="doccomment">//!</span>
@@ -282,10 +280,8 @@
 <span class="doccomment">//! echo</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ### TODO</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - Parse sequence of programs from stream.</span>
-<span class="doccomment">//! - Partial parses for readline-ish / syntax highlighting.</span>
+<span class="doccomment">//! TODO #5: Parse sequence of programs from stream.</span>
+<span class="doccomment">//! TODO #5: Partial parses for readline-ish / syntax highlighting.</span>
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span>;
@@ -298,7 +294,7 @@
 <span class="doccomment">/// within the control of the shell are reproduced; IO redirection, working</span>
 <span class="doccomment">/// directory, and even the environment are each faithfully preserved.</span>
 <span class="doccomment">///</span>
-<span class="comment">// TODO: We can reasonably reproduce the redirects, pwd... but is it</span>
+<span class="comment">// TODO #4: We can reasonably reproduce the redirects, pwd... but is it</span>
 <span class="comment">// sane to try this with ENV too?</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Command</span>: <span class="ident">Debug</span> {
     <span class="doccomment">/// Return the command&#39;s arguments (including it&#39;s name).</span>
@@ -405,7 +401,7 @@
     }
 
     <span class="doccomment">/// A program&#39;s text and the interperator to be used.</span>
-    <span class="comment">// TODO: Include grammar seperate from interperator?</span>
+    <span class="comment">// TODO #8: Include grammar seperate from interperator?</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BridgedProgram</span>(<span class="kw">pub</span> <span class="ident">Interpreter</span>, <span class="kw">pub</span> <span class="ident">String</span>);
 }

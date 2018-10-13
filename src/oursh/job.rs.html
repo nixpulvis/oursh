@@ -126,9 +126,9 @@
 <span class="doccomment">/// The shell&#39;s main job (pun intended) is to run commands. Each job has various arguments, and</span>
 <span class="doccomment">/// rules about what things should be done.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// - TODO: Redirection example.</span>
-<span class="doccomment">/// - TODO: Background example.</span>
-<span class="doccomment">/// - TODO: Environment example?</span>
+<span class="doccomment">/// - TODO #4: Redirection example.</span>
+<span class="doccomment">/// - TODO #6: Background example.</span>
+<span class="doccomment">/// - TODO #4: Environment example?</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Job</span> {
     <span class="ident">argv</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span>,
     <span class="comment">// TODO: Call this pid?</span>
@@ -137,7 +137,7 @@
 
 <span class="kw">impl</span> <span class="ident">Job</span> {
     <span class="doccomment">/// Create a new job from the given command.</span>
-    <span class="comment">// TODO: Return result.</span>
+    <span class="comment">// TODO #4: Return result.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">argv</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="ident">Job</span> {
             <span class="ident">argv</span>: <span class="ident">argv</span>,
@@ -148,14 +148,14 @@
     <span class="doccomment">/// Run a shell job, waiting for the command to finish.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This function also does a simple lookup for builtin functions.</span>
-    <span class="comment">// TODO: Return result.</span>
+    <span class="comment">// TODO #4: Return result.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="comment">// TODO: Proper builtins, in program module.</span>
+        <span class="comment">// TODO #4: Proper builtins, in program module.</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">argv</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">argv</span>[<span class="number">0</span>].<span class="ident">to_bytes</span>() <span class="op">==</span> <span class="string">b&quot;exit&quot;</span> {
             <span class="ident">exit</span>(<span class="number">0</span>);
         }
 
-        <span class="comment">// TODO: This is a awful background parse :P</span>
+        <span class="comment">// TODO #4: This is a awful background parse :P</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">argv</span>.<span class="ident">last</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_bytes</span>()) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="string">b&quot;&amp;&quot;</span>) {
             <span class="self">self</span>.<span class="ident">argv</span>.<span class="ident">pop</span>();
             <span class="self">self</span>.<span class="ident">fork</span>();
@@ -194,7 +194,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">exec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="comment">// TODO: Where should we handle empty commands?</span>
+        <span class="comment">// TODO #4: Where should we handle empty commands?</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">argv</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">return</span>;
         }
@@ -214,7 +214,7 @@
                 <span class="kw">loop</span> {
                     <span class="kw">match</span> <span class="ident">waitpid</span>(<span class="ident">child</span>, <span class="prelude-val">None</span>) {
                         <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">StillAlive</span>) <span class="op">=&gt;</span> {},
-                        <span class="comment">// TODO: Cover other cases?</span>
+                        <span class="comment">// TODO #4: Cover other cases?</span>
                         <span class="kw">_</span> <span class="op">=&gt;</span> <span class="kw">break</span>,
                     }
                 }

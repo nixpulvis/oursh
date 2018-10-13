@@ -2,9 +2,9 @@
 <p>The shell's main job (pun intended) is to run commands. Each job has various arguments, and
 rules about what things should be done.</p>
 <ul>
-<li>TODO: Redirection example.</li>
-<li>TODO: Background example.</li>
-<li>TODO: Environment example?</li>
+<li>TODO #4: Redirection example.</li>
+<li>TODO #6: Background example.</li>
+<li>TODO #4: Environment example?</li>
 </ul>
 </div><h2 id='methods' class='small-section-header'>Methods<a href='#methods' class='anchor'></a></h2><h3 id='impl' class='impl'><span class='in-band'><table class='table-display'><tbody><tr><td><code>impl <a class="struct" href="../../oursh/job/struct.Job.html" title="struct oursh::job::Job">Job</a></code><a href='#impl' class='anchor'></a></span></td><td><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/oursh/job.rs.html#25-112' title='goto source code'>[src]</a></span></td></tr></tbody></table></h3><div class='impl-items'><h4 id='method.new' class="method"><span id='new.v' class='invisible'><table class='table-display'><tbody><tr><td><code>pub fn <a href='#method.new' class='fnname'>new</a>(argv: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/ffi/c_str/struct.CString.html" title="struct std::ffi::c_str::CString">CString</a>&gt;) -&gt; Self</code></span></td><td><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/oursh/job.rs.html#28-33' title='goto source code'>[src]</a></td></tr></tbody></table></span></h4><div class='docblock'><p>Create a new job from the given command.</p>
 </div><h4 id='method.run' class="method"><span id='run.v' class='invisible'><table class='table-display'><tbody><tr><td><code>pub fn <a href='#method.run' class='fnname'>run</a>(&amp;mut self)</code></span></td><td><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/oursh/job.rs.html#39-52' title='goto source code'>[src]</a></td></tr></tbody></table></span></h4><div class='docblock'><p>Run a shell job, waiting for the command to finish.</p>
