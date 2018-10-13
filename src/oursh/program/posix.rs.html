@@ -299,6 +299,12 @@
 <span id="299">299</span>
 <span id="300">300</span>
 <span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -494,10 +500,16 @@
             },
             <span class="ident">Command</span>::<span class="ident">Background</span>(<span class="kw-2">ref</span> <span class="ident">command</span>) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">command</span> <span class="op">=</span> <span class="ident">command</span>.<span class="ident">clone</span>();
-                <span class="ident">thread</span>::<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">||</span> {
+                <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">thread</span>::<span class="ident">Builder</span>::<span class="ident">new</span>()
+                    .<span class="ident">name</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">command</span>))
+                    .<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">||</span>
+                {
                     (<span class="kw-2">*</span><span class="ident">command</span>).<span class="ident">run</span>()
                         .<span class="ident">expect</span>(<span class="string">&quot;error running command in background&quot;</span>);
-                });
+                }).<span class="ident">expect</span>(<span class="string">&quot;error spawning thread&quot;</span>);
+                <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+                <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">hash_map</span>::<span class="ident">DefaultHasher</span>;
+                <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;[{:?}]&quot;</span>, <span class="ident">handle</span>.<span class="ident">thread</span>().<span class="ident">name</span>());
             },
             <span class="kw">_</span> <span class="op">=&gt;</span> <span class="macro">unimplemented</span><span class="macro">!</span>(),
         };
