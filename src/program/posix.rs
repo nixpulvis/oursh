@@ -106,10 +106,12 @@
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
 use std::ffi::CString;
-use std::io::BufRead;
+use std::io::{Write, BufRead};
+use std::process::{self, Stdio};
 use std::thread;
 use job::Job;
 use program::Program as ProgramTrait;
+
 
 pub use self::ast::Program;
 pub use self::ast::Command;
@@ -157,10 +159,31 @@ impl super::Command for Command {
                         .expect("error running command");
                 }
             },
+            Command::Not(ref command) => {
+                command.run()
+                    .expect("error running command");
+                // TODO: Flip status code.
+            },
+            Command::And(ref left, ref right) => {
+                left.run()
+                    .expect("error running left command");
+                right.run()
+                    .expect("error running right command");
+                // TODO: Status check.
+            },
+            Command::Or(ref left, ref right) => {
+                left.run()
+                    .expect("error running left command");
+                right.run()
+                    .expect("error running right command");
+                // TODO: Status check.
+            },
+            Command::Subshell(ref program) => {
+                // TODO: Run in a *subshell* ffs.
+                program.run()
+                    .expect("error running subshell program");
+            },
             Command::Pipeline(ref left, ref right) => {
-                use std::process::{self, Stdio};
-                use std::io::Write;
-
                 if let box Command::Simple(left_words) = left {
                     let mut child = process::Command::new(&left_words[0].0)
                         .args(left_words.iter().skip(1).map(|w| &w.0))
@@ -201,7 +224,6 @@ impl super::Command for Command {
                 }).expect("error spawning thread");
                 println!("[{:?}]", handle.thread().name());
             },
-            _ => unimplemented!(),
         };
         Ok(())
     }
