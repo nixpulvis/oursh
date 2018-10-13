@@ -303,6 +303,29 @@
 <span id="303">303</span>
 <span id="304">304</span>
 <span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -412,10 +435,12 @@
 <span class="doccomment">//! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/</span>
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufRead</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::{<span class="ident">Write</span>, <span class="ident">BufRead</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>::{<span class="self">self</span>, <span class="ident">Stdio</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">thread</span>;
 <span class="kw">use</span> <span class="ident">job</span>::<span class="ident">Job</span>;
 <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">Program</span> <span class="kw">as</span> <span class="ident">ProgramTrait</span>;
+
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">ast</span>::<span class="ident">Program</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">ast</span>::<span class="ident">Command</span>;
@@ -451,22 +476,43 @@
                 }).<span class="ident">collect</span>();
                 <span class="ident">Job</span>::<span class="ident">new</span>(<span class="ident">argv</span>).<span class="ident">run</span>();
             },
-            <span class="ident">Command</span>::<span class="ident">Pair</span>(<span class="kw-2">ref</span> <span class="ident">left</span>, <span class="kw-2">ref</span> <span class="ident">right</span>) <span class="op">=&gt;</span> {
-                <span class="ident">left</span>.<span class="ident">run</span>()
-                    .<span class="ident">expect</span>(<span class="string">&quot;error running command&quot;</span>);
-                <span class="ident">right</span>.<span class="ident">run</span>()
-                    .<span class="ident">expect</span>(<span class="string">&quot;error running command&quot;</span>);
-            },
+            <span class="comment">// Command::Pair(ref left, ref right) =&gt; {</span>
+            <span class="comment">//     left.run()</span>
+            <span class="comment">//         .expect(&quot;error running command&quot;);</span>
+            <span class="comment">//     right.run()</span>
+            <span class="comment">//         .expect(&quot;error running command&quot;);</span>
+            <span class="comment">// },</span>
             <span class="ident">Command</span>::<span class="ident">Compound</span>(<span class="kw-2">ref</span> <span class="ident">program</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">command</span> <span class="kw">in</span> <span class="ident">program</span>.<span class="number">0</span>.<span class="ident">iter</span>() {
                     <span class="ident">command</span>.<span class="ident">run</span>()
                         .<span class="ident">expect</span>(<span class="string">&quot;error running command&quot;</span>);
                 }
             },
+            <span class="ident">Command</span>::<span class="ident">Not</span>(<span class="kw-2">ref</span> <span class="ident">command</span>) <span class="op">=&gt;</span> {
+                <span class="ident">command</span>.<span class="ident">run</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error running command&quot;</span>);
+                <span class="comment">// TODO: Flip status code.</span>
+            },
+            <span class="ident">Command</span>::<span class="ident">And</span>(<span class="kw-2">ref</span> <span class="ident">left</span>, <span class="kw-2">ref</span> <span class="ident">right</span>) <span class="op">=&gt;</span> {
+                <span class="ident">left</span>.<span class="ident">run</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error running left command&quot;</span>);
+                <span class="ident">right</span>.<span class="ident">run</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error running right command&quot;</span>);
+                <span class="comment">// TODO: Status check.</span>
+            },
+            <span class="ident">Command</span>::<span class="ident">Or</span>(<span class="kw-2">ref</span> <span class="ident">left</span>, <span class="kw-2">ref</span> <span class="ident">right</span>) <span class="op">=&gt;</span> {
+                <span class="ident">left</span>.<span class="ident">run</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error running left command&quot;</span>);
+                <span class="ident">right</span>.<span class="ident">run</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error running right command&quot;</span>);
+                <span class="comment">// TODO: Status check.</span>
+            },
+            <span class="ident">Command</span>::<span class="ident">Subshell</span>(<span class="kw-2">ref</span> <span class="ident">program</span>) <span class="op">=&gt;</span> {
+                <span class="comment">// TODO: Run in a *subshell* ffs.</span>
+                <span class="ident">program</span>.<span class="ident">run</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;error running subshell program&quot;</span>);
+            },
             <span class="ident">Command</span>::<span class="ident">Pipeline</span>(<span class="kw-2">ref</span> <span class="ident">left</span>, <span class="kw-2">ref</span> <span class="ident">right</span>) <span class="op">=&gt;</span> {
-                <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>::{<span class="self">self</span>, <span class="ident">Stdio</span>};
-                <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>;
-
                 <span class="kw">if</span> <span class="kw">let</span> <span class="kw">box</span> <span class="ident">Command</span>::<span class="ident">Simple</span>(<span class="ident">left_words</span>) <span class="op">=</span> <span class="ident">left</span> {
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">process</span>::<span class="ident">Command</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">left_words</span>[<span class="number">0</span>].<span class="number">0</span>)
                         .<span class="ident">args</span>(<span class="ident">left_words</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">w</span>.<span class="number">0</span>))
@@ -502,12 +548,12 @@
                     .<span class="ident">name</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">command</span>))
                     .<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">||</span>
                 {
+                    <span class="comment">// TODO: Suspend and restore raw mode.</span>
                     (<span class="kw-2">*</span><span class="ident">command</span>).<span class="ident">run</span>()
                         .<span class="ident">expect</span>(<span class="string">&quot;error running command in background&quot;</span>);
                 }).<span class="ident">expect</span>(<span class="string">&quot;error spawning thread&quot;</span>);
                 <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;[{:?}]&quot;</span>, <span class="ident">handle</span>.<span class="ident">thread</span>().<span class="ident">name</span>());
             },
-            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="macro">unimplemented</span><span class="macro">!</span>(),
         };
         <span class="prelude-val">Ok</span>(())
     }
@@ -532,11 +578,11 @@
         <span class="doccomment">/// ```</span>
         <span class="comment">// TODO: Simple should not just be a vec of words.</span>
         <span class="ident">Simple</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Word</span><span class="op">&gt;</span>),
-        <span class="doccomment">/// Pair of commands, used to make AST sequences.</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">/// ```sh</span>
-        <span class="doccomment">/// ```</span>
-        <span class="ident">Pair</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>),
+        <span class="comment">///// Pair of commands, used to make AST sequences.</span>
+        <span class="comment">/////</span>
+        <span class="comment">///// ```sh</span>
+        <span class="comment">///// ```</span>
+        <span class="comment">//Pair(Box&lt;Command&gt;, Box&lt;Command&gt;),</span>
         <span class="doccomment">/// A full program embedded in a compound command.</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// ```sh</span>
