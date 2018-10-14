@@ -13,10 +13,12 @@ use docopt::{Docopt, ArgvMap, Value};
 
 // Write the Docopt usage string.
 const USAGE: &'static str = "
-Usage: oursh [-#] [<file>]
+Usage: oursh [options] [<file>]
 
 Options:
-    -#, --ast  Print an AST of each program.
+    -h --help     Show this screen.
+    -# --ast      Print an AST of each program.
+    -v --verbose  Print extra information.
 ";
 
 // Our shell, for the greater good. Ready and waiting.
@@ -74,7 +76,9 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) + 'a {
         // Parse with the primary grammar and run each command in order.
         match parse_primary(text.as_bytes()) {
             Ok(program) => {
-                if args.get_bool("-#") { debug!(program); }
+                if args.get_bool("-#") || args.get_count("-v") > 1 {
+                    debug!(program);
+                }
 
                 program.run()
                     .expect(&format!("error running program: {:?}", program));
