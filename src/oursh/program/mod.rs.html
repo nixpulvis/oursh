@@ -199,6 +199,7 @@
 <span id="199">199</span>
 <span id="200">200</span>
 <span id="201">201</span>
+<span id="202">202</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Parsing and handling program syntax(es) of the shell.</span>
 <span class="doccomment">//!</span>
@@ -210,7 +211,7 @@
 <span class="doccomment">//! ### POSIX Shell Language</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The basic, portable POSIX shell language. For detailed information read the</span>
-<span class="doccomment">//! [`posix`](posix) module docs.</span>
+<span class="doccomment">//! [`posix`](program::posix) module docs.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```sh</span>
 <span class="doccomment">//! a=0</span>
@@ -228,7 +229,7 @@
 <span class="doccomment">//! ### Modern Shell Language</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! A more modern and ergonomic language. For more detailed information read</span>
-<span class="doccomment">//! the [`modern`](modern) module docs.</span>
+<span class="doccomment">//! the [`modern`](program::modern) module docs.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```sh</span>
 <span class="doccomment">//! # WIP</span>
@@ -253,12 +254,13 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### `{@}` Language Blocks</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Both the [`posix`](posix) and [`modern`](modern) languages have support for</span>
-<span class="doccomment">//! a special expression which treats the body as a program from another</span>
-<span class="doccomment">//! language. This forms the basis of oursh&#39;s modern features, and backwards</span>
-<span class="doccomment">//! compatibility. While the primary goal of this syntax is to be able to mix</span>
-<span class="doccomment">//! both POSIX and non-POSIX shell scripts, the feature is much more powerful.</span>
-<span class="doccomment">//! Any interperator can be used, just like with `#!`.</span>
+<span class="doccomment">//! Both the [`posix`](program::posix) and [`modern`](program::modern)</span>
+<span class="doccomment">//! languages have support for a special expression which treats the body as a</span>
+<span class="doccomment">//! program from another language. This forms the basis of oursh&#39;s modern</span>
+<span class="doccomment">//! features, and backwards compatibility. While the primary goal of this</span>
+<span class="doccomment">//! syntax is to be able to mix both POSIX and non-POSIX shell scripts, the</span>
+<span class="doccomment">//! feature is much more powerful.  Any interperator can be used, just like</span>
+<span class="doccomment">//! with `#!`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```sh</span>
 <span class="doccomment">//! date      # Call `date` in the primary syntax.</span>
