@@ -1672,10 +1672,20 @@
 <span id="1672">1672</span>
 <span id="1673">1673</span>
 <span id="1674">1674</span>
+<span id="1675">1675</span>
+<span id="1676">1676</span>
+<span id="1677">1677</span>
+<span id="1678">1678</span>
+<span id="1679">1679</span>
+<span id="1680">1680</span>
+<span id="1681">1681</span>
+<span id="1682">1682</span>
+<span id="1683">1683</span>
 </pre><pre class="rust ">
 <span class="comment">// auto-generated: &quot;lalrpop 0.16.0&quot;</span>
-<span class="comment">// sha256: f65c4af9ae6029e5295384dc2dab6fcb5315a1876d9c865ab638398156b186b</span>
+<span class="comment">// sha256: 1eb3a39784ce5202394a14572b35062e9be80c7c4e1bde71a328beb3aba3b81</span>
 <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">posix</span>::<span class="ident">ast</span>;
+<span class="kw">use</span> <span class="ident">program</span>::<span class="ident">ast</span>::<span class="ident">Interpreter</span>;
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_extern_crates</span>)]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">lalrpop_util</span> <span class="kw">as</span> <span class="ident">__lalrpop_util</span>;
 
@@ -1684,6 +1694,7 @@
     <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_snake_case</span>, <span class="ident">non_camel_case_types</span>, <span class="ident">unused_mut</span>, <span class="ident">unused_variables</span>, <span class="ident">unused_imports</span>, <span class="ident">unused_parens</span>)]</span>
 
     <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">posix</span>::<span class="ident">ast</span>;
+    <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">ast</span>::<span class="ident">Interpreter</span>;
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_extern_crates</span>)]</span>
     <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">lalrpop_util</span> <span class="kw">as</span> <span class="ident">__lalrpop_util</span>;
     <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">__intern_token</span>::<span class="ident">Token</span>;
@@ -2821,6 +2832,7 @@
 <span class="kw">mod</span> <span class="ident">__intern_token</span> {
     <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">unused_imports</span>)]</span>
     <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">posix</span>::<span class="ident">ast</span>;
+    <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">ast</span>::<span class="ident">Interpreter</span>;
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_extern_crates</span>)]</span>
     <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">lalrpop_util</span> <span class="kw">as</span> <span class="ident">__lalrpop_util</span>;
     <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">regex</span> <span class="kw">as</span> <span class="ident">__regex</span>;
@@ -3003,9 +3015,7 @@
 ) <span class="op">-&gt;</span> <span class="ident">ast</span>::<span class="ident">Program</span>
 {
     {
-        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">l</span>, <span class="ident">j</span>) <span class="op">=</span> (<span class="ident">l</span>, <span class="ident">cs</span>.<span class="ident">clone</span>());
-        <span class="ident">l</span>.<span class="number">0</span>.<span class="ident">push</span>(<span class="kw">box</span> <span class="ident">cs</span>);
-        <span class="ident">l</span>
+        <span class="ident">l</span>.<span class="ident">push</span>(<span class="kw">box</span> <span class="ident">cs</span>.<span class="ident">clone</span>())
     }
 }
 
@@ -3033,7 +3043,9 @@
     (<span class="kw">_</span>, <span class="ident">__0</span>, <span class="kw">_</span>): (<span class="ident">usize</span>, <span class="ident">ast</span>::<span class="ident">Command</span>, <span class="ident">usize</span>),
 ) <span class="op">-&gt;</span> <span class="ident">ast</span>::<span class="ident">Program</span>
 {
-    <span class="ident">ast</span>::<span class="ident">Program</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">__0</span>])
+    {
+        <span class="ident">ast</span>::<span class="ident">Program</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">__0</span>])
+    }
 }
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
@@ -3047,9 +3059,7 @@
 ) <span class="op">-&gt;</span> <span class="ident">ast</span>::<span class="ident">Program</span>
 {
     {
-        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">c</span>, <span class="ident">j</span>) <span class="op">=</span> (<span class="ident">c</span>, <span class="ident">cs</span>.<span class="ident">clone</span>());
-        <span class="ident">c</span>.<span class="number">0</span>.<span class="ident">push</span>(<span class="kw">box</span> <span class="ident">cs</span>);
-        <span class="ident">c</span>
+        <span class="ident">c</span>.<span class="ident">push</span>(<span class="kw">box</span> <span class="ident">cs</span>.<span class="ident">clone</span>())
     }
 }
 
@@ -3061,7 +3071,9 @@
     (<span class="kw">_</span>, <span class="ident">__0</span>, <span class="kw">_</span>): (<span class="ident">usize</span>, <span class="ident">ast</span>::<span class="ident">Command</span>, <span class="ident">usize</span>),
 ) <span class="op">-&gt;</span> <span class="ident">ast</span>::<span class="ident">Program</span>
 {
-    <span class="ident">ast</span>::<span class="ident">Program</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">__0</span>])
+    {
+        <span class="ident">ast</span>::<span class="ident">Program</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">__0</span>])
+    }
 }
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
@@ -3144,7 +3156,9 @@
     (<span class="kw">_</span>, <span class="ident">ps</span>, <span class="kw">_</span>): (<span class="ident">usize</span>, <span class="ident">ast</span>::<span class="ident">Command</span>, <span class="ident">usize</span>),
 ) <span class="op">-&gt;</span> <span class="ident">ast</span>::<span class="ident">Command</span>
 {
-    <span class="ident">ast</span>::<span class="ident">Command</span>::<span class="ident">Not</span>(<span class="kw">box</span> <span class="ident">ps</span>)
+    {
+        <span class="ident">ast</span>::<span class="ident">Command</span>::<span class="ident">Not</span>(<span class="kw">box</span> <span class="ident">ps</span>)
+    }
 }
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
@@ -3193,7 +3207,9 @@
     (<span class="kw">_</span>, <span class="ident">__0</span>, <span class="kw">_</span>): (<span class="ident">usize</span>, ::<span class="ident">std</span>::<span class="ident">vec</span>::<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ast</span>::<span class="ident">Word</span><span class="op">&gt;</span>, <span class="ident">usize</span>),
 ) <span class="op">-&gt;</span> <span class="ident">ast</span>::<span class="ident">Command</span>
 {
+    {
     <span class="ident">ast</span>::<span class="ident">Command</span>::<span class="ident">Simple</span>(<span class="ident">__0</span>)
+}
 }
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
@@ -3204,7 +3220,9 @@
     (<span class="kw">_</span>, <span class="ident">__0</span>, <span class="kw">_</span>): (<span class="ident">usize</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;input</span> <span class="ident">str</span>, <span class="ident">usize</span>),
 ) <span class="op">-&gt;</span> <span class="ident">ast</span>::<span class="ident">Word</span>
 {
+    {
     <span class="ident">ast</span>::<span class="ident">Word</span>(<span class="ident">__0</span>.<span class="ident">into</span>())
+}
 }
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>

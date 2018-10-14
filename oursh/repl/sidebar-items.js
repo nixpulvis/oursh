@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["start","Start a REPL over the strings the user provides."]],"struct":[["History",""],["Prompt","A status prompt to be displayed in interactive sessions before each program."]]});
+initSidebarItems({"fn":[["start","Start a REPL over the strings the user provides."]],"mod":[["history","Keeps a record of previous commands, used for completion and archeology."]],"struct":[["Prompt","A status prompt to be displayed in interactive sessions before each program."]]});

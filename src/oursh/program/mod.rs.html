@@ -198,6 +198,7 @@
 <span id="198">198</span>
 <span id="199">199</span>
 <span id="200">200</span>
+<span id="201">201</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Parsing and handling program syntax(es) of the shell.</span>
 <span class="doccomment">//!</span>
@@ -205,6 +206,50 @@
 <span class="doccomment">//! from a file, are *programs*. Our shell provides multiple discrete languages</span>
 <span class="doccomment">//! to write programs in, each with a corresponding implementation of this</span>
 <span class="doccomment">//! module&#39;s `Program` trait.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### POSIX Shell Language</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The basic, portable POSIX shell language. For detailed information read the</span>
+<span class="doccomment">//! [`posix`](posix) module docs.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```sh</span>
+<span class="doccomment">//! a=0</span>
+<span class="doccomment">//! b=1</span>
+<span class="doccomment">//! for ((i=0; i&lt;10; i++))</span>
+<span class="doccomment">//! do</span>
+<span class="doccomment">//!     echo -n &quot;$a &quot;</span>
+<span class="doccomment">//!     fn=$((a + b))</span>
+<span class="doccomment">//!     a=$b</span>
+<span class="doccomment">//!     b=$fn</span>
+<span class="doccomment">//! done</span>
+<span class="doccomment">//! echo</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### Modern Shell Language</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! A more modern and ergonomic language. For more detailed information read</span>
+<span class="doccomment">//! the [`modern`](modern) module docs.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```sh</span>
+<span class="doccomment">//! # WIP</span>
+<span class="doccomment">//! var a = 0</span>
+<span class="doccomment">//! var b = 1</span>
+<span class="doccomment">//! for i in 0..10 {</span>
+<span class="doccomment">//!     echo -n &quot;$a &quot;</span>
+<span class="doccomment">//!     let fn = $((a + b))</span>
+<span class="doccomment">//!     a = $b</span>
+<span class="doccomment">//!     b = $fn</span>
+<span class="doccomment">//! }</span>
+<span class="doccomment">//! echo</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### Default Syntax</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Our shell has a `PrimaryProgram` which is in charge of parsing programs</span>
+<span class="doccomment">//! which are not passed in via a `{@}` language block. This can be configured</span>
+<span class="doccomment">//! to your preference. This does not effect the shell when launched in</span>
+<span class="doccomment">//! POSIX compatibility mode, or when a specific default language is passed</span>
+<span class="doccomment">//! as a flag.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### `{@}` Language Blocks</span>
 <span class="doccomment">//!</span>
@@ -228,52 +273,8 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Strict POSIX compatibility can be enabled by removing this feature alone.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ### Default Syntax</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Our shell has a `PrimaryProgram` which is in charge of parsing programs</span>
-<span class="doccomment">//! which are not passed in via a `{@}` language block. This can be configured</span>
-<span class="doccomment">//! to your preference. This does not effect the shell when launched in</span>
-<span class="doccomment">//! POSIX compatibility mode, or when a specific default language is passed</span>
-<span class="doccomment">//! as a flag.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### POSIX Syntax</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The basic, portable POSIX shell language. For detailed information read the</span>
-<span class="doccomment">//! [`posix`](posix) module docs.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```sh</span>
-<span class="doccomment">//! a=0</span>
-<span class="doccomment">//! b=1</span>
-<span class="doccomment">//! for ((i=0; i&lt;10; i++))</span>
-<span class="doccomment">//! do</span>
-<span class="doccomment">//!     echo -n &quot;$a &quot;</span>
-<span class="doccomment">//!     fn=$((a + b))</span>
-<span class="doccomment">//!     a=$b</span>
-<span class="doccomment">//!     b=$fn</span>
-<span class="doccomment">//! done</span>
-<span class="doccomment">//! echo</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### Modern Syntax</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! A more modern and ergonomic language. For more detailed information read</span>
-<span class="doccomment">//! the [`modern`](modern) module docs.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```sh</span>
-<span class="doccomment">//! # WIP</span>
-<span class="doccomment">//! var a = 0</span>
-<span class="doccomment">//! var b = 1</span>
-<span class="doccomment">//! for i in 0..10 {</span>
-<span class="doccomment">//!     echo -n &quot;$a &quot;</span>
-<span class="doccomment">//!     let fn = $((a + b))</span>
-<span class="doccomment">//!     a = $b</span>
-<span class="doccomment">//!     b = $fn</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! echo</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! TODO #5: Parse sequence of programs from stream.</span>
-<span class="doccomment">//! TODO #5: Partial parses for readline-ish / syntax highlighting.</span>
+<span class="doccomment">//! - TODO #5: Parse sequence of programs from stream.</span>
+<span class="doccomment">//! - TODO #5: Partial parses for readline-ish / syntax highlighting.</span>
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span>;
@@ -281,24 +282,22 @@
 
 <span class="doccomment">/// A command is a task given by the user as part of a [`Program`](Program).</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Each command is handled by a `Job`, and a single command may be run multiple</span>
-<span class="doccomment">/// times each as a new `Job`. Each time a command is run, the conditions</span>
-<span class="doccomment">/// within the control of the shell are reproduced; IO redirection, working</span>
-<span class="doccomment">/// directory, and even the environment are each faithfully preserved.</span>
+<span class="doccomment">/// Each command is handled by a `Job`, and a single command may be run</span>
+<span class="doccomment">/// multiple times each as a new `Job`. Each time a command is run, the</span>
+<span class="doccomment">/// conditions within the control of the shell are reproduced; IO redirection,</span>
+<span class="doccomment">/// working directory, and even the environment are each faithfully preserved.</span>
 <span class="doccomment">///</span>
 <span class="comment">// TODO #4: We can reasonably reproduce the redirects, pwd... but is it</span>
-<span class="comment">// sane to try this with ENV too?</span>
+<span class="comment">//          sane to try this with ENV too?</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Command</span>: <span class="ident">Debug</span> {
-    <span class="doccomment">/// Return the command&#39;s arguments (including it&#39;s name).</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function returns a vector as expected by the `exec(3)` family of</span>
-    <span class="doccomment">/// functions.</span>
+    <span class="doccomment">/// Run the command, returning a result of it&#39;s work.</span>
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Return the name of this command.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This name *may* not be the same as the name given to the process by</span>
     <span class="doccomment">/// the running `Job`.</span>
+    <span class="comment">// TODO: Ids?</span>
     <span class="kw">fn</span> <span class="ident">name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CString</span> {
         <span class="ident">CString</span>::<span class="ident">new</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>))
             .<span class="ident">expect</span>(<span class="string">&quot;error in UTF-8 of format&quot;</span>)
@@ -315,7 +314,7 @@
 <span class="doccomment">/// ### Working Thoughts</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// - Is simply iterating a collection of `commands` really the correct</span>
-<span class="doccomment">/// semantics for all the types of programs we want?</span>
+<span class="doccomment">///   semantics for all the types of programs we want?</span>
 <span class="doccomment">/// - What language information do we still need to store?</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Program</span>: <span class="ident">Sized</span> {
     <span class="doccomment">/// The type of each of this program&#39;s commands.</span>
@@ -330,9 +329,7 @@
     <span class="doccomment">/// Run the program sequentially.</span>
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">command</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">commands</span>().<span class="ident">iter</span>() {
-            <span class="ident">command</span>.<span class="ident">run</span>()
-                .<span class="ident">expect</span>(<span class="string">&quot;error running command&quot;</span>);
-            <span class="comment">// Job::new(&amp;**command).run();</span>
+            <span class="ident">command</span>.<span class="ident">run</span>()<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -365,13 +362,25 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use oursh::program::{parse, BasicProgram};</span>
+<span class="doccomment">/// use oursh::program::{parse, PosixProgram, BasicProgram};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// parse::&lt;BasicProgram, &amp;[u8]&gt;(b&quot;ls&quot;);</span>
+<span class="doccomment">/// let program = b&quot;sleep 1; date &amp; date&quot;;</span>
+<span class="doccomment">/// assert!(parse::&lt;PosixProgram, &amp;[u8]&gt;(program).is_ok());</span>
+<span class="doccomment">/// // TODO: assert!(parse::&lt;BasicProgram, &amp;[u8]&gt;(program).is_err());</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Program</span>, <span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">P</span>, ()<span class="op">&gt;</span> {
     <span class="ident">P</span>::<span class="ident">parse</span>(<span class="ident">reader</span>)
 }
+
+<span class="comment">// The various program grammars.</span>
+<span class="comment">//</span>
+<span class="comment">// If reading this code were like sking, you&#39;d now be hitting blues. ASTs and</span>
+<span class="comment">// language semantics are somewhat tricky subjects.</span>
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">basic</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">basic</span>::<span class="ident">Program</span> <span class="kw">as</span> <span class="ident">BasicProgram</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">posix</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">posix</span>::<span class="ident">Program</span> <span class="kw">as</span> <span class="ident">PosixProgram</span>;
 
 
 <span class="doccomment">/// Abstract Syntax Tree for programs between multiple languages.</span>
@@ -392,12 +401,5 @@
         <span class="ident">Other</span>(<span class="ident">String</span>),
     }
 }
-
-<span class="comment">// The various program grammars.</span>
-
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">basic</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">basic</span>::<span class="ident">Program</span> <span class="kw">as</span> <span class="ident">BasicProgram</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">posix</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">posix</span>::<span class="ident">Program</span> <span class="kw">as</span> <span class="ident">PosixProgram</span>;
 </pre>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../../";window.currentCrate = "oursh";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script defer src="../../../search-index.js"></script></body></html>

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["History","The history of a user's provided commands."]]});

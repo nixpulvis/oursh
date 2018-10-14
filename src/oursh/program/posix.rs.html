@@ -358,13 +358,52 @@
 <span id="358">358</span>
 <span id="359">359</span>
 <span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This shell language (often called `sh`) is at the heart of the most popular</span>
 <span class="doccomment">//! shells, namely `bash` and `zsh`. While shells typically implement many</span>
 <span class="doccomment">//! extensions to the POSIX standard we&#39;ll be implementing only the most basic</span>
-<span class="doccomment">//! set of functionality and offloading all extensions to the `modern` language.</span>
+<span class="doccomment">//! set of functionality and offloading all extensions to the `modern`</span>
+<span class="doccomment">//! language.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Compatibility</span>
 <span class="doccomment">//!</span>
@@ -379,8 +418,8 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Examples</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! There are more than enough examples of `sh` scripts out there, but here is a</span>
-<span class="doccomment">//! collection of examples tested in **this** shell&#39;s implementation of the</span>
+<span class="doccomment">//! There are more than enough examples of `sh` scripts out there, but here is</span>
+<span class="doccomment">//! a collection of examples tested in **this** shell&#39;s implementation of the</span>
 <span class="doccomment">//! POSIX standard. This section will not be a complete description of the</span>
 <span class="doccomment">//! syntax of the `sh` language, but will be updated with as many interesting</span>
 <span class="doccomment">//! cases as possible.</span>
@@ -475,9 +514,11 @@
 <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">ast</span>::<span class="ident">Interpreter</span>;
 
 
+<span class="comment">// Re-export the two trait implementing types.</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">ast</span>::<span class="ident">Program</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">ast</span>::<span class="ident">Command</span>;
 
+<span class="comment">// The syntax and semantics of a single POSIX command.</span>
 <span class="kw">impl</span> <span class="kw">super</span>::<span class="ident">Program</span> <span class="kw">for</span> <span class="ident">Program</span> {
     <span class="kw">type</span> <span class="ident">Command</span> <span class="op">=</span> <span class="ident">Command</span>;
 
@@ -487,6 +528,7 @@
             <span class="kw">return</span> <span class="prelude-val">Err</span>(());
         }
 
+        <span class="comment">// TODO #8: Custom lexer here.</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">parsed</span>) <span class="op">=</span> <span class="ident">lalrpop</span>::<span class="ident">ProgramParser</span>::<span class="ident">new</span>().<span class="ident">parse</span>(<span class="kw-2">&amp;</span><span class="ident">string</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">parsed</span>)
         } <span class="kw">else</span> {
@@ -499,6 +541,7 @@
     }
 }
 
+<span class="comment">// The semantics of a single POSIX command.</span>
 <span class="kw">impl</span> <span class="kw">super</span>::<span class="ident">Command</span> <span class="kw">for</span> <span class="ident">Command</span> {
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
@@ -546,6 +589,7 @@
                     .<span class="ident">expect</span>(<span class="string">&quot;error running subshell program&quot;</span>);
             },
             <span class="ident">Command</span>::<span class="ident">Pipeline</span>(<span class="kw-2">ref</span> <span class="ident">left</span>, <span class="kw-2">ref</span> <span class="ident">right</span>) <span class="op">=&gt;</span> {
+                <span class="comment">// TODO: This is obviously a temporary hack.</span>
                 <span class="kw">if</span> <span class="kw">let</span> <span class="kw">box</span> <span class="ident">Command</span>::<span class="ident">Simple</span>(<span class="ident">left_words</span>) <span class="op">=</span> <span class="ident">left</span> {
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">process</span>::<span class="ident">Command</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">left_words</span>[<span class="number">0</span>].<span class="number">0</span>)
                         .<span class="ident">args</span>(<span class="ident">left_words</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">w</span>.<span class="number">0</span>))
@@ -589,6 +633,8 @@
             },
             <span class="ident">Command</span>::<span class="ident">Bridgeshell</span>(<span class="kw-2">ref</span> <span class="ident">bridged_program</span>) <span class="op">=&gt;</span> {
                 <span class="comment">// TODO: Pass text off to another parser.</span>
+                <span class="comment">// TODO: Even for the Shebang interpretor, we shouldn&#39;t create</span>
+                <span class="comment">//       files like this.</span>
                 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::{<span class="self">self</span>, <span class="ident">File</span>};
                 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">unix</span>::<span class="ident">fs</span>::<span class="ident">PermissionsExt</span>;
                 <span class="kw">let</span> <span class="ident">bridgefile</span> <span class="op">=</span> <span class="string">&quot;./bridge&quot;</span>;
@@ -623,12 +669,12 @@
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Program</span>(<span class="kw">pub</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;&gt;</span>);
 
-    <span class="doccomment">/// A program&#39;s text and the interperator to be used.</span>
-    <span class="comment">// TODO #8: Include grammar seperate from interperator?</span>
+    <span class="doccomment">/// A program&#39;s text and the interpreter to be used.</span>
+    <span class="comment">// TODO #8: Include grammar separate from interpreter?</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BridgedProgram</span>(<span class="kw">pub</span> <span class="ident">Interpreter</span>, <span class="kw">pub</span> <span class="ident">String</span>);
 
-    <span class="doccomment">/// A command is a highly recursive node with the main features</span>
+    <span class="doccomment">/// A command is a *highly* mutually-recursive node with the main features</span>
     <span class="doccomment">/// of the POSIX language.</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
     <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Command</span> {
@@ -641,11 +687,7 @@
         <span class="doccomment">/// ```</span>
         <span class="comment">// TODO #8: Simple should not just be a vec of words.</span>
         <span class="ident">Simple</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Word</span><span class="op">&gt;</span>),
-        <span class="comment">///// Pair of commands, used to make AST sequences.</span>
-        <span class="comment">/////</span>
-        <span class="comment">///// ```sh</span>
-        <span class="comment">///// ```</span>
-        <span class="comment">//Pair(Box&lt;Command&gt;, Box&lt;Command&gt;),</span>
+
         <span class="doccomment">/// A full program embedded in a compound command.</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// ```sh</span>
@@ -653,6 +695,7 @@
         <span class="doccomment">/// ```</span>
         <span class="comment">// TODO #10: We are currently overpermissive here.</span>
         <span class="ident">Compound</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Program</span><span class="op">&gt;</span>),
+
         <span class="doccomment">/// Performs boolean negation to the status code of the inner</span>
         <span class="doccomment">/// command.</span>
         <span class="doccomment">///</span>
@@ -662,6 +705,7 @@
         <span class="doccomment">/// ! grep &#39;password&#39; data.txt</span>
         <span class="doccomment">/// ```</span>
         <span class="ident">Not</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>),
+
         <span class="doccomment">/// Perform the first command, conditionally running the next</span>
         <span class="doccomment">/// upon success.</span>
         <span class="doccomment">///</span>
@@ -671,6 +715,7 @@
         <span class="doccomment">/// mkdir tmp &amp;&amp; cd tmp</span>
         <span class="doccomment">/// ```</span>
         <span class="ident">And</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>),
+
         <span class="doccomment">/// Perform the first command, conditionally running the next</span>
         <span class="doccomment">/// upon failure.</span>
         <span class="doccomment">///</span>
@@ -680,6 +725,7 @@
         <span class="doccomment">/// kill $1 || kill -9 $1</span>
         <span class="doccomment">/// ```</span>
         <span class="ident">Or</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>),
+
         <span class="doccomment">/// Run the inner **program** in a sub-shell environment.</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// ### Examples</span>
@@ -688,6 +734,7 @@
         <span class="doccomment">/// DATE=(date)</span>
         <span class="doccomment">/// ```</span>
         <span class="ident">Subshell</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Program</span><span class="op">&gt;</span>),
+
         <span class="doccomment">/// Run a command&#39;s output through to the input of another.</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// ### Examples</span>
@@ -696,6 +743,7 @@
         <span class="doccomment">/// cat $1 | wc -l</span>
         <span class="doccomment">/// ```</span>
         <span class="ident">Pipeline</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>),
+
         <span class="doccomment">/// Run a command in the background.</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// ### Examples</span>
@@ -706,7 +754,20 @@
         <span class="doccomment">/// done &amp;</span>
         <span class="doccomment">/// ```</span>
         <span class="ident">Background</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Program</span><span class="op">&gt;</span>),
-        <span class="doccomment">/// NOTE: *NON-POSIX*</span>
+
+        <span class="doccomment">/// Run a program through another parser/interpreter.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// ### Examples</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// ```sh</span>
+        <span class="doccomment">/// {@ruby puts (Math.sqrt(32**2/57.2))}</span>
+        <span class="doccomment">/// ```</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// ### Compatibility</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// This is **non-POSIX**</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// TODO: How bad is it?</span>
         <span class="ident">Bridgeshell</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">BridgedProgram</span><span class="op">&gt;</span>),
     }
 
@@ -716,8 +777,23 @@
     <span class="comment">//       need to decide on our custom Tokens and lexer.</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Word</span>(<span class="kw">pub</span> <span class="ident">String</span>);
+
+
+    <span class="kw">impl</span> <span class="ident">Program</span> {
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">command</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+            <span class="self">self</span>.<span class="number">0</span>.<span class="ident">push</span>(<span class="ident">command</span>);
+            <span class="self">self</span>
+        }
+    }
 }
 
+<span class="comment">// Following with the skiing analogy, the code inside here is black level.</span>
+<span class="comment">// Many of the issues in a grammar rule cause conflicts in seemingly unrelated</span>
+<span class="comment">// rules. Some issues are known to be harder to solve, and while LALRPOP does</span>
+<span class="comment">// a fantasic job of helping, it&#39;s not perfect. Avoid the rocks, trees, and</span>
+<span class="comment">// enjoy.</span>
+<span class="comment">//</span>
+<span class="comment">// The code for this module is located in `src/program/posix.lalrpop`.</span>
 <span class="macro">lalrpop_mod</span><span class="macro">!</span>(<span class="ident">lalrpop</span>, <span class="string">&quot;/program/posix.rs&quot;</span>);
 </pre>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../../";window.currentCrate = "oursh";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script defer src="../../../search-index.js"></script></body></html>

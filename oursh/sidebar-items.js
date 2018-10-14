@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["job","Subprocess execution management."],["program","Parsing and handling program syntax(es) of the shell."],["repl","Quick and effective raw mode repl library for ANSI terminals."]]});
+initSidebarItems({"macro":[["debug","Print debug information to stderr.."]],"mod":[["job","Subprocess execution management."],["program","Parsing and handling program syntax(es) of the shell."],["repl","Quick and effective raw mode repl library for ANSI terminals."]]});
