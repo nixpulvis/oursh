@@ -72,7 +72,7 @@
 //! [fish]: https://github.com/fish-shell/fish-shell
 //! [arch]: https://www.archlinux.org/
 //! [rush]: https://github.com/nixpulvis/rush
-//! [myshell.py]: /doc/cs2600-a8-myshell.py
+//! [myshell.py]: https://github.com/nixpulvis/oursh/blob/master/doc/cs2600-a8-myshell.py
 //! [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
 #![feature(box_syntax, box_patterns)]
 
