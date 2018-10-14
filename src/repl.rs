@@ -16,6 +16,7 @@ use termion::{style, color};
 // TODO: Partial syntax, completion.
 pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
     // Load history from file in $HOME.
+    #[cfg(feature = "history")]
     let mut history = History::load();
 
     // A styled static (for now) prompt.
@@ -38,7 +39,10 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
         match c.unwrap() {
             Key::Esc => {
                 // Save history to file in $HOME.
+                #[cfg(feature = "history")]
                 history.save();
+
+                // Exit this wonderful world.
                 exit(0)
             },
             Key::Char('\n') => {
@@ -49,8 +53,11 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 // Run the command.
                 stdout.suspend_raw_mode().unwrap();
                 runner(&text);
-                history.add(&text, 1);
-                history.reset_index();
+                #[cfg(feature = "history")]
+                {
+                    history.add(&text, 1);
+                    history.reset_index();
+                }
                 stdout.activate_raw_mode().unwrap();
 
                 // Reset for the next program.
@@ -60,6 +67,7 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 // Print a boring static prompt.
                 prompt.display(&mut stdout);
             },
+            #[cfg(feature = "history")]
             Key::Up => {
                 print!("{}{}", termion::cursor::Left(text.len() as u16),
                                termion::clear::UntilNewline);
@@ -71,6 +79,7 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 }
                 stdout.flush().unwrap();
             },
+            #[cfg(feature = "history")]
             Key::Down => {
                 print!("{}{}", termion::cursor::Left(text.len() as u16),
                                termion::clear::UntilNewline);

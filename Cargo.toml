@@ -5,6 +5,12 @@ authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
 
 build = "build.rs"
 
+[features]
+default = ["history"]
+
+history = []
+cursor = []
+
 [dependencies]
 lalrpop-util = "0.16.0"
 nix = "*"
