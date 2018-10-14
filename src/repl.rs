@@ -1,4 +1,4 @@
-//! ...
+//! Quick and effective raw mode repl library for ANSI terminals.
 //!
 //! There will be *absolutely no* blocking STDIN/OUT/ERR on things like tab
 //! completion or other potentially slow, or user defined behavior.
@@ -12,6 +12,8 @@ use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::{style, color};
 
+/// Start a REPL over the strings the user provides.
+// TODO: Partial syntax, completion.
 pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
     // Load history from file in $HOME.
     let mut history = History::load();
@@ -35,7 +37,7 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Esc => {
-                // Load history from file in $HOME.
+                // Save history to file in $HOME.
                 history.save();
                 exit(0)
             },
@@ -59,10 +61,9 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 prompt.display(&mut stdout);
             },
             Key::Up => {
-                print!("{}{}",
-                       termion::clear::CurrentLine,
-                       termion::cursor::Left(prompt.len() as u16));
-                prompt.display(&mut stdout);
+                print!("{}{}", termion::cursor::Left(text.len() as u16),
+                               termion::clear::UntilNewline);
+
                 if let Some(history_text) = history.get_up() {
                     cursor = history_text.len();
                     text = history_text;
@@ -71,18 +72,13 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 stdout.flush().unwrap();
             },
             Key::Down => {
-                print!("{}{}",
-                       termion::clear::CurrentLine,
-                       termion::cursor::Left(prompt.len() as u16));
-                prompt.display(&mut stdout);
+                print!("{}{}", termion::cursor::Left(text.len() as u16),
+                               termion::clear::UntilNewline);
 
-                match history.get_down() {
-                    Some(history_text) => {
-                        cursor = history_text.len();
-                        text = history_text;
-                        print!("{}", text);
-                    },
-                    None => text = String::new(),
+                if let Some(history_text) = history.get_down() {
+                    cursor = history_text.len();
+                    text = history_text;
+                    print!("{}", text);
                 }
                 stdout.flush().unwrap();
             },
@@ -104,13 +100,12 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
             },
             Key::Backspace => {
                 if !text.is_empty() {
-                    cursor = cursor.saturating_sub(1);
-                    print!("{}{}",
-                           termion::cursor::Left(1),
-                           termion::clear::UntilNewline);
                     text.remove(cursor);
-                    print!("{}", &text[cursor..]);
-                    print!("{}", termion::cursor::Left((text.len() - cursor) as u16));
+                    cursor = cursor.saturating_sub(1);
+                    let shift = (text.len() - cursor) as u16;
+                    print!("{}{}", termion::cursor::Left(shift),
+                                     termion::clear::UntilNewline);
+                                     // &text[cursor..]);
                     stdout.flush().unwrap();
                 }
             }
