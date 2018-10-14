@@ -108,6 +108,23 @@ We will want to create a few internal modules for the shell.
 - `config` - loading for `.ourshrc` and others.
 - `package` - simplistic package manager support (builtin function).
 
+---
+
+_Current modules as of: 2018-10-14_
+
+```
+oursh : crate
+ ├── job : public
+ ├── program : public
+ │   ├── ast : public
+ │   ├── basic : public
+ │   └── posix : public
+ │       └── ast : public
+ ├── repl : public
+ │   └── history : public @ #[cfg(feature = "history")]
+ └── tests : private @ #[cfg(test)]
+```
+
 
 [documentation]: https://nixpulvis.com/oursh/oursh
 [rustup]: https://github.com/rust-lang-nursery/rustup.rs
