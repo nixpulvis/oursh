@@ -323,6 +323,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "oursh"
 version = "0.2.0"
 dependencies = [
+ "docopt 0.8.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lalrpop 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lalrpop-util 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "nix 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -12,6 +12,7 @@ cursor = []
 history = ["cursor"]
 
 [dependencies]
+docopt = "*"
 lalrpop-util = "0.16.0"
 nix = "*"
 pwd = "*"
