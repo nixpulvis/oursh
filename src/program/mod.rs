@@ -160,7 +160,7 @@ pub fn parse_primary<R: BufRead>(reader: R) -> Result<PrimaryProgram, ()> {
 ///
 /// # Examples
 ///
-/// ```
+/// ```should_panic
 /// use oursh::program::{parse, PosixProgram, BasicProgram};
 ///
 /// let program = b"sleep 1; date & date";
