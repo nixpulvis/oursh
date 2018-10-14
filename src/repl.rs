@@ -31,6 +31,7 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
 
     // TODO #5: We need a better state object for these values.
     let mut text = String::new();
+    #[cfg(feature = "cursor")]
     let mut cursor = 0usize;
 
     // Iterate the keys as a user presses them.
@@ -62,7 +63,10 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
 
                 // Reset for the next program.
                 text.clear();
-                cursor = 0;
+                #[cfg(feature = "cursor")]
+                {
+                    cursor = 0;
+                }
 
                 // Print a boring static prompt.
                 prompt.display(&mut stdout);
@@ -91,22 +95,28 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 }
                 stdout.flush().unwrap();
             },
+            #[cfg(feature = "cursor")]
             Key::Left => {
                 cursor = cursor.saturating_sub(1);
                 print!("{}", termion::cursor::Left(1));
                 stdout.flush().unwrap();
             },
+            #[cfg(feature = "cursor")]
             Key::Right => {
                 cursor = cursor.saturating_add(1);
                 print!("{}", termion::cursor::Right(1));
                 stdout.flush().unwrap();
             },
             Key::Char(c) => {
-                cursor = cursor.saturating_add(1);
+                #[cfg(feature = "cursor")]
+                {
+                    cursor = cursor.saturating_add(1);
+                }
                 text.push(c);
                 print!("{}", c);
                 stdout.flush().unwrap();
             },
+            #[cfg(feature = "cursor")]
             Key::Backspace => {
                 if !text.is_empty() {
                     text.remove(cursor);

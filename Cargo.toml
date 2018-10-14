@@ -8,8 +8,8 @@ build = "build.rs"
 [features]
 default = ["history"]
 
-history = []
 cursor = []
+history = ["cursor"]
 
 [dependencies]
 lalrpop-util = "0.16.0"
