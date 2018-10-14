@@ -1,3 +1,4 @@
+#[macro_use]
 extern crate oursh;
 extern crate termion;
 
@@ -29,14 +30,6 @@ fn main() {
         // Run the program.
         parse_and_run(&text);
     }
-}
-
-macro_rules! debug {
-    ($e:expr) => {
-        eprintln!("----- {} -----", stringify!($e));
-        eprintln!("{:#?}", $e);
-        eprintln!("-----");
-    };
 }
 
 fn parse_and_run(text: &String) {

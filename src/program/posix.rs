@@ -3,7 +3,8 @@
 //! This shell language (often called `sh`) is at the heart of the most popular
 //! shells, namely `bash` and `zsh`. While shells typically implement many
 //! extensions to the POSIX standard we'll be implementing only the most basic
-//! set of functionality and offloading all extensions to the `modern` language.
+//! set of functionality and offloading all extensions to the `modern`
+//! language.
 //!
 //! # Compatibility
 //!
@@ -18,8 +19,8 @@
 //!
 //! # Examples
 //!
-//! There are more than enough examples of `sh` scripts out there, but here is a
-//! collection of examples tested in **this** shell's implementation of the
+//! There are more than enough examples of `sh` scripts out there, but here is
+//! a collection of examples tested in **this** shell's implementation of the
 //! POSIX standard. This section will not be a complete description of the
 //! syntax of the `sh` language, but will be updated with as many interesting
 //! cases as possible.
@@ -114,9 +115,11 @@ use program::Program as ProgramTrait;
 use program::ast::Interpreter;
 
 
+// Re-export the two trait implementing types.
 pub use self::ast::Program;
 pub use self::ast::Command;
 
+// The syntax and semantics of a single POSIX command.
 impl super::Program for Program {
     type Command = Command;
 
@@ -126,6 +129,7 @@ impl super::Program for Program {
             return Err(());
         }
 
+        // TODO #8: Custom lexer here.
         if let Ok(parsed) = lalrpop::ProgramParser::new().parse(&string) {
             Ok(parsed)
         } else {
@@ -138,6 +142,7 @@ impl super::Program for Program {
     }
 }
 
+// The semantics of a single POSIX command.
 impl super::Command for Command {
     fn run(&self) -> Result<(), ()> {
         match *self {
@@ -185,6 +190,7 @@ impl super::Command for Command {
                     .expect("error running subshell program");
             },
             Command::Pipeline(ref left, ref right) => {
+                // TODO: This is obviously a temporary hack.
                 if let box Command::Simple(left_words) = left {
                     let mut child = process::Command::new(&left_words[0].0)
                         .args(left_words.iter().skip(1).map(|w| &w.0))
@@ -228,6 +234,8 @@ impl super::Command for Command {
             },
             Command::Bridgeshell(ref bridged_program) => {
                 // TODO: Pass text off to another parser.
+                // TODO: Even for the Shebang interpretor, we shouldn't create
+                //       files like this.
                 use std::fs::{self, File};
                 use std::os::unix::fs::PermissionsExt;
                 let bridgefile = "./bridge";
@@ -262,12 +270,12 @@ pub mod ast {
     #[derive(Debug, Clone)]
     pub struct Program(pub Vec<Box<Command>>);
 
-    /// A program's text and the interperator to be used.
-    // TODO #8: Include grammar seperate from interperator?
+    /// A program's text and the interpreter to be used.
+    // TODO #8: Include grammar separate from interpreter?
     #[derive(Debug, Clone)]
     pub struct BridgedProgram(pub Interpreter, pub String);
 
-    /// A command is a highly recursive node with the main features
+    /// A command is a *highly* mutually-recursive node with the main features
     /// of the POSIX language.
     #[derive(Debug, Clone)]
     pub enum Command {
@@ -280,11 +288,7 @@ pub mod ast {
         /// ```
         // TODO #8: Simple should not just be a vec of words.
         Simple(Vec<Word>),
-        ///// Pair of commands, used to make AST sequences.
-        /////
-        ///// ```sh
-        ///// ```
-        //Pair(Box<Command>, Box<Command>),
+
         /// A full program embedded in a compound command.
         ///
         /// ```sh
@@ -292,6 +296,7 @@ pub mod ast {
         /// ```
         // TODO #10: We are currently overpermissive here.
         Compound(Box<Program>),
+
         /// Performs boolean negation to the status code of the inner
         /// command.
         ///
@@ -301,6 +306,7 @@ pub mod ast {
         /// ! grep 'password' data.txt
         /// ```
         Not(Box<Command>),
+
         /// Perform the first command, conditionally running the next
         /// upon success.
         ///
@@ -310,6 +316,7 @@ pub mod ast {
         /// mkdir tmp && cd tmp
         /// ```
         And(Box<Command>, Box<Command>),
+
         /// Perform the first command, conditionally running the next
         /// upon failure.
         ///
@@ -319,6 +326,7 @@ pub mod ast {
         /// kill $1 || kill -9 $1
         /// ```
         Or(Box<Command>, Box<Command>),
+
         /// Run the inner **program** in a sub-shell environment.
         ///
         /// ### Examples
@@ -327,6 +335,7 @@ pub mod ast {
         /// DATE=(date)
         /// ```
         Subshell(Box<Program>),
+
         /// Run a command's output through to the input of another.
         ///
         /// ### Examples
@@ -335,6 +344,7 @@ pub mod ast {
         /// cat $1 | wc -l
         /// ```
         Pipeline(Box<Command>, Box<Command>),
+
         /// Run a command in the background.
         ///
         /// ### Examples
@@ -345,7 +355,20 @@ pub mod ast {
         /// done &
         /// ```
         Background(Box<Program>),
-        /// NOTE: *NON-POSIX*
+
+        /// Run a program through another parser/interpreter.
+        ///
+        /// ### Examples
+        ///
+        /// ```sh
+        /// {@ruby puts (Math.sqrt(32**2/57.2))}
+        /// ```
+        ///
+        /// ### Compatibility
+        ///
+        /// This is **non-POSIX**
+        ///
+        /// TODO: How bad is it?
         Bridgeshell(Box<BridgedProgram>),
     }
 
@@ -355,6 +378,21 @@ pub mod ast {
     //       need to decide on our custom Tokens and lexer.
     #[derive(Debug, Clone)]
     pub struct Word(pub String);
+
+
+    impl Program {
+        pub(crate) fn push(mut self, command: Box<Command>) -> Self {
+            self.0.push(command);
+            self
+        }
+    }
 }
 
+// Following with the skiing analogy, the code inside here is black level.
+// Many of the issues in a grammar rule cause conflicts in seemingly unrelated
+// rules. Some issues are known to be harder to solve, and while LALRPOP does
+// a fantasic job of helping, it's not perfect. Avoid the rocks, trees, and
+// enjoy.
+//
+// The code for this module is located in `src/program/posix.lalrpop`.
 lalrpop_mod!(lalrpop, "/program/posix.rs");

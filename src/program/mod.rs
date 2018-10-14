@@ -5,6 +5,50 @@
 //! to write programs in, each with a corresponding implementation of this
 //! module's `Program` trait.
 //!
+//! ### POSIX Shell Language
+//!
+//! The basic, portable POSIX shell language. For detailed information read the
+//! [`posix`](posix) module docs.
+//!
+//! ```sh
+//! a=0
+//! b=1
+//! for ((i=0; i<10; i++))
+//! do
+//!     echo -n "$a "
+//!     fn=$((a + b))
+//!     a=$b
+//!     b=$fn
+//! done
+//! echo
+//! ```
+//!
+//! ### Modern Shell Language
+//!
+//! A more modern and ergonomic language. For more detailed information read
+//! the [`modern`](modern) module docs.
+//!
+//! ```sh
+//! # WIP
+//! var a = 0
+//! var b = 1
+//! for i in 0..10 {
+//!     echo -n "$a "
+//!     let fn = $((a + b))
+//!     a = $b
+//!     b = $fn
+//! }
+//! echo
+//! ```
+//!
+//! ### Default Syntax
+//!
+//! Our shell has a `PrimaryProgram` which is in charge of parsing programs
+//! which are not passed in via a `{@}` language block. This can be configured
+//! to your preference. This does not effect the shell when launched in
+//! POSIX compatibility mode, or when a specific default language is passed
+//! as a flag.
+//!
 //! ### `{@}` Language Blocks
 //!
 //! Both the [`posix`](posix) and [`modern`](modern) languages have support for
@@ -27,52 +71,8 @@
 //!
 //! Strict POSIX compatibility can be enabled by removing this feature alone.
 //!
-//! ### Default Syntax
-//!
-//! Our shell has a `PrimaryProgram` which is in charge of parsing programs
-//! which are not passed in via a `{@}` language block. This can be configured
-//! to your preference. This does not effect the shell when launched in
-//! POSIX compatibility mode, or when a specific default language is passed
-//! as a flag.
-//!
-//! ### POSIX Syntax
-//!
-//! The basic, portable POSIX shell language. For detailed information read the
-//! [`posix`](posix) module docs.
-//!
-//! ```sh
-//! a=0
-//! b=1
-//! for ((i=0; i<10; i++))
-//! do
-//!     echo -n "$a "
-//!     fn=$((a + b))
-//!     a=$b
-//!     b=$fn
-//! done
-//! echo
-//! ```
-//!
-//! ### Modern Syntax
-//!
-//! A more modern and ergonomic language. For more detailed information read
-//! the [`modern`](modern) module docs.
-//!
-//! ```sh
-//! # WIP
-//! var a = 0
-//! var b = 1
-//! for i in 0..10 {
-//!     echo -n "$a "
-//!     let fn = $((a + b))
-//!     a = $b
-//!     b = $fn
-//! }
-//! echo
-//! ```
-//!
-//! TODO #5: Parse sequence of programs from stream.
-//! TODO #5: Partial parses for readline-ish / syntax highlighting.
+//! - TODO #5: Parse sequence of programs from stream.
+//! - TODO #5: Partial parses for readline-ish / syntax highlighting.
 
 use std::ffi::CString;
 use std::fmt::Debug;
@@ -80,24 +80,22 @@ use std::io::BufRead;
 
 /// A command is a task given by the user as part of a [`Program`](Program).
 ///
-/// Each command is handled by a `Job`, and a single command may be run multiple
-/// times each as a new `Job`. Each time a command is run, the conditions
-/// within the control of the shell are reproduced; IO redirection, working
-/// directory, and even the environment are each faithfully preserved.
+/// Each command is handled by a `Job`, and a single command may be run
+/// multiple times each as a new `Job`. Each time a command is run, the
+/// conditions within the control of the shell are reproduced; IO redirection,
+/// working directory, and even the environment are each faithfully preserved.
 ///
 // TODO #4: We can reasonably reproduce the redirects, pwd... but is it
-// sane to try this with ENV too?
+//          sane to try this with ENV too?
 pub trait Command: Debug {
-    /// Return the command's arguments (including it's name).
-    ///
-    /// This function returns a vector as expected by the `exec(3)` family of
-    /// functions.
+    /// Run the command, returning a result of it's work.
     fn run(&self) -> Result<(), ()>;
 
     /// Return the name of this command.
     ///
     /// This name *may* not be the same as the name given to the process by
     /// the running `Job`.
+    // TODO: Ids?
     fn name(&self) -> CString {
         CString::new(format!("{:?}", self))
             .expect("error in UTF-8 of format")
@@ -114,7 +112,7 @@ pub trait Command: Debug {
 /// ### Working Thoughts
 ///
 /// - Is simply iterating a collection of `commands` really the correct
-/// semantics for all the types of programs we want?
+///   semantics for all the types of programs we want?
 /// - What language information do we still need to store?
 pub trait Program: Sized {
     /// The type of each of this program's commands.
@@ -129,9 +127,7 @@ pub trait Program: Sized {
     /// Run the program sequentially.
     fn run(&self) -> Result<(), ()> {
         for command in self.commands().iter() {
-            command.run()
-                .expect("error running command");
-            // Job::new(&**command).run();
+            command.run()?;
         }
         Ok(())
     }
@@ -164,13 +160,25 @@ pub fn parse_primary<R: BufRead>(reader: R) -> Result<PrimaryProgram, ()> {
 /// # Examples
 ///
 /// ```
-/// use oursh::program::{parse, BasicProgram};
+/// use oursh::program::{parse, PosixProgram, BasicProgram};
 ///
-/// parse::<BasicProgram, &[u8]>(b"ls");
+/// let program = b"sleep 1; date & date";
+/// assert!(parse::<PosixProgram, &[u8]>(program).is_ok());
+/// // TODO: assert!(parse::<BasicProgram, &[u8]>(program).is_err());
 /// ```
 pub fn parse<P: Program, R: BufRead>(reader: R) -> Result<P, ()> {
     P::parse(reader)
 }
+
+// The various program grammars.
+//
+// If reading this code were like sking, you'd now be hitting blues. ASTs and
+// language semantics are somewhat tricky subjects.
+
+pub mod basic;
+pub use self::basic::Program as BasicProgram;
+pub mod posix;
+pub use self::posix::Program as PosixProgram;
 
 
 /// Abstract Syntax Tree for programs between multiple languages.
@@ -191,10 +199,3 @@ pub mod ast {
         Other(String),
     }
 }
-
-// The various program grammars.
-
-pub mod basic;
-pub use self::basic::Program as BasicProgram;
-pub mod posix;
-pub use self::posix::Program as PosixProgram;

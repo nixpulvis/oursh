@@ -11,16 +11,19 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::{style, color};
+#[cfg(feature = "history")]
+use repl::history::History;
 
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.
+// TODO: The F type should be more like `Fn(&impl Read) -> Result<...>`.
 pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
     let mut history = History::load();
 
     // A styled static (for now) prompt.
-    let prompt = Prompt::new().sh_style();
+    let prompt = Prompt::new().long_style();
 
     // Convert the tty's stdout into raw mode.
     let mut stdout = stdout.into_raw_mode()
@@ -129,6 +132,7 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 }
             }
             Key::Ctrl('c') => {
+                // TODO: Send signal if we're running a program.
                 text.clear();
                 print!("\n\r");
                 prompt.display(&mut stdout);
@@ -143,14 +147,11 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
 pub struct Prompt(String);
 
 impl Prompt {
+    /// The most basic possible prompt.
     pub const DEFAULT_FORMAT: &'static str = "$ ";
 
     pub fn new() -> Self {
         Prompt(format!("{}", Self::DEFAULT_FORMAT))
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
     }
 
     pub fn sh_style(self) -> Self {
@@ -214,109 +215,7 @@ impl Prompt {
     }
 }
 
-use std::fs::File;
-use std::path::Path;
-use std::io::prelude::*;
 
-#[derive(Debug)]
-pub struct History(Option<usize>, Vec<(String, usize)>);
+#[cfg(feature = "history")]
+pub mod history;
 
-impl History {
-    pub fn reset_index(&mut self) {
-        self.0 = None;
-    }
-
-    pub fn add(&mut self, text: &str, count: usize) {
-        if text.is_empty() {
-            return;
-        }
-
-        // HACK: There's got to be a cleaner way.
-        let mut index = 0;
-        if self.1.iter().enumerate().find(|(i, (t, _))| {
-            index = *i;
-            text == t
-        }).is_some() {
-            self.1[index].1 += count;
-            let text = self.1.remove(index);
-            self.1.insert(0, text);
-        } else {
-            self.1.insert(0, (text.to_owned(), count));
-        }
-
-        println!("adding history item: {:?}", self.1[0]);
-    }
-
-    pub fn get_up(&mut self) -> Option<String> {
-        let text_len = self.1.len();
-        if text_len > 0 {
-            match self.0 {
-                Some(i) => {
-                    self.0 = Some(i.saturating_add(1)
-                                   .min(text_len - 1));
-                },
-                None => self.0 = Some(0),
-            }
-        } else {
-            self.0 = None;
-        }
-
-        match self.0 {
-            Some(i) => Some(self.1[i].0.clone()),
-            None => None,
-        }
-    }
-
-    pub fn get_down(&mut self) -> Option<String> {
-        match self.0 {
-            Some(i) if i == 0 => self.0 = None,
-            Some(i) => self.0 = Some(i.saturating_sub(1)),
-            None => {},
-        };
-
-        match self.0 {
-            Some(i) => Some(self.1[i].0.clone()),
-            None => None,
-        }
-    }
-
-    pub fn load() -> Self {
-        let mut history = History(None, vec![]);
-
-        if Path::new("/home/nixpulvis/.oursh_history").exists() {
-            let mut f = File::open("/home/nixpulvis/.oursh_history")
-                .expect("error cannot find history");
-            let mut contents = String::new();
-            f.read_to_string(&mut contents)
-                .expect("error reading history");
-            // TODO: We really need something like serde or serde-json
-            //       for the pair if we want to have historical run counts.
-            // let hist = contents.split("\n").map(|s| {
-            //     String::from(s).split(" ").map(|s| {
-            //         println!("{:?}", s);
-            //     })
-            // }).collect::<Vec<String, usize>>();
-            let hist = contents.split("\n").map(|s| {
-                (String::from(s), 0)
-            });
-
-            // Add each entry to the history in order.
-            for (text, index) in hist {
-                history.add(&text, index);
-            }
-
-            // Reverse the order so users get the most recent commands first.
-            history.1 = history.1.into_iter().rev().collect();
-        }
-
-        history
-    }
-
-    pub fn save(&self) {
-        let mut f = File::create("/home/nixpulvis/.oursh_history")
-            .expect("error cannot find history");
-        let text = self.1.iter().map(|(t, _)| t.to_owned()).collect::<Vec<String>>().join("\n");
-        f.write_all(text.as_bytes())
-            .expect("error writing history");
-    }
-}

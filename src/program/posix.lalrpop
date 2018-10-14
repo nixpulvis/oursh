@@ -1,13 +1,12 @@
 use program::posix::ast;
+use program::ast::Interpreter;
 
 grammar;
 
 pub Program: ast::Program = {
     // TODO #8: We need our own lexer to make this rule work.
     // <p: Program> "\n"+ <c: Commands> => {
-    //     let (mut p, c) = (p, c);
-    //     p.0.push(box c);
-    //     p
+    //     p.push(box c.clone());
     // },
     Complete => <>,
 }
@@ -23,34 +22,36 @@ Complete: ast::Program = {
 
 List: ast::Program = {
     <l: List> ";" <cs: Commands> => {
-        let (mut l, j) = (l, cs.clone());
-        l.0.push(box cs);
-        l
+        l.push(box cs.clone())
     },
     <l: List> "&" <cs: Commands> => {
         let bg = ast::Command::Background(box l);
         ast::Program(vec![box bg, box cs])
     },
-    Commands => ast::Program(vec![box <>]),
+    Commands => {
+        ast::Program(vec![box <>])
+    },
 }
 
 Compound: ast::Program = {
     <c: Compound> ";" <cs: Commands> => {
-        let (mut c, j) = (c, cs.clone());
-        c.0.push(box cs);
-        c
+        c.push(box cs.clone())
     },
     // TODO #10: Why doesn't this work?
     // <cs: Commands> ";" => ast::Program(vec![box cs]),
-    Commands => ast::Program(vec![box <>]),
+    Commands => {
+        ast::Program(vec![box <>])
+    },
 }
 
 Commands: ast::Command = {
     // TODO: Hopefully in fixing #8 and #10 this can play nicely.
-    //"{@" <i: r"#![^}^;]*"> <t: r";[^}]*"> "}" => {
-    //    let b = ast::BridgedProgram(Interpreter::Other(i.into()), t.into());
-    //    ast::Command::Bridgeshell(box b)
-    //},
+    // NOTE: This can be successfully complied, but will break the tests.
+    //
+    // "{@" <i: r"#![^}^;]*"> <t: r";[^}]*"> "}" => {
+    //     let b = ast::BridgedProgram(Interpreter::Other(i.into()), t.into());
+    //     ast::Command::Bridgeshell(box b)
+    // },
     "(" <p: Program> ")" => {
         ast::Command::Subshell(box p)
     },
@@ -67,7 +68,9 @@ Commands: ast::Command = {
 }
 
 Pipeline: ast::Command = {
-    "!" <ps: PipelineSeq> => ast::Command::Not(box ps),
+    "!" <ps: PipelineSeq> => {
+        ast::Command::Not(box ps)
+    },
     <ps: PipelineSeq> => ps,
 }
 
@@ -78,7 +81,11 @@ PipelineSeq: ast::Command = {
     <c: Command> => c,
 }
 
-Command: ast::Command = Word+ => ast::Command::Simple(<>);
+Command: ast::Command = Word+ => {
+    ast::Command::Simple(<>)
+};
 
 // TODO #8: Custom lexer plus proger rules needed.
-Word: ast::Word = r"[a-zA-Z0-9-_\.]+" => ast::Word(<>.into());
+Word: ast::Word = r"[a-zA-Z0-9-_\.]+" => {
+    ast::Word(<>.into())
+};

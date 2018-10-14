@@ -1,0 +1,110 @@
+//! Keeps a record of previous commands, used for completion and archeology.
+use std::fs::File;
+use std::path::Path;
+use std::io::prelude::*;
+
+/// The history of a user's provided commands.
+#[derive(Debug)]
+pub struct History(Option<usize>, Vec<(String, usize)>);
+
+impl History {
+    pub fn reset_index(&mut self) {
+        self.0 = None;
+    }
+
+    pub fn add(&mut self, text: &str, count: usize) {
+        if text.is_empty() {
+            return;
+        }
+
+        // HACK: There's got to be a cleaner way.
+        let mut index = 0;
+        if self.1.iter().enumerate().find(|(i, (t, _))| {
+            index = *i;
+            text == t
+        }).is_some() {
+            self.1[index].1 += count;
+            let text = self.1.remove(index);
+            self.1.insert(0, text);
+        } else {
+            self.1.insert(0, (text.to_owned(), count));
+        }
+
+        debug!("adding history item: {:?}", self.1[0]);
+    }
+
+    pub fn get_up(&mut self) -> Option<String> {
+        let text_len = self.1.len();
+        if text_len > 0 {
+            match self.0 {
+                Some(i) => {
+                    self.0 = Some(i.saturating_add(1)
+                                   .min(text_len - 1));
+                },
+                None => self.0 = Some(0),
+            }
+        } else {
+            self.0 = None;
+        }
+
+        match self.0 {
+            Some(i) => Some(self.1[i].0.clone()),
+            None => None,
+        }
+    }
+
+    pub fn get_down(&mut self) -> Option<String> {
+        match self.0 {
+            Some(i) if i == 0 => self.0 = None,
+            Some(i) => self.0 = Some(i.saturating_sub(1)),
+            None => {},
+        };
+
+        match self.0 {
+            Some(i) => Some(self.1[i].0.clone()),
+            None => None,
+        }
+    }
+
+    pub fn load() -> Self {
+        let mut history = History(None, vec![]);
+        if Path::new("/home/nixpulvis/.oursh_history").exists() {
+            let mut f = File::open("/home/nixpulvis/.oursh_history")
+                .expect("error cannot find history");
+            let mut contents = String::new();
+            f.read_to_string(&mut contents)
+                .expect("error reading history");
+            // TODO: We really need something like serde or serde-json
+            //       for the pair if we want to have historical run counts.
+            // let hist = contents.split("\n").map(|s| {
+            //     String::from(s).split(" ").map(|s| {
+            //         println!("{:?}", s);
+            //     })
+            // }).collect::<Vec<String, usize>>();
+            let hist = contents.split("\n").map(|s| {
+                (String::from(s), 0)
+            });
+
+            // Add each entry to the history in order.
+            for (text, index) in hist {
+                history.add(&text, index);
+            }
+
+            // Reverse the order so users get the most recent commands first.
+            history.1 = history.1.into_iter().rev().collect();
+        }
+
+        history
+    }
+
+    pub fn save(&self) {
+        let mut f = File::create("/home/nixpulvis/.oursh_history")
+            .expect("error cannot find history");
+        for (text, _) in self.1.iter() {
+            f.write_all(text.as_bytes())
+                .expect("error writing history");
+            f.write_all(b"\n")
+                .expect("error writing history");
+        }
+    }
+}

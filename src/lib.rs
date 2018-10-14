@@ -83,6 +83,32 @@ extern crate termion;
 #[macro_use]
 extern crate lalrpop_util;
 
+/// Print debug information to stderr..
+///
+/// ### Examples
+///
+/// ```
+/// use oursh::debug;
+///
+/// debug!(1 + 2);
+///
+/// let msg = "because.";
+/// debug!("why!? {}", msg);
+/// ```
+#[macro_export]
+macro_rules! debug {
+    ($e:expr) => {
+        eprintln!("----- {} -----", stringify!($e));
+        eprintln!("{:#?}", $e);
+        eprintln!("-----");
+    };
+    ($format:expr, $e:expr) => {
+        eprintln!("----- {} -----", stringify!($e));
+        eprintln!($format, $e);
+        eprintln!("-----");
+    };
+}
+
 pub mod job;
 pub mod program;
 pub mod repl;
