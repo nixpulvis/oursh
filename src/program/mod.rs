@@ -8,7 +8,7 @@
 //! ### POSIX Shell Language
 //!
 //! The basic, portable POSIX shell language. For detailed information read the
-//! [`posix`](posix) module docs.
+//! [`posix`](program::posix) module docs.
 //!
 //! ```sh
 //! a=0
@@ -26,7 +26,7 @@
 //! ### Modern Shell Language
 //!
 //! A more modern and ergonomic language. For more detailed information read
-//! the [`modern`](modern) module docs.
+//! the [`modern`](program::modern) module docs.
 //!
 //! ```sh
 //! # WIP
@@ -51,12 +51,13 @@
 //!
 //! ### `{@}` Language Blocks
 //!
-//! Both the [`posix`](posix) and [`modern`](modern) languages have support for
-//! a special expression which treats the body as a program from another
-//! language. This forms the basis of oursh's modern features, and backwards
-//! compatibility. While the primary goal of this syntax is to be able to mix
-//! both POSIX and non-POSIX shell scripts, the feature is much more powerful.
-//! Any interperator can be used, just like with `#!`.
+//! Both the [`posix`](program::posix) and [`modern`](program::modern)
+//! languages have support for a special expression which treats the body as a
+//! program from another language. This forms the basis of oursh's modern
+//! features, and backwards compatibility. While the primary goal of this
+//! syntax is to be able to mix both POSIX and non-POSIX shell scripts, the
+//! feature is much more powerful.  Any interperator can be used, just like
+//! with `#!`.
 //!
 //! ```sh
 //! date      # Call `date` in the primary syntax.

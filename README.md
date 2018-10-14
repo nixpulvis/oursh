@@ -131,6 +131,7 @@ oursh : crate
 [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
 [termios]: https://crates.io/crates/termios
 [libc]: https://crates.io/crates/libc
+[lalrpop]: https://github.com/lalrpop/lalrpop
 [fish]: https://github.com/fish-shell/fish-shell
 [arch]: https://www.archlinux.org/
 [rush]: https://github.com/nixpulvis/rush
