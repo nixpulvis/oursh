@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["complete",""]]});
+initSidebarItems({"fn":[["complete",""],["executable_complete",""]]});
