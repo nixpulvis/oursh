@@ -25,8 +25,7 @@ regex = "0.2"
 # Option 1: http://man7.org/linux/man-pages/man3/termios.3.html
 #termios = "*"
 # Option 2: http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/
-termion = "1.5"
-# termion = { git = "https://github.com/nixpulvis/termion", branch = "suspend-raw" }
+termion = { git = "https://github.com/nixpulvis/termion", branch = "suspend-raw" }
 utf8 = "^0.0.2"
 
 [build-dependencies]
