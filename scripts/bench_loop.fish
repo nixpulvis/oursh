@@ -4,7 +4,7 @@ set program $argv[3]
 
 if test $program = "oursh"
     for i in (seq $N)
-        oursh $script
+        target/release/oursh $script
     end
 end
 
