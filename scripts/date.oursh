@@ -1,0 +1,4 @@
+{@#!/usr/bin/env ruby;
+    require 'date'
+    puts Date.today.iso8601
+}

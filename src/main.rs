@@ -63,14 +63,6 @@ fn main() {
     }
 }
 
-enum RunMode {
-    Repl,
-    Stdin,
-    File,
-}
-
-// fn ::
-
 fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) + 'a {
     move |text: &String| {
         // Parse with the primary grammar and run each command in order.

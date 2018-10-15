@@ -107,11 +107,16 @@
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
 use std::ffi::CString;
+#[cfg(feature = "bridge")]
+use std::fs::{self, File};
 use std::io::{Write, BufRead};
+#[cfg(feature = "bridge")]
+use std::os::unix::fs::PermissionsExt;
 use std::process::{self, Stdio};
 use std::thread;
 use job::Job;
 use program::Program as ProgramTrait;
+#[cfg(feature = "bridge")]
 use program::ast::Interpreter;
 
 
@@ -145,6 +150,7 @@ impl super::Program for Program {
 // The semantics of a single POSIX command.
 impl super::Command for Command {
     fn run(&self) -> Result<(), ()> {
+        #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref words) => {
                 let argv = words.iter().map(|w| {
@@ -226,31 +232,42 @@ impl super::Command for Command {
                 }).expect("error spawning thread");
                 println!("[{:?}]", handle.thread().name());
             },
-            Command::Bridgeshell(ref bridged_program) => {
+            #[cfg(feature = "bridge")]
+            Command::Bridgeshell(ref program) => {
                 // TODO: Pass text off to another parser.
-                // TODO: Even for the Shebang interpretor, we shouldn't create
-                //       files like this.
-                use std::fs::{self, File};
-                use std::os::unix::fs::PermissionsExt;
-                let bridgefile = "./bridge";
-                {
-                    let mut file = File::create(bridgefile).unwrap();
-                    if let Interpreter::Other(ref interp) = bridged_program.0 {
-                        file.write_all(interp.as_bytes()).unwrap();
+                if let Interpreter::Other(ref interpreter) = program.0 {
+                    // TODO: Even for the Shebang interpretor, we shouldn't
+                    // create files like this.
+                    // XXX: Length is the worlds worst hash function.
+                    let bridgefile = format!("/tmp/.oursh_bridge-{}", program.1.len());
+                    {
+                        let mut file = File::create(&bridgefile).unwrap();
+                        let interpreter = interpreter.chars()
+                                                     .map(|c| c as u8)
+                                                     .collect::<Vec<u8>>();
+                        file.write_all(&interpreter).unwrap();
                         file.write_all(b"\n").unwrap();
+                        let program = program.1.chars()
+                                               .skip(1)
+                                               .skip_while(|c| *c == ' ')
+                                               .map(|c| c as u8)
+                                               .collect::<Vec<u8>>();
+                        file.write_all(&program).unwrap();
+
+                        let mut perms = fs::metadata(&bridgefile).unwrap()
+                                                               .permissions();
+                        perms.set_mode(0o777);
+                        fs::set_permissions(&bridgefile, perms).unwrap();
                     }
-                    file.write_all(bridged_program.1.as_bytes()).unwrap();
-                    let mut perms = fs::metadata(bridgefile).unwrap().permissions();
-                    perms.set_mode(0o777);
-                    fs::set_permissions(bridgefile, perms).unwrap();
+                    // TODO #4: Suspend and restore raw mode.
+                    let mut child = process::Command::new(&format!("{}", bridgefile))
+                        .spawn()
+                        .expect("error swawning bridge process");
+                    child.wait()
+                        .expect("error waiting for bridge process");
                 }
-                // TODO #4: Suspend and restore raw mode.
-                let mut child = process::Command::new(bridgefile)
-                    .spawn()
-                    .expect("error swawning bridge process");
-                child.wait()
-                    .expect("error waiting for bridge process");
             },
+            _ => unimplemented!(),
         };
         Ok(())
     }
