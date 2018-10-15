@@ -26,7 +26,7 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
     let mut history = History::load();
 
     // A styled static (for now) prompt.
-    let prompt = Prompt::new().short_style();
+    let prompt = Prompt::new().sh_style();
 
     // Convert the tty's stdout into raw mode.
     let mut stdout = stdout.into_raw_mode()
