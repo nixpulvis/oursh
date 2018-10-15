@@ -257,6 +257,20 @@
 <span id="257">257</span>
 <span id="258">258</span>
 <span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Quick and effective raw mode repl library for ANSI terminals.</span>
 <span class="doccomment">//!</span>
@@ -272,6 +286,8 @@
 <span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">input</span>::<span class="ident">TermRead</span>;
 <span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">raw</span>::<span class="ident">IntoRawMode</span>;
 <span class="kw">use</span> <span class="ident">termion</span>::{<span class="ident">style</span>, <span class="ident">color</span>};
+<span class="comment">// #[cfg(feature = &quot;completion&quot;)]</span>
+<span class="comment">// use repl::completion::*;</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;history&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">repl</span>::<span class="ident">history</span>::<span class="ident">History</span>;
 
@@ -325,6 +341,17 @@
 
                 <span class="comment">// Print a boring static prompt.</span>
                 <span class="ident">prompt</span>.<span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stdout</span>);
+            },
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;completion&quot;</span>)]</span>
+            <span class="ident">Key</span>::<span class="ident">Char</span>(<span class="string">&#39;\t&#39;</span>) <span class="op">=&gt;</span> {
+                <span class="ident">text</span> <span class="op">=</span> <span class="ident">completion</span>::<span class="ident">complete</span>(<span class="kw-2">&amp;</span><span class="ident">text</span>);
+                <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}{}&quot;</span>,
+                       <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">Left</span>(<span class="number">1000</span>),  <span class="comment">// XXX</span>
+                       <span class="ident">termion</span>::<span class="ident">clear</span>::<span class="ident">CurrentLine</span>);
+                <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
+                <span class="ident">prompt</span>.<span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stdout</span>);
+                <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">text</span>);
+                <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
             },
             <span class="ident">Key</span>::<span class="ident">Char</span>(<span class="ident">c</span>) <span class="op">=&gt;</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>((<span class="ident">x</span>, <span class="ident">y</span>)) <span class="op">=</span> <span class="ident">stdout</span>.<span class="ident">cursor_pos</span>() {
@@ -514,8 +541,9 @@
 }
 
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;completion&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">completion</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;history&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">history</span>;
-
 </pre>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../../";window.currentCrate = "oursh";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script defer src="../../../search-index.js"></script></body></html>
