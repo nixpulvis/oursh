@@ -100,6 +100,7 @@
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
+<span id="103">103</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Subprocess execution management.</span>
 <span class="doccomment">//!</span>
@@ -149,6 +150,7 @@
         <span class="comment">// }</span>
     }
 
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused</span>)]</span>
     <span class="kw">fn</span> <span class="ident">fork</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="kw">match</span> <span class="ident">fork</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">ForkResult</span>::<span class="ident">Parent</span> { <span class="ident">child</span>, .. }) <span class="op">=&gt;</span> {
