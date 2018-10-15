@@ -37,13 +37,13 @@ impl Job {
     /// This function also does a simple lookup for builtin functions.
     // TODO #4: Return result.
     pub fn run(&mut self) {
-        // TODO #4: This is a awful background parse :P
-        if self.argv.last().map(|s| s.to_bytes()) == Some(b"&") {
-            self.argv.pop();
-            self.fork();
-        } else {
+        // TODO #4: We need to implement background jobs.
+        // if is_background {
+        //     self.argv.pop();
+        //     self.fork();
+        // } else {
             self.fork_and_wait();
-        }
+        // }
     }
 
     fn fork(&mut self) {
@@ -76,11 +76,6 @@ impl Job {
     }
 
     fn exec(&self) {
-        // TODO #4: Where should we handle empty commands?
-        if self.argv.len() == 0 {
-            return;
-        }
-
         match execvp(&self.argv[0], &self.argv) {
             Ok(_) => unreachable!(),
             Err(e) => {
