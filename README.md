@@ -73,11 +73,17 @@ inspires a lot of the modern syntax.
 POSIX compatibility comes from my desire to use this shell as my `chsh -s ...`
 shell on [Arch Linux][arch]. See the full POSIX reference for more information.
 
+Some of the shebang language interoperation was inspired by my time with the
+Northeastern University PL group, and generally from writing [Racket][racket].
+The beauty of of merging the UNIX style `#!...` with Racket's `#lang ...` here
+is very exciting to me. I might just _have_ to make a `{#lang ...}` shortcut
+for Racket!
+
 I've built and wrote a few things about shells before:
 
 - [`rush`][rush] A glorified homework assignment for computer architecture.
 - [`myshell.py`][myshell.py] My submission for computer organization a8.
-- [Building a Shell -- Part 1][basp1] Start of this project.
+- [Building a Shell - Part 1][basp1] Start of this project.
 
 
 ## [POSIX Reference][posix]
@@ -146,6 +152,7 @@ oursh : crate
 [lalrpop]: https://github.com/lalrpop/lalrpop
 [fish]: https://github.com/fish-shell/fish-shell
 [arch]: https://www.archlinux.org/
+[racket]: https://racket-lang.org/
 [rush]: https://github.com/nixpulvis/rush
 [myshell.py]: /doc/cs2600-a8-myshell.py
 [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
