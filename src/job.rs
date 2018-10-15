@@ -46,6 +46,7 @@ impl Job {
         // }
     }
 
+    #[allow(unused)]
     fn fork(&mut self) {
         match fork() {
             Ok(ForkResult::Parent { child, .. }) => {

@@ -17,10 +17,9 @@ fn simple_command() {
 }
 
 #[test]
+#[ignore]  // TODO #10
 fn compound_command() {
-    assert_piped_oursh!("{ echo pi }", "pi\n")
-    // TODO: Should be this:
-    // assert_piped_oursh!("{ ls; }", "# oursh\n")
+    assert_piped_oursh!("{ echo pi; }", "pi\n")
 }
 
 #[test]

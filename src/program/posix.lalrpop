@@ -37,15 +37,13 @@ Compound: ast::Program = {
     <c: Compound> ";" <cs: Commands> => {
         c.push(box cs.clone())
     },
-    // TODO #10: Why doesn't this work?
-    // <cs: Commands> ";" => ast::Program(vec![box cs]),
-    Commands => {
-        ast::Program(vec![box <>])
+    <cs: Commands> ";" => {
+        ast::Program(vec![box cs])
     },
 }
 
 Commands: ast::Command = {
-    // TODO: Hopefully in fixing #8 and #10 this can play nicely.
+    // TODO #15: Hopefully in fixing #8 and #10 this can play nicely.
     // NOTE: This can be successfully complied, but will break a doc tests.
     "{#" <i: r"![^}^;]*"> <t: r";[^}]*"> "}" => {
         let b = ast::BridgedProgram(Interpreter::Other(i.into()), t.into());
@@ -80,6 +78,8 @@ PipelineSeq: ast::Command = {
     <c: Command> => c,
 }
 
+// TODO #8: We *really* need a custom lexer so we can split this
+// on something.
 Command: ast::Command = Word+ => {
     ast::Command::Simple(<>)
 };
