@@ -9,8 +9,7 @@ build = "build.rs"
 default = ["history"]
 
 bridge = []
-cursor = []
-history = ["cursor"]
+history = []
 
 [dependencies]
 docopt = "*"

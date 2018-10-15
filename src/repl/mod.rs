@@ -34,8 +34,6 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
 
     // TODO #5: We need a better state object for these values.
     let mut text = String::new();
-    #[cfg(feature = "cursor")]
-    let mut cursor = 0usize;
 
     // Iterate the keys as a user presses them.
     // TODO #5: Mouse?
@@ -66,10 +64,6 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
 
                 // Reset for the next program.
                 text.clear();
-                #[cfg(feature = "cursor")]
-                {
-                    cursor = 0;
-                }
 
                 // Print a boring static prompt.
                 prompt.display(&mut stdout);
@@ -80,7 +74,6 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                                termion::clear::UntilNewline);
 
                 if let Some(history_text) = history.get_up() {
-                    cursor = history_text.len();
                     text = history_text;
                     print!("{}", text);
                 }
@@ -92,42 +85,29 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                                termion::clear::UntilNewline);
 
                 if let Some(history_text) = history.get_down() {
-                    cursor = history_text.len();
                     text = history_text;
                     print!("{}", text);
                 }
                 stdout.flush().unwrap();
             },
-            #[cfg(feature = "cursor")]
             Key::Left => {
-                cursor = cursor.saturating_sub(1);
                 print!("{}", termion::cursor::Left(1));
                 stdout.flush().unwrap();
             },
-            #[cfg(feature = "cursor")]
             Key::Right => {
-                cursor = cursor.saturating_add(1);
                 print!("{}", termion::cursor::Right(1));
                 stdout.flush().unwrap();
             },
             Key::Char(c) => {
-                #[cfg(feature = "cursor")]
-                {
-                    cursor = cursor.saturating_add(1);
-                }
                 text.push(c);
                 print!("{}", c);
                 stdout.flush().unwrap();
             },
-            #[cfg(feature = "cursor")]
             Key::Backspace => {
                 if !text.is_empty() {
-                    text.remove(cursor);
-                    cursor = cursor.saturating_sub(1);
-                    let shift = (text.len() - cursor) as u16;
-                    print!("{}{}", termion::cursor::Left(shift),
-                                     termion::clear::UntilNewline);
-                                     // &text[cursor..]);
+                    text.pop();
+                    print!("{}{}", termion::cursor::Left(1),
+                                   termion::clear::UntilNewline);
                     stdout.flush().unwrap();
                 }
             }
