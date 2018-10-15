@@ -16,7 +16,9 @@ programs, the language this will be written in.
 
 - [x] Basic command REPL
 - [ ] POSIX compatibility
-    - [ ] w/ non-posix blocks (`{@lang ... }`)
+- [ ] POSIX compatibility
+- [ ] Shebang blocks, `{#!/usr/bin/env ruby; puts 1}`, `{# ... }`
+    - [ ] w/ non-posix blocks (`{#lang ... }`)
 - [ ] bash/zsh autocomplete compatibility
 - [ ] `man` / `-h` / `--help` parsing
 - [ ] Multi-line input

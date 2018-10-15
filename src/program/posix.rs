@@ -242,9 +242,10 @@ impl super::Command for Command {
                     let bridgefile = format!("/tmp/.oursh_bridge-{}", program.1.len());
                     {
                         let mut file = File::create(&bridgefile).unwrap();
-                        let interpreter = interpreter.chars()
-                                                     .map(|c| c as u8)
-                                                     .collect::<Vec<u8>>();
+                        let mut interpreter = interpreter.chars()
+                                                       .map(|c| c as u8)
+                                                       .collect::<Vec<u8>>();
+                        interpreter.insert(0, '#' as u8);
                         file.write_all(&interpreter).unwrap();
                         file.write_all(b"\n").unwrap();
                         let program = program.1.chars()
@@ -372,7 +373,7 @@ pub mod ast {
         /// ### Examples
         ///
         /// ```sh
-        /// {@ruby puts (Math.sqrt(32**2/57.2))}
+        /// {#ruby puts (Math.sqrt(32**2/57.2))}
         /// ```
         ///
         /// ### Compatibility

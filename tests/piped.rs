@@ -63,9 +63,9 @@ fn background_command() {
 #[test]
 #[cfg(feature = "bridge")]
 fn bridged_sh_command() {
-    assert_piped_oursh!("{@#!/bin/sh; echo '1'}", "1\n");
+    assert_piped_oursh!("{#!/bin/sh; echo '1'}", "1\n");
     assert_piped_oursh!(r#"
-{@#!/bin/sh;
+{#!/bin/sh;
     for i in 1 2 3 4 5
     do
         echo -n $i
@@ -76,16 +76,16 @@ fn bridged_sh_command() {
 #[test]
 #[cfg(feature = "bridge")]
 fn bridged_ruby_command() {
-    assert_piped_oursh!("{@#!/usr/bin/env ruby; puts 1}", "1\n");
+    assert_piped_oursh!("{#!/usr/bin/env ruby; puts 1}", "1\n");
 }
 
 #[test]
 #[cfg(feature = "bridge")]
 fn bridged_python_command() {
-    assert_piped_oursh!("{@#!/usr/bin/env python; print(1)}", "1\n");
-    assert_piped_oursh!("{@#!/usr/bin/env python  ;    print(1)}", "1\n");
+    assert_piped_oursh!("{#!/usr/bin/env python; print(1)}", "1\n");
+    assert_piped_oursh!("{#!/usr/bin/env python  ;    print(1)}", "1\n");
     assert_piped_oursh!(r#"
-{@#!/usr/bin/env python;
+{#!/usr/bin/env python;
 print("hello world")
 }"#, "hello world\n");
 }
@@ -94,7 +94,7 @@ print("hello world")
 #[cfg(feature = "bridge")]
 fn bridged_racket_command() {
     assert_piped_oursh!(r#"
-{@#!/usr/bin/env racket;
+{#!/usr/bin/env racket;
     #lang racket/base
     (print "hello world!")
 }"#, "\"hello world!\"");
@@ -105,7 +105,7 @@ fn bridged_racket_command() {
 #[cfg(feature = "bridge")]
 fn bridged_rust_command() {
     assert_piped_oursh!(r#"
-{@#!/usr/bin/env cargo-script-run;
+{#!/usr/bin/env cargo-script-run;
     fn main() {
         println!("hello world!");
     }

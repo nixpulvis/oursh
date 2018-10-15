@@ -10,8 +10,8 @@
 //!
 //! ## Features
 //!
-//! - Basic command REPL
-//! - POSIX compatibility w/ non-posix blocks (`{@lang ... }`)
+//! - POSIX compatibility
+//! - Shebang blocks, `{#!/usr/bin/env ruby; puts 1}`, `{# ... }`
 //! - bash/zsh autocomplete compatibility
 //! - `man` / `-h` / `--help` parsing
 //! - Multi-line input

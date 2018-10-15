@@ -44,12 +44,12 @@
 //! ### Default Syntax
 //!
 //! Our shell has a `PrimaryProgram` which is in charge of parsing programs
-//! which are not passed in via a `{@}` language block. This can be configured
+//! which are not passed in via a `{#}` language block. This can be configured
 //! to your preference. This does not effect the shell when launched in
 //! POSIX compatibility mode, or when a specific default language is passed
 //! as a flag.
 //!
-//! ### `{@}` Language Blocks
+//! ### `{#}` Language Blocks
 //!
 //! Both the [`posix`](program::posix) and [`modern`](program::modern)
 //! languages have support for a special expression which treats the body as a
@@ -61,10 +61,10 @@
 //!
 //! ```sh
 //! date      # Call `date` in the primary syntax.
-//! {@ date}  # Specifies the alternate syntax.
+//! {# date}  # Specifies the alternate syntax.
 //!
 //! # Use ruby, why not...
-//! {@!ruby
+//! {#!ruby
 //!     require 'date'
 //!     puts Date.today
 //! }
@@ -107,7 +107,7 @@ pub trait Command: Debug {
 /// A program is as large as a file or as small as a line.
 ///
 /// Each program is to be treated as a complete single language entity, with
-/// the explicit exception of `{@}` blocks, which act as bridges between
+/// the explicit exception of `{#}` blocks, which act as bridges between
 /// programs.
 ///
 /// ### Working Thoughts
@@ -190,8 +190,8 @@ pub mod ast {
     /// ### Examples
     ///
     /// ```sh
-    /// {@ ...}
-    /// {@ruby ...}
+    /// {# ...}
+    /// {#ruby ...}
     /// ```
     #[derive(Debug, Clone)]
     pub enum Interpreter {
