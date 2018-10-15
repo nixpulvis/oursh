@@ -136,7 +136,20 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                         stdout.flush().unwrap();
                     }
                 }
-            }
+            },
+            Key::Ctrl('a') => {
+                if let Ok((_x, y)) = stdout.cursor_pos() {
+                    print!("{}", termion::cursor::Goto(prompt_length, y));
+                    stdout.flush().unwrap();
+                }
+            },
+            Key::Ctrl('e') => {
+                if let Ok((_x, y)) = stdout.cursor_pos() {
+                    let end = prompt_length + text.len() as u16;
+                    print!("{}", termion::cursor::Goto(end, y));
+                    stdout.flush().unwrap();
+                }
+            },
             Key::Ctrl('c') => {
                 // TODO: Send signal if we're running a program.
                 text.clear();
