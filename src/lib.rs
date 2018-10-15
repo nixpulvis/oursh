@@ -98,14 +98,18 @@ extern crate lalrpop_util;
 #[macro_export]
 macro_rules! debug {
     ($e:expr) => {
-        eprintln!("----- {} -----", stringify!($e));
-        eprintln!("{:#?}", $e);
-        eprintln!("-----");
+        if let Ok(_level) = ::std::env::var("LOG") {
+            eprintln!("----- {} -----", stringify!($e));
+            eprintln!("{:#?}", $e);
+            eprintln!("-----");
+        }
     };
     ($format:expr, $e:expr) => {
-        eprintln!("----- {} -----", stringify!($e));
-        eprintln!($format, $e);
-        eprintln!("-----");
+        if let Ok(_level) = ::std::env::var("LOG") {
+            eprintln!("----- {} -----", stringify!($e));
+            eprintln!($format, $e);
+            eprintln!("-----");
+        }
     };
 }
 
