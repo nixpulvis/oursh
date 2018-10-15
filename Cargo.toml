@@ -11,10 +11,11 @@ repository = "https://github.com/nixpulvis/oursh"
 build = "build.rs"
 
 [features]
-default = ["history"]
+default = ["history", "completion"]
 
-bridge = []
-history = []
+bridge     = []
+completion = []
+history    = []
 
 [dependencies]
 docopt = "0.8"

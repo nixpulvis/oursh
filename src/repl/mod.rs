@@ -12,6 +12,8 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::{style, color};
+// #[cfg(feature = "completion")]
+// use repl::completion::*;
 #[cfg(feature = "history")]
 use repl::history::History;
 
@@ -65,6 +67,17 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
 
                 // Print a boring static prompt.
                 prompt.display(&mut stdout);
+            },
+            #[cfg(feature = "completion")]
+            Key::Char('\t') => {
+                text = completion::complete(&text);
+                print!("{}{}",
+                       termion::cursor::Left(1000),  // XXX
+                       termion::clear::CurrentLine);
+                stdout.flush().unwrap();
+                prompt.display(&mut stdout);
+                print!("{}", text);
+                stdout.flush().unwrap();
             },
             Key::Char(c) => {
                 if let Ok((x, y)) = stdout.cursor_pos() {
@@ -254,6 +267,7 @@ impl Prompt {
 }
 
 
+#[cfg(feature = "completion")]
+pub mod completion;
 #[cfg(feature = "history")]
 pub mod history;
-
