@@ -137,11 +137,11 @@
             <span class="self">self</span>.<span class="number">1</span>[<span class="ident">index</span>].<span class="number">1</span> <span class="op">+=</span> <span class="ident">count</span>;
             <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">1</span>.<span class="ident">remove</span>(<span class="ident">index</span>);
             <span class="self">self</span>.<span class="number">1</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">text</span>);
+            <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;updating history item: {:?}&quot;</span>, <span class="self">self</span>.<span class="number">1</span>[<span class="number">0</span>]);
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="number">1</span>.<span class="ident">insert</span>(<span class="number">0</span>, (<span class="ident">text</span>.<span class="ident">to_owned</span>(), <span class="ident">count</span>));
+            <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;adding history item: {:?}&quot;</span>, <span class="self">self</span>.<span class="number">1</span>[<span class="number">0</span>]);
         }
-
-        <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;adding history item: {:?}&quot;</span>, <span class="self">self</span>.<span class="number">1</span>[<span class="number">0</span>]);
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_up</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
