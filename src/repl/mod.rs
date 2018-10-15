@@ -44,12 +44,6 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Esc => {
-                // Save history to file in $HOME.
-                #[cfg(feature = "history")]
-                history.save();
-
-                // Exit this wonderful world.
-                exit(0)
             },
             Key::Char('\n') => {
                 // Perform a raw mode line break.
@@ -141,9 +135,19 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 print!("^C\n\r");
                 prompt.display(&mut stdout);
             },
-            // Key::Ctrl('d') => {
-            //     exit(0);
-            // },
+            Key::Ctrl('d') => {
+                if text.is_empty() {
+                    print!("exit\n\r");
+                    stdout.flush().unwrap();
+
+                    // Save history to file in $HOME.
+                    #[cfg(feature = "history")]
+                    history.save();
+
+                    // Exit this wonderful world.
+                    exit(0)
+                }
+            },
             Key::Ctrl('l') => {
                 print!("{}{}",
                        termion::clear::All,

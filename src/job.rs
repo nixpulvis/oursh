@@ -37,11 +37,6 @@ impl Job {
     /// This function also does a simple lookup for builtin functions.
     // TODO #4: Return result.
     pub fn run(&mut self) {
-        // TODO #4: Proper builtins, in program module.
-        if self.argv.len() > 0 && self.argv[0].to_bytes() == b"exit" {
-            exit(0);
-        }
-
         // TODO #4: This is a awful background parse :P
         if self.argv.last().map(|s| s.to_bytes()) == Some(b"&") {
             self.argv.pop();
