@@ -1,0 +1,14 @@
+`fish scripts/bench.fish` on 2018-10-15.
+
+bench sh
+2.07user 0.63system 0:02.73elapsed 99%CPU (0avgtext+0avgdata 6620maxresident)k
+0inputs+0outputs (0major+94893minor)pagefaults 0swaps
+bench oursh
+2.86user 1.32system 0:04.22elapsed 99%CPU (0avgtext+0avgdata 6612maxresident)k
+0inputs+0outputs (0major+327618minor)pagefaults 0swaps
+bench zsh
+2.00user 0.72system 0:02.76elapsed 98%CPU (0avgtext+0avgdata 6408maxresident)k
+0inputs+0outputs (0major+110221minor)pagefaults 0swaps
+bench fish
+47.64user 19.36system 1:17.35elapsed 86%CPU (0avgtext+0avgdata 6596maxresident)k
+0inputs+0outputs (0major+3673243minor)pagefaults 0swaps
