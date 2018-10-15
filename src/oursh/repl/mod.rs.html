@@ -216,9 +216,6 @@
 <span id="216">216</span>
 <span id="217">217</span>
 <span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Quick and effective raw mode repl library for ANSI terminals.</span>
 <span class="doccomment">//!</span>
@@ -229,6 +226,7 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>::<span class="ident">exit</span>;
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>;
 <span class="kw">use</span> <span class="ident">pwd</span>::<span class="ident">Passwd</span>;
+<span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">DetectCursorPos</span>;
 <span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">event</span>::<span class="ident">Key</span>;
 <span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">input</span>::<span class="ident">TermRead</span>;
 <span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">raw</span>::<span class="ident">IntoRawMode</span>;
@@ -254,10 +252,11 @@
     <span class="comment">// Display the inital prompt.</span>
     <span class="ident">prompt</span>.<span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stdout</span>);
 
+    <span class="comment">// XXX: Hack to get the prompt length.</span>
+    <span class="kw">let</span> <span class="ident">prompt_length</span> <span class="op">=</span> <span class="ident">stdout</span>.<span class="ident">cursor_pos</span>().<span class="ident">unwrap</span>().<span class="number">0</span>;
+
     <span class="comment">// TODO #5: We need a better state object for these values.</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cursor&quot;</span>)]</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cursor</span> <span class="op">=</span> <span class="number">0usize</span>;
 
     <span class="comment">// Iterate the keys as a user presses them.</span>
     <span class="comment">// TODO #5: Mouse?</span>
@@ -288,10 +287,6 @@
 
                 <span class="comment">// Reset for the next program.</span>
                 <span class="ident">text</span>.<span class="ident">clear</span>();
-                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cursor&quot;</span>)]</span>
-                {
-                    <span class="ident">cursor</span> <span class="op">=</span> <span class="number">0</span>;
-                }
 
                 <span class="comment">// Print a boring static prompt.</span>
                 <span class="ident">prompt</span>.<span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stdout</span>);
@@ -302,7 +297,6 @@
                                <span class="ident">termion</span>::<span class="ident">clear</span>::<span class="ident">UntilNewline</span>);
 
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">history_text</span>) <span class="op">=</span> <span class="ident">history</span>.<span class="ident">get_up</span>() {
-                    <span class="ident">cursor</span> <span class="op">=</span> <span class="ident">history_text</span>.<span class="ident">len</span>();
                     <span class="ident">text</span> <span class="op">=</span> <span class="ident">history_text</span>;
                     <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">text</span>);
                 }
@@ -314,43 +308,43 @@
                                <span class="ident">termion</span>::<span class="ident">clear</span>::<span class="ident">UntilNewline</span>);
 
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">history_text</span>) <span class="op">=</span> <span class="ident">history</span>.<span class="ident">get_down</span>() {
-                    <span class="ident">cursor</span> <span class="op">=</span> <span class="ident">history_text</span>.<span class="ident">len</span>();
                     <span class="ident">text</span> <span class="op">=</span> <span class="ident">history_text</span>;
                     <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">text</span>);
                 }
                 <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
             },
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cursor&quot;</span>)]</span>
             <span class="ident">Key</span>::<span class="ident">Left</span> <span class="op">=&gt;</span> {
-                <span class="ident">cursor</span> <span class="op">=</span> <span class="ident">cursor</span>.<span class="ident">saturating_sub</span>(<span class="number">1</span>);
-                <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">Left</span>(<span class="number">1</span>));
-                <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>((<span class="ident">x</span>, <span class="ident">_y</span>)) <span class="op">=</span> <span class="ident">stdout</span>.<span class="ident">cursor_pos</span>() {
+                    <span class="kw">if</span> <span class="ident">x</span> <span class="op">&gt;</span> <span class="ident">prompt_length</span> {
+                        <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">Left</span>(<span class="number">1</span>));
+                        <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
+                    }
+                }
             },
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cursor&quot;</span>)]</span>
             <span class="ident">Key</span>::<span class="ident">Right</span> <span class="op">=&gt;</span> {
-                <span class="ident">cursor</span> <span class="op">=</span> <span class="ident">cursor</span>.<span class="ident">saturating_add</span>(<span class="number">1</span>);
-                <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">Right</span>(<span class="number">1</span>));
-                <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>((<span class="ident">x</span>, <span class="ident">_y</span>)) <span class="op">=</span> <span class="ident">stdout</span>.<span class="ident">cursor_pos</span>() {
+                    <span class="kw">if</span> <span class="ident">x</span> <span class="op">&lt;</span> <span class="ident">prompt_length</span> <span class="op">+</span> <span class="ident">text</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u16</span> {
+                        <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">Right</span>(<span class="number">1</span>));
+                        <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
+                    }
+                }
             },
             <span class="ident">Key</span>::<span class="ident">Char</span>(<span class="ident">c</span>) <span class="op">=&gt;</span> {
-                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cursor&quot;</span>)]</span>
-                {
-                    <span class="ident">cursor</span> <span class="op">=</span> <span class="ident">cursor</span>.<span class="ident">saturating_add</span>(<span class="number">1</span>);
-                }
                 <span class="ident">text</span>.<span class="ident">push</span>(<span class="ident">c</span>);
                 <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">c</span>);
                 <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
             },
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cursor&quot;</span>)]</span>
             <span class="ident">Key</span>::<span class="ident">Backspace</span> <span class="op">=&gt;</span> {
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">text</span>.<span class="ident">is_empty</span>() {
-                    <span class="ident">text</span>.<span class="ident">remove</span>(<span class="ident">cursor</span>);
-                    <span class="ident">cursor</span> <span class="op">=</span> <span class="ident">cursor</span>.<span class="ident">saturating_sub</span>(<span class="number">1</span>);
-                    <span class="kw">let</span> <span class="ident">shift</span> <span class="op">=</span> (<span class="ident">text</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">cursor</span>) <span class="kw">as</span> <span class="ident">u16</span>;
-                    <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}{}&quot;</span>, <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">Left</span>(<span class="ident">shift</span>),
-                                     <span class="ident">termion</span>::<span class="ident">clear</span>::<span class="ident">UntilNewline</span>);
-                                     <span class="comment">// &amp;text[cursor..]);</span>
-                    <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>((<span class="ident">x</span>, <span class="ident">y</span>)) <span class="op">=</span> <span class="ident">stdout</span>.<span class="ident">cursor_pos</span>() {
+                    <span class="kw">if</span> <span class="ident">x</span> <span class="op">&gt;</span> <span class="ident">prompt_length</span> {
+                        <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">x</span> <span class="op">-</span> <span class="ident">prompt_length</span>;
+                        <span class="ident">text</span>.<span class="ident">remove</span>((<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">usize</span>);
+                        <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}{}{}{}&quot;</span>, <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">Goto</span>(<span class="ident">prompt_length</span>, <span class="ident">y</span>),
+                                           <span class="ident">termion</span>::<span class="ident">clear</span>::<span class="ident">UntilNewline</span>,
+                                           <span class="ident">text</span>,
+                                           <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">Goto</span>(<span class="ident">x</span> <span class="op">-</span> <span class="number">1</span>, <span class="ident">y</span>));
+                        <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
+                    }
                 }
             }
             <span class="ident">Key</span>::<span class="ident">Ctrl</span>(<span class="string">&#39;c&#39;</span>) <span class="op">=&gt;</span> {
