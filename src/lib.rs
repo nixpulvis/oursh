@@ -74,7 +74,8 @@
 //! [rush]: https://github.com/nixpulvis/rush
 //! [myshell.py]: https://github.com/nixpulvis/oursh/blob/master/doc/cs2600-a8-myshell.py
 //! [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
-#![feature(box_syntax, box_patterns)]
+#![feature(alloc_system, box_syntax, box_patterns)]
+#![crate_type = "dylib"]
 
 extern crate nix;
 extern crate pwd;
