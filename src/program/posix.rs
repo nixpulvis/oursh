@@ -223,6 +223,7 @@ impl super::Command for Command {
             Command::Background(ref command) => {
                 let command = command.clone();
                 let handle = thread::Builder::new()
+                    // TODO: Prettier text form of the command.
                     .name(format!("{:?}", command))
                     .spawn(move ||
                 {
@@ -230,7 +231,7 @@ impl super::Command for Command {
                     (*command).run()
                         .expect("error running command in background");
                 }).expect("error spawning thread");
-                println!("[{:?}]", handle.thread().name());
+                println!("[{}]", handle.thread().name().unwrap());
             },
             #[cfg(feature = "bridge")]
             Command::Bridgeshell(ref program) => {
