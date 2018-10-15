@@ -26,11 +26,11 @@ impl History {
             self.1[index].1 += count;
             let text = self.1.remove(index);
             self.1.insert(0, text);
+            debug!("updating history item: {:?}", self.1[0]);
         } else {
             self.1.insert(0, (text.to_owned(), count));
+            debug!("adding history item: {:?}", self.1[0]);
         }
-
-        debug!("adding history item: {:?}", self.1[0]);
     }
 
     pub fn get_up(&mut self) -> Option<String> {

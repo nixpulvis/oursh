@@ -68,7 +68,7 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) + 'a {
         // Parse with the primary grammar and run each command in order.
         match parse_primary(text.as_bytes()) {
             Ok(program) => {
-                if args.get_bool("-#") || args.get_count("-v") > 1 {
+                if args.get_bool("-#") {
                     debug!(program);
                 }
 
