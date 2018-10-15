@@ -14,10 +14,21 @@ programs, the language this will be written in.
 
 ## Features
 
-- [x] Basic command REPL
 - [ ] POSIX compatibility
-- [ ] Shebang blocks, `{#!/usr/bin/env ruby; puts 1}`, `{# ... }`
-    - [ ] w/ non-posix blocks (`{#lang ... }`)
+    - [x] Simple commands `ls`
+    - [ ] Quotes `echo "foo"; echo 'bar'`
+    - [ ] Variables `echo $foo`
+    - [ ] Environment `echo $TERM`
+    - [ ] Special variables `echo $?; echo $1`
+    - [ ] Compound commands `{ ls; date; }`
+    - [ ] Boolean status syntax `! true && false || true`
+    - [x] Subshells `(sleep 1; date)`
+    - [ ] Background jobs `{ sleep 1; date; }& date`
+- [ ] Shebang block bridged programs
+    - [ ] Alternate syntax `{# ...}`
+    - [ ] Hashlang syntax `{#lang; ...}`, i.e. `{#posix ls}`
+    - [x] Shebang syntax `{#!interpreter; ...}`,
+          i.e. `{#!/usr/bin/env ruby; puts :sym}`
 - [ ] bash/zsh autocomplete compatibility
 - [ ] `man` / `-h` / `--help` parsing
 - [ ] Multi-line input
