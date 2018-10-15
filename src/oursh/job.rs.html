@@ -105,11 +105,6 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
-<span id="108">108</span>
-<span id="109">109</span>
-<span id="110">110</span>
-<span id="111">111</span>
-<span id="112">112</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Subprocess execution management.</span>
 <span class="doccomment">//!</span>
@@ -150,11 +145,6 @@
     <span class="doccomment">/// This function also does a simple lookup for builtin functions.</span>
     <span class="comment">// TODO #4: Return result.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="comment">// TODO #4: Proper builtins, in program module.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">argv</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">argv</span>[<span class="number">0</span>].<span class="ident">to_bytes</span>() <span class="op">==</span> <span class="string">b&quot;exit&quot;</span> {
-            <span class="ident">exit</span>(<span class="number">0</span>);
-        }
-
         <span class="comment">// TODO #4: This is a awful background parse :P</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">argv</span>.<span class="ident">last</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_bytes</span>()) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="string">b&quot;&amp;&quot;</span>) {
             <span class="self">self</span>.<span class="ident">argv</span>.<span class="ident">pop</span>();

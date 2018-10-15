@@ -408,6 +408,7 @@
 <span id="408">408</span>
 <span id="409">409</span>
 <span id="410">410</span>
+<span id="411">411</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -634,6 +635,7 @@
             <span class="ident">Command</span>::<span class="ident">Background</span>(<span class="kw-2">ref</span> <span class="ident">command</span>) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">command</span> <span class="op">=</span> <span class="ident">command</span>.<span class="ident">clone</span>();
                 <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">thread</span>::<span class="ident">Builder</span>::<span class="ident">new</span>()
+                    <span class="comment">// TODO: Prettier text form of the command.</span>
                     .<span class="ident">name</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">command</span>))
                     .<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">||</span>
                 {
@@ -641,7 +643,7 @@
                     (<span class="kw-2">*</span><span class="ident">command</span>).<span class="ident">run</span>()
                         .<span class="ident">expect</span>(<span class="string">&quot;error running command in background&quot;</span>);
                 }).<span class="ident">expect</span>(<span class="string">&quot;error spawning thread&quot;</span>);
-                <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;[{:?}]&quot;</span>, <span class="ident">handle</span>.<span class="ident">thread</span>().<span class="ident">name</span>());
+                <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;[{}]&quot;</span>, <span class="ident">handle</span>.<span class="ident">thread</span>().<span class="ident">name</span>().<span class="ident">unwrap</span>());
             },
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>)]</span>
             <span class="ident">Command</span>::<span class="ident">Bridgeshell</span>(<span class="kw-2">ref</span> <span class="ident">program</span>) <span class="op">=&gt;</span> {
