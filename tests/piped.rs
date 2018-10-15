@@ -44,6 +44,7 @@ fn or_command() {
 
 #[test]
 fn subshell_command() {
+    assert_piped_oursh!("( true )");
     assert_piped_oursh!("(echo 1)", "1\n");
 }
 

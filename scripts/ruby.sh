@@ -1,1 +1,1 @@
-ruby -e 'pp self.method(:quit).call'
+ruby -e puts :hello_world
