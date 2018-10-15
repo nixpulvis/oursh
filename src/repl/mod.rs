@@ -66,6 +66,19 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 // Print a boring static prompt.
                 prompt.display(&mut stdout);
             },
+            Key::Char(c) => {
+                if let Ok((x, y)) = stdout.cursor_pos() {
+                    let i = (x - prompt_length) as usize;
+                    text.insert(i, c);
+                    print!("{}{}",
+                           &text[i..],
+                           termion::cursor::Goto(x + 1, y));
+                } else {
+                    text.push(c);
+                    print!("{}", c);
+                }
+                stdout.flush().unwrap();
+            },
             #[cfg(feature = "history")]
             Key::Up => {
                 print!("{}{}",
@@ -109,11 +122,6 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                         stdout.flush().unwrap();
                     }
                 }
-            },
-            Key::Char(c) => {
-                text.push(c);
-                print!("{}", c);
-                stdout.flush().unwrap();
             },
             Key::Backspace => {
                 if let Ok((x, y)) = stdout.cursor_pos() {
