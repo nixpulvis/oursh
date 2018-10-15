@@ -138,7 +138,16 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
             Key::Ctrl('c') => {
                 // TODO: Send signal if we're running a program.
                 text.clear();
-                print!("\n\r");
+                print!("^C\n\r");
+                prompt.display(&mut stdout);
+            },
+            // Key::Ctrl('d') => {
+            //     exit(0);
+            // },
+            Key::Ctrl('l') => {
+                print!("{}{}",
+                       termion::clear::All,
+                       termion::cursor::Goto(1, 1));
                 prompt.display(&mut stdout);
             },
             _ => {}
