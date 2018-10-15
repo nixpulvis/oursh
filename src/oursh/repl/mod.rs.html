@@ -290,14 +290,14 @@
                 <span class="ident">stdout</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>();
 
                 <span class="comment">// Run the command.</span>
-                <span class="ident">stdout</span>.<span class="ident">suspend_raw_mode</span>().<span class="ident">unwrap</span>();
+                <span class="comment">// stdout.suspend_raw_mode().unwrap();</span>
                 <span class="ident">runner</span>(<span class="kw-2">&amp;</span><span class="ident">text</span>);
                 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;history&quot;</span>)]</span>
                 {
                     <span class="ident">history</span>.<span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="ident">text</span>, <span class="number">1</span>);
                     <span class="ident">history</span>.<span class="ident">reset_index</span>();
                 }
-                <span class="ident">stdout</span>.<span class="ident">activate_raw_mode</span>().<span class="ident">unwrap</span>();
+                <span class="comment">// stdout.activate_raw_mode().unwrap();</span>
 
                 <span class="comment">// Reset for the next program.</span>
                 <span class="ident">text</span>.<span class="ident">clear</span>();
