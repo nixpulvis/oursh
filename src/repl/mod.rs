@@ -74,8 +74,10 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
             },
             #[cfg(feature = "history")]
             Key::Up => {
-                print!("{}{}", termion::cursor::Left(text.len() as u16),
-                               termion::clear::UntilNewline);
+                print!("{}{}",
+                       termion::cursor::Left(1000),  // XXX
+                       termion::clear::CurrentLine);
+                prompt.display(&mut stdout);
 
                 if let Some(history_text) = history.get_up() {
                     text = history_text;
@@ -85,14 +87,18 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
             },
             #[cfg(feature = "history")]
             Key::Down => {
-                print!("{}{}", termion::cursor::Left(text.len() as u16),
-                               termion::clear::UntilNewline);
+                print!("{}{}",
+                       termion::cursor::Left(1000),  // XXX
+                       termion::clear::CurrentLine);
+                prompt.display(&mut stdout);
 
                 if let Some(history_text) = history.get_down() {
                     text = history_text;
                     print!("{}", text);
+                    stdout.flush().unwrap();
+                } else {
+                    text.clear();
                 }
-                stdout.flush().unwrap();
             },
             Key::Left => {
                 if let Ok((x, _y)) = stdout.cursor_pos() {
@@ -120,10 +126,11 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                     if x > prompt_length {
                         let i = x - prompt_length;
                         text.remove((i - 1) as usize);
-                        print!("{}{}{}{}", termion::cursor::Goto(prompt_length, y),
-                                           termion::clear::UntilNewline,
-                                           text,
-                                           termion::cursor::Goto(x - 1, y));
+                        print!("{}{}{}{}",
+                               termion::cursor::Goto(prompt_length, y),
+                               termion::clear::UntilNewline,
+                               text,
+                               termion::cursor::Goto(x - 1, y));
                         stdout.flush().unwrap();
                     }
                 }
