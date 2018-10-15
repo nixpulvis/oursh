@@ -71,7 +71,7 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) + 'a {
         match parse_primary(text.as_bytes()) {
             Ok(program) => {
                 if args.get_bool("-#") {
-                    debug!(program);
+                    println!("{:#?}", program);
                 }
 
                 program.run()
