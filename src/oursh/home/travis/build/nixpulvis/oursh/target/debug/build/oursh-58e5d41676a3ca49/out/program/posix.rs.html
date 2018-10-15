@@ -1781,7 +1781,7 @@
 <span id="1781">1781</span>
 </pre><pre class="rust ">
 <span class="comment">// auto-generated: &quot;lalrpop 0.16.0&quot;</span>
-<span class="comment">// sha256: 35b03db9fbd283bdad6978ac31d458dba89a86d25f08a50cb66804437ed19e2</span>
+<span class="comment">// sha256: f1b3bf316bdfc2a9217e82025fb42f374ecaebfe99464915a92445d2a298cf</span>
 <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">posix</span>::<span class="ident">ast</span>;
 <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">ast</span>::<span class="ident">Interpreter</span>;
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_extern_crates</span>)]</span>
@@ -2078,8 +2078,8 @@
             <span class="string">r###&quot;&quot;|&quot;&quot;###</span>,
             <span class="string">r###&quot;&quot;||&quot;&quot;###</span>,
             <span class="string">r###&quot;&quot;}&quot;&quot;###</span>,
-            <span class="string">r###&quot;r#&quot;![^}^;]*&quot;#&quot;###</span>,
-            <span class="string">r###&quot;r#&quot;;[^}]*&quot;#&quot;###</span>,
+            <span class="string">r###&quot;r#&quot;![^}^#]*&quot;#&quot;###</span>,
+            <span class="string">r###&quot;r#&quot;#[^}]*&quot;#&quot;###</span>,
             <span class="string">r###&quot;r#&quot;[a-zA-Z0-9-_\\.:/]+&quot;#&quot;###</span>,
         ];
         <span class="ident">__ACTION</span>[(<span class="ident">__state</span> <span class="op">*</span> <span class="number">15</span>)..].<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">__TERMINAL</span>).<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>, <span class="ident">terminal</span>)<span class="op">|</span> {
@@ -2545,7 +2545,7 @@
         <span class="kw">_</span>: ::<span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
     ) <span class="op">-&gt;</span> (<span class="ident">usize</span>, (<span class="ident">usize</span>,<span class="ident">__Symbol</span><span class="op">&lt;</span><span class="lifetime">&#39;input</span><span class="op">&gt;</span>,<span class="ident">usize</span>), <span class="ident">usize</span>)
     {
-        <span class="comment">// Commands = &quot;{#&quot;, r#&quot;![^}^;]*&quot;#, r#&quot;;[^}]*&quot;#, &quot;}&quot; =&gt; ActionFn(10);</span>
+        <span class="comment">// Commands = &quot;{#&quot;, r#&quot;![^}^#]*&quot;#, r#&quot;#[^}]*&quot;#, &quot;}&quot; =&gt; ActionFn(10);</span>
         <span class="kw">let</span> <span class="ident">__sym3</span> <span class="op">=</span> <span class="ident">__pop_Variant0</span>(<span class="ident">__symbols</span>);
         <span class="kw">let</span> <span class="ident">__sym2</span> <span class="op">=</span> <span class="ident">__pop_Variant0</span>(<span class="ident">__symbols</span>);
         <span class="kw">let</span> <span class="ident">__sym1</span> <span class="op">=</span> <span class="ident">__pop_Variant0</span>(<span class="ident">__symbols</span>);
@@ -3026,8 +3026,8 @@
     <span class="kw">impl</span> <span class="ident">__MatcherBuilder</span> {
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="ident">__MatcherBuilder</span> {
             <span class="kw">let</span> <span class="ident">__strs</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
-                <span class="string">&quot;^(![\u{0}-:&lt;-\\]_-\\|\\~-\u{10ffff}]*)&quot;</span>,
-                <span class="string">&quot;^(;[\u{0}-\\|\\~-\u{10ffff}]*)&quot;</span>,
+                <span class="string">&quot;^(![\u{0}-\&quot;\\$-\\]_-\\|\\~-\u{10ffff}]*)&quot;</span>,
+                <span class="string">&quot;^(\\#[\u{0}-\\|\\~-\u{10ffff}]*)&quot;</span>,
                 <span class="string">&quot;^([\\--:A-Z_a-z]+)&quot;</span>,
                 <span class="string">&quot;^(!)&quot;</span>,
                 <span class="string">&quot;^(\\&amp;)&quot;</span>,
@@ -3044,8 +3044,8 @@
             ];
             <span class="kw">let</span> <span class="ident">__regex_set</span> <span class="op">=</span> <span class="ident">__regex</span>::<span class="ident">RegexSet</span>::<span class="ident">new</span>(<span class="ident">__strs</span>).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">__regex_vec</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[
-                <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^(![\u{0}-:&lt;-\\]_-\\|\\~-\u{10ffff}]*)&quot;</span>).<span class="ident">unwrap</span>(),
-                <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^(;[\u{0}-\\|\\~-\u{10ffff}]*)&quot;</span>).<span class="ident">unwrap</span>(),
+                <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^(![\u{0}-\&quot;\\$-\\]_-\\|\\~-\u{10ffff}]*)&quot;</span>).<span class="ident">unwrap</span>(),
+                <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^(\\#[\u{0}-\\|\\~-\u{10ffff}]*)&quot;</span>).<span class="ident">unwrap</span>(),
                 <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^([\\--:A-Z_a-z]+)&quot;</span>).<span class="ident">unwrap</span>(),
                 <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^(!)&quot;</span>).<span class="ident">unwrap</span>(),
                 <span class="ident">__regex</span>::<span class="ident">Regex</span>::<span class="ident">new</span>(<span class="string">&quot;^(\\&amp;)&quot;</span>).<span class="ident">unwrap</span>(),

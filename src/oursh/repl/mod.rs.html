@@ -284,7 +284,7 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">history</span> <span class="op">=</span> <span class="ident">History</span>::<span class="ident">load</span>();
 
     <span class="comment">// A styled static (for now) prompt.</span>
-    <span class="kw">let</span> <span class="ident">prompt</span> <span class="op">=</span> <span class="ident">Prompt</span>::<span class="ident">new</span>().<span class="ident">long_style</span>();
+    <span class="kw">let</span> <span class="ident">prompt</span> <span class="op">=</span> <span class="ident">Prompt</span>::<span class="ident">new</span>().<span class="ident">short_style</span>();
 
     <span class="comment">// Convert the tty&#39;s stdout into raw mode.</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stdout</span> <span class="op">=</span> <span class="ident">stdout</span>.<span class="ident">into_raw_mode</span>()
