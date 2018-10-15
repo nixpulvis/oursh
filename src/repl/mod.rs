@@ -7,6 +7,7 @@ use std::io::{Write, Stdin, Stdout};
 use std::process::exit;
 use nix::unistd;
 use pwd::Passwd;
+use termion::cursor::DetectCursorPos;
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
@@ -31,6 +32,9 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
 
     // Display the inital prompt.
     prompt.display(&mut stdout);
+
+    // XXX: Hack to get the prompt length.
+    let prompt_length = stdout.cursor_pos().unwrap().0;
 
     // TODO #5: We need a better state object for these values.
     let mut text = String::new();
@@ -91,12 +95,20 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 stdout.flush().unwrap();
             },
             Key::Left => {
-                print!("{}", termion::cursor::Left(1));
-                stdout.flush().unwrap();
+                if let Ok((x, _y)) = stdout.cursor_pos() {
+                    if x > prompt_length {
+                        print!("{}", termion::cursor::Left(1));
+                        stdout.flush().unwrap();
+                    }
+                }
             },
             Key::Right => {
-                print!("{}", termion::cursor::Right(1));
-                stdout.flush().unwrap();
+                if let Ok((x, _y)) = stdout.cursor_pos() {
+                    if x < prompt_length + text.len() as u16 {
+                        print!("{}", termion::cursor::Right(1));
+                        stdout.flush().unwrap();
+                    }
+                }
             },
             Key::Char(c) => {
                 text.push(c);
@@ -104,11 +116,16 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 stdout.flush().unwrap();
             },
             Key::Backspace => {
-                if !text.is_empty() {
-                    text.pop();
-                    print!("{}{}", termion::cursor::Left(1),
-                                   termion::clear::UntilNewline);
-                    stdout.flush().unwrap();
+                if let Ok((x, y)) = stdout.cursor_pos() {
+                    if x > prompt_length {
+                        let i = x - prompt_length;
+                        text.remove((i - 1) as usize);
+                        print!("{}{}{}{}", termion::cursor::Goto(prompt_length, y),
+                                           termion::clear::UntilNewline,
+                                           text,
+                                           termion::cursor::Goto(x - 1, y));
+                        stdout.flush().unwrap();
+                    }
                 }
             }
             Key::Ctrl('c') => {
