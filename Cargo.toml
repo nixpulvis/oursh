@@ -2,6 +2,11 @@
 name = "oursh"
 version = "0.2.0"
 authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
+description = "Modern, fast POSIX compatible shell"
+license-file = "LICENSE"
+documentation = "https://docs.rs/oursh"
+homepage = "https://nixpulvis/oursh/oursh"
+repository = "https://github.com/nixpulvis/oursh"
 
 build = "build.rs"
 
@@ -12,19 +17,20 @@ bridge = []
 history = []
 
 [dependencies]
-docopt = "*"
+docopt = "0.8"
 lalrpop-util = "0.16.0"
-nix = "*"
-pwd = "*"
-regex = "*"
+nix = "0.11"
+pwd = "1.3"
+regex = "0.2"
 # Option 1: http://man7.org/linux/man-pages/man3/termios.3.html
 #termios = "*"
 # Option 2: http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/
-termion = { git = "https://github.com/nixpulvis/termion", branch = "suspend-raw" }
-utf8 = "*"
+termion = "1.5"
+# termion = { git = "https://github.com/nixpulvis/termion", branch = "suspend-raw" }
+utf8 = "^0.0.2"
 
 [build-dependencies]
 lalrpop = "0.16.0"
 
 [dev-dependencies]
-chrono = "*"
+chrono = "0.4"

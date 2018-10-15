@@ -51,14 +51,14 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                 stdout.flush().unwrap();
 
                 // Run the command.
-                stdout.suspend_raw_mode().unwrap();
+                // stdout.suspend_raw_mode().unwrap();
                 runner(&text);
                 #[cfg(feature = "history")]
                 {
                     history.add(&text, 1);
                     history.reset_index();
                 }
-                stdout.activate_raw_mode().unwrap();
+                // stdout.activate_raw_mode().unwrap();
 
                 // Reset for the next program.
                 text.clear();
