@@ -16,8 +16,9 @@
 //! assert_eq!("cargo", &text);
 //! ```
 
-use std::{env, fs};
+use std::cmp::Ordering::Equal;
 use std::os::unix::fs::PermissionsExt;
+use std::{env, fs};
 
 /// Return a completed (valid) program text from the partial string
 /// given.
@@ -35,7 +36,9 @@ pub fn complete(text: &str) -> String {
         "la" => "ls -la".into(),
         t @ _ => {
             let mut matches = executable_completions(t);
-            matches.sort_by(|a, b| a.len().cmp(&b.len()));
+            matches.sort_by(|a, b| {
+                match a.len().cmp(&b.len()) { Equal => b.cmp(&a), o => o }
+            });
             matches.first().unwrap_or(&"".to_string()).clone()
         },
     }
@@ -73,5 +76,16 @@ pub fn executable_completions(text: &str) -> Vec<String> {
             matches
         }
         None => panic!("PATH is undefined"),
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn lexicographical_order() {
+        assert_eq!("cat", complete("ca"));
     }
 }
