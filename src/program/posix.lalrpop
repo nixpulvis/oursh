@@ -45,7 +45,8 @@ Compound: ast::Program = {
 Commands: ast::Command = {
     // TODO #15: Hopefully in fixing #8 and #10 this can play nicely.
     // NOTE: This can be successfully complied, but will break a doc tests.
-    "{#" <i: r"![^}^;]*"> <t: r";[^}]*"> "}" => {
+    // XXX: The trailing `.../usr/bin/env ruby#` is a hack until lexer support.
+    "{#" <i: r"![^}^#]*"> <t: r"#[^}]*"> "}" => {
         let b = ast::BridgedProgram(Interpreter::Other(i.into()), t.into());
         ast::Command::Bridgeshell(box b)
     },
