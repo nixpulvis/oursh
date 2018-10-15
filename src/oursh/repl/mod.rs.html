@@ -223,6 +223,15 @@
 <span id="223">223</span>
 <span id="224">224</span>
 <span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Quick and effective raw mode repl library for ANSI terminals.</span>
 <span class="doccomment">//!</span>
@@ -364,7 +373,16 @@
             <span class="ident">Key</span>::<span class="ident">Ctrl</span>(<span class="string">&#39;c&#39;</span>) <span class="op">=&gt;</span> {
                 <span class="comment">// TODO: Send signal if we&#39;re running a program.</span>
                 <span class="ident">text</span>.<span class="ident">clear</span>();
-                <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;\n\r&quot;</span>);
+                <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;^C\n\r&quot;</span>);
+                <span class="ident">prompt</span>.<span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stdout</span>);
+            },
+            <span class="comment">// Key::Ctrl(&#39;d&#39;) =&gt; {</span>
+            <span class="comment">//     exit(0);</span>
+            <span class="comment">// },</span>
+            <span class="ident">Key</span>::<span class="ident">Ctrl</span>(<span class="string">&#39;l&#39;</span>) <span class="op">=&gt;</span> {
+                <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;{}{}&quot;</span>,
+                       <span class="ident">termion</span>::<span class="ident">clear</span>::<span class="ident">All</span>,
+                       <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">Goto</span>(<span class="number">1</span>, <span class="number">1</span>));
                 <span class="ident">prompt</span>.<span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stdout</span>);
             },
             <span class="kw">_</span> <span class="op">=&gt;</span> {}
