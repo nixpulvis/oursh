@@ -247,12 +247,12 @@
 <span class="doccomment">//! ### Default Syntax</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Our shell has a `PrimaryProgram` which is in charge of parsing programs</span>
-<span class="doccomment">//! which are not passed in via a `{@}` language block. This can be configured</span>
+<span class="doccomment">//! which are not passed in via a `{#}` language block. This can be configured</span>
 <span class="doccomment">//! to your preference. This does not effect the shell when launched in</span>
 <span class="doccomment">//! POSIX compatibility mode, or when a specific default language is passed</span>
 <span class="doccomment">//! as a flag.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ### `{@}` Language Blocks</span>
+<span class="doccomment">//! ### `{#}` Language Blocks</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Both the [`posix`](program::posix) and [`modern`](program::modern)</span>
 <span class="doccomment">//! languages have support for a special expression which treats the body as a</span>
@@ -264,10 +264,10 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```sh</span>
 <span class="doccomment">//! date      # Call `date` in the primary syntax.</span>
-<span class="doccomment">//! {@ date}  # Specifies the alternate syntax.</span>
+<span class="doccomment">//! {# date}  # Specifies the alternate syntax.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Use ruby, why not...</span>
-<span class="doccomment">//! {@!ruby</span>
+<span class="doccomment">//! {#!ruby</span>
 <span class="doccomment">//!     require &#39;date&#39;</span>
 <span class="doccomment">//!     puts Date.today</span>
 <span class="doccomment">//! }</span>
@@ -310,7 +310,7 @@
 <span class="doccomment">/// A program is as large as a file or as small as a line.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Each program is to be treated as a complete single language entity, with</span>
-<span class="doccomment">/// the explicit exception of `{@}` blocks, which act as bridges between</span>
+<span class="doccomment">/// the explicit exception of `{#}` blocks, which act as bridges between</span>
 <span class="doccomment">/// programs.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ### Working Thoughts</span>
@@ -393,8 +393,8 @@
     <span class="doccomment">/// ### Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```sh</span>
-    <span class="doccomment">/// {@ ...}</span>
-    <span class="doccomment">/// {@ruby ...}</span>
+    <span class="doccomment">/// {# ...}</span>
+    <span class="doccomment">/// {#ruby ...}</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
     <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Interpreter</span> {

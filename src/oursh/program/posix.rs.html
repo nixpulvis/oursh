@@ -407,6 +407,7 @@
 <span id="407">407</span>
 <span id="408">408</span>
 <span id="409">409</span>
+<span id="410">410</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -652,9 +653,10 @@
                     <span class="kw">let</span> <span class="ident">bridgefile</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;/tmp/.oursh_bridge-{}&quot;</span>, <span class="ident">program</span>.<span class="number">1</span>.<span class="ident">len</span>());
                     {
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="ident">bridgefile</span>).<span class="ident">unwrap</span>();
-                        <span class="kw">let</span> <span class="ident">interpreter</span> <span class="op">=</span> <span class="ident">interpreter</span>.<span class="ident">chars</span>()
-                                                     .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span> <span class="kw">as</span> <span class="ident">u8</span>)
-                                                     .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span>();
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">interpreter</span> <span class="op">=</span> <span class="ident">interpreter</span>.<span class="ident">chars</span>()
+                                                       .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span> <span class="kw">as</span> <span class="ident">u8</span>)
+                                                       .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span>();
+                        <span class="ident">interpreter</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="string">&#39;#&#39;</span> <span class="kw">as</span> <span class="ident">u8</span>);
                         <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">interpreter</span>).<span class="ident">unwrap</span>();
                         <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="string">b&quot;\n&quot;</span>).<span class="ident">unwrap</span>();
                         <span class="kw">let</span> <span class="ident">program</span> <span class="op">=</span> <span class="ident">program</span>.<span class="number">1</span>.<span class="ident">chars</span>()
@@ -782,7 +784,7 @@
         <span class="doccomment">/// ### Examples</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// ```sh</span>
-        <span class="doccomment">/// {@ruby puts (Math.sqrt(32**2/57.2))}</span>
+        <span class="doccomment">/// {#ruby puts (Math.sqrt(32**2/57.2))}</span>
         <span class="doccomment">/// ```</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// ### Compatibility</span>

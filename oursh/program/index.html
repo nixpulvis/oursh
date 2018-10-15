@@ -33,11 +33,11 @@ echo
 </code></pre>
 <h3 id="default-syntax" class="section-header"><a href="#default-syntax">Default Syntax</a></h3>
 <p>Our shell has a <code>PrimaryProgram</code> which is in charge of parsing programs
-which are not passed in via a <code>{@}</code> language block. This can be configured
+which are not passed in via a <code>{#}</code> language block. This can be configured
 to your preference. This does not effect the shell when launched in
 POSIX compatibility mode, or when a specific default language is passed
 as a flag.</p>
-<h3 id="-language-blocks" class="section-header"><a href="#-language-blocks"><code>{@}</code> Language Blocks</a></h3>
+<h3 id="-language-blocks" class="section-header"><a href="#-language-blocks"><code>{#}</code> Language Blocks</a></h3>
 <p>Both the <a href="../../oursh/program/posix/index.html"><code>posix</code></a> and <a href="program::modern"><code>modern</code></a>
 languages have support for a special expression which treats the body as a
 program from another language. This forms the basis of oursh's modern
@@ -46,10 +46,10 @@ syntax is to be able to mix both POSIX and non-POSIX shell scripts, the
 feature is much more powerful.  Any interperator can be used, just like
 with <code>#!</code>.</p>
 <pre><code class="language-sh">date      # Call `date` in the primary syntax.
-{@ date}  # Specifies the alternate syntax.
+{# date}  # Specifies the alternate syntax.
 
 # Use ruby, why not...
-{@!ruby
+{#!ruby
     require 'date'
     puts Date.today
 }
