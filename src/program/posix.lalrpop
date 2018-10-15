@@ -85,6 +85,6 @@ Command: ast::Command = Word+ => {
 };
 
 // TODO #8: Custom lexer plus proger rules needed.
-Word: ast::Word = r"[a-zA-Z0-9-_\.:()]+" => {
+Word: ast::Word = r"[a-zA-Z0-9-_\.:()/]+" => {
     ast::Word(<>.into())
 };
