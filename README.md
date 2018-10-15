@@ -30,6 +30,8 @@ programs, the language this will be written in.
     - [x] Shebang syntax `{#!interpreter; ...}`,
           i.e. `{#!/usr/bin/env ruby; puts :sym}`
 - [ ] bash/zsh autocomplete compatibility
+    - [x] Executable completion
+    - [ ] POSIX `sh` completion
 - [ ] `man` / `-h` / `--help` parsing
 - [ ] Multi-line input
 - [ ] Modern scripting language (types, higher-order functions, threading?, etc)
