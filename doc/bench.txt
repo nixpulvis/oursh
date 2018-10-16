@@ -1,14 +1,15 @@
-`fish scripts/bench.fish` on 2018-10-15.
+`fish scripts/bench.fish` on 2018-10-16.
+
 
 bench sh
-2.07user 0.63system 0:02.73elapsed 99%CPU (0avgtext+0avgdata 6620maxresident)k
-0inputs+0outputs (0major+94893minor)pagefaults 0swaps
+1.87user 0.41system 0:02.26elapsed 101%CPU (0avgtext+0avgdata 6604maxresident)k
+0inputs+16outputs (0major+204977minor)pagefaults 0swaps
 bench oursh
-2.86user 1.32system 0:04.22elapsed 99%CPU (0avgtext+0avgdata 6612maxresident)k
-0inputs+0outputs (0major+327618minor)pagefaults 0swaps
+2.52user 0.98system 0:03.50elapsed 100%CPU (0avgtext+0avgdata 6620maxresident)k
+0inputs+16outputs (0major+693056minor)pagefaults 0swaps
 bench zsh
-2.00user 0.72system 0:02.76elapsed 98%CPU (0avgtext+0avgdata 6408maxresident)k
-0inputs+0outputs (0major+110221minor)pagefaults 0swaps
+1.97user 0.54system 0:02.49elapsed 100%CPU (0avgtext+0avgdata 6624maxresident)k
+0inputs+16outputs (0major+233713minor)pagefaults 0swaps
 bench fish
-47.64user 19.36system 1:17.35elapsed 86%CPU (0avgtext+0avgdata 6596maxresident)k
-0inputs+0outputs (0major+3673243minor)pagefaults 0swaps
+4.53user 1.24system 0:05.79elapsed 99%CPU (0avgtext+0avgdata 6636maxresident)k
+0inputs+0outputs (0major+353707minor)pagefaults 0swaps

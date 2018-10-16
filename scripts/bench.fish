@@ -1,4 +1,4 @@
-set N 500
+set N 1000
 
 if test "$argv[1]" = "oursh"
     echo "bench oursh"
@@ -13,10 +13,16 @@ if test "$argv[1]" = "oursh"
 else
     echo "bench sh"
     time fish scripts/bench_loop.fish $N scripts/hello_world.sh sh > /dev/null
+
     echo "bench oursh"
+    rm -f $HOME/.oursh_history
     time fish scripts/bench_loop.fish $N scripts/hello_world.sh oursh > /dev/null
+
     echo "bench zsh"
     time fish scripts/bench_loop.fish $N scripts/hello_world.sh zsh > /dev/null
+
     echo "bench fish"
+    mv $HOME/.config/fish/config.fish $HOME/.config/fish/config.fish.tmp
     time fish scripts/bench_loop.fish $N scripts/hello_world.sh fish > /dev/null
+    mv $HOME/.config/fish/config.fish.tmp $HOME/.config/fish/config.fish
 end
