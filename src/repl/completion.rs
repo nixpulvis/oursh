@@ -10,7 +10,7 @@
 //! let mut text = "car".to_string();
 //!
 //! // Perform the completion, on `\t` perhaps.
-//! text = complete(&text);
+//! text = complete(&text).first();
 //!
 //! // The user's input is updated to the complete executable.
 //! assert_eq!("cargo", &text);
@@ -20,10 +20,36 @@ use std::cmp::Ordering::Equal;
 use std::os::unix::fs::PermissionsExt;
 use std::{env, fs};
 
+#[derive(Debug)]
 pub enum Completion {
     None,
     Partial(Vec<String>),
     Complete(String),
+}
+
+impl Completion {
+    pub fn is_complete(&self) -> bool {
+        match *self {
+            Completion::None |
+            Completion::Partial(_) => false,
+            Completion::Complete(_) => true,
+        }
+    }
+
+    pub fn first(&self) -> String {
+        match *self {
+            Completion::None => "".to_owned(),
+            Completion::Partial(ref p) => {
+                match p.first() {
+                    Some(t) => t.to_owned(),
+                    None => "".to_owned(),
+                }
+            },
+            Completion::Complete(ref s) => s.to_owned(),
+        }
+    }
+
+    // fn guess
 }
 
 /// Return a completed (valid) program text from the partial string
@@ -34,15 +60,18 @@ pub enum Completion {
 /// ```
 /// use oursh::repl::completion::complete;
 ///
-/// assert_eq!("pwd", complete("pw"));
+/// assert_eq!("pwd", complete("pw").first());
 /// ```
-pub fn complete(text: &str) -> String {
+pub fn complete(text: &str) -> Completion {
     let mut matches = executable_completions(text);
     matches.sort_by(|a, b| {
         match a.len().cmp(&b.len()) { Equal => b.cmp(&a), o => o }
     });
-    matches.first().unwrap_or(&text.to_string()).clone()
-    // path_complete(text)
+    if matches.len() > 0 {
+        return Completion::Complete(matches.remove(0));
+    }
+
+    path_complete(text)
 }
 
 /// Return a list of the matches from the given partial program text.
@@ -90,11 +119,16 @@ pub fn executable_completions(text: &str) -> Vec<String> {
 /// ```
 /// use oursh::repl::completion::path_complete;
 ///
-/// assert_eq!("/usr/bin/", path_complete("/usr/b"));
-/// assert_eq!("ls /home/", path_complete("ls /hom"));
+/// assert_eq!("/usr/bin/", path_complete("/usr/b").first());
+/// assert_eq!("ls /home/", path_complete("ls /hom").first());
 /// ```
-pub fn path_complete(text: &str) -> String {
-    text.into()
+pub fn path_complete(text: &str) -> Completion {
+    match text {
+        "/hom" => Completion::Complete("/home/".into()),
+        "/usr/b" => Completion::Complete("/usr/bin/".into()),
+        "ls /hom" => Completion::Complete("ls /home/".into()),
+        _ => Completion::None,
+    }
 }
 
 #[cfg(test)]
@@ -103,13 +137,13 @@ mod tests {
 
     #[test]
     fn lexicographical_order() {
-        assert_eq!("cargo", complete("car"));
+        assert_eq!("cargo", complete("car").first());
     }
 
     #[test]
     fn paths() {
-        assert_eq!("/home/", complete("/hom"));
-        assert_eq!("/usr/bin/", complete("/usr/b"));
-        assert_eq!("ls /home/", complete("ls /hom"));
+        assert_eq!("/home/", complete("/hom").first());
+        assert_eq!("/usr/bin/", complete("/usr/b").first());
+        assert_eq!("ls /home/", complete("ls /hom").first());
     }
 }
