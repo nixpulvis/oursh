@@ -61,16 +61,21 @@ pub fn executable_completions(text: &str) -> Vec<String> {
         Some(paths) => {
             let mut matches = vec![];
             for dir in env::split_paths(&paths) {
-                let executables = fs::read_dir(dir).unwrap();
-                for path in executables.map(|e| e.unwrap().path()) {
-                    let metadata = fs::metadata(&path);
-                    let filename = path.file_name().unwrap().to_string_lossy();
-                    if (metadata.unwrap().permissions().mode() & 0o111 != 0) &&
-                        filename.starts_with(text)
-                    {
-                        matches.push(filename.into());
+                if let Ok(executables) = fs::read_dir(dir) {
+                    let paths = executables.filter_map(|e| {
+                        match e { Ok(p) => Some(p.path()), _ => None }
+                    });
+                    for path in paths {
+                        let metadata = fs::metadata(&path);
+                        if let Some(filename) = path.file_name() {
+                            let filename = filename.to_string_lossy();
+                            if (metadata.unwrap().permissions().mode() & 0o111 != 0) &&
+                                filename.starts_with(text)
+                            {
+                                matches.push(filename.into());
+                            }
+                        }
                     }
-
                 }
             }
             matches
