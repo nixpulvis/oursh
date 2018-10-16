@@ -85,7 +85,7 @@ extern crate termion;
 #[macro_use]
 extern crate lalrpop_util;
 
-/// Print debug information to stderr..
+/// Print debug information to stderr.
 ///
 /// ### Examples
 ///
