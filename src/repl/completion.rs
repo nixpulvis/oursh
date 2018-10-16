@@ -20,14 +20,22 @@ use std::cmp::Ordering::Equal;
 use std::os::unix::fs::PermissionsExt;
 use std::{env, fs};
 
+/// The result of a query for text completion.
+///
+/// A complete result is expected tob run without much thought by the
+/// user. Some care should be taken to avoid dangerous completions.
 #[derive(Debug)]
 pub enum Completion {
+    /// Nothing completes the user text.
     None,
+    /// The user text could match multiple complete values.
     Partial(Vec<String>),
+    /// A single complete value.
     Complete(String),
 }
 
 impl Completion {
+    /// Returns true if this completion is a single option.
     pub fn is_complete(&self) -> bool {
         match *self {
             Completion::None |
@@ -36,6 +44,8 @@ impl Completion {
         }
     }
 
+    /// Return the first (lexicographically) option if there are multiple
+    /// possibilities.
     pub fn first(&self) -> String {
         match *self {
             Completion::None => "".to_owned(),
@@ -49,6 +59,7 @@ impl Completion {
         }
     }
 
+    /// Return a list of all the possibile complete matches.
     pub fn possibilities(&self) -> Vec<String> {
         match *self {
             Completion::None => vec![],
