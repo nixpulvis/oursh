@@ -49,6 +49,14 @@ impl Completion {
         }
     }
 
+    pub fn possibilities(&self) -> Vec<String> {
+        match *self {
+            Completion::None => vec![],
+            Completion::Partial(ref p) => p.clone(),
+            Completion::Complete(ref t) => vec![t.clone()],
+        }
+    }
+
     // fn guess
 }
 
@@ -63,15 +71,11 @@ impl Completion {
 /// assert_eq!("pwd", complete("pw").first());
 /// ```
 pub fn complete(text: &str) -> Completion {
-    let mut matches = executable_completions(text);
-    matches.sort_by(|a, b| {
-        match a.len().cmp(&b.len()) { Equal => b.cmp(&a), o => o }
-    });
-    if matches.len() > 0 {
-        return Completion::Complete(matches.remove(0));
+    match executable_completions(text) {
+        c @ Completion::Partial(_) |
+        c @ Completion::Complete(_) => c,
+        Completion::None => path_complete(text),
     }
-
-    path_complete(text)
 }
 
 /// Return a list of the matches from the given partial program text.
@@ -81,10 +85,12 @@ pub fn complete(text: &str) -> Completion {
 /// ```
 /// use oursh::repl::completion::executable_completions;
 ///
-/// assert!(executable_completions("ru").contains(&"rustc".into()));
-/// assert!(executable_completions("ru").contains(&"ruby".into()));
+/// assert!(executable_completions("ru").possibilities()
+///     .contains(&"rustc".into()));
+/// assert!(executable_completions("ru").possibilities()
+///     .contains(&"ruby".into()));
 /// ```
-pub fn executable_completions(text: &str) -> Vec<String> {
+pub fn executable_completions(text: &str) -> Completion {
     match env::var_os("PATH") {
         Some(paths) => {
             let mut matches = vec![];
@@ -93,20 +99,37 @@ pub fn executable_completions(text: &str) -> Vec<String> {
                     let paths = executables.filter_map(|e| {
                         match e { Ok(p) => Some(p.path()), _ => None }
                     });
+
                     for path in paths {
-                        let metadata = fs::metadata(&path);
                         if let Some(filename) = path.file_name() {
                             let filename = filename.to_string_lossy();
-                            if (metadata.unwrap().permissions().mode() & 0o111 != 0) &&
-                                filename.starts_with(text)
-                            {
-                                matches.push(filename.into());
+                            if let Ok(metadata) = fs::metadata(&path) {
+                                if (metadata.permissions()
+                                            .mode() & 0o111 != 0)
+                                    && filename.starts_with(text)
+                                {
+                                    matches.push(filename.into());
+                                }
                             }
                         }
                     }
                 }
             }
-            matches
+
+            match matches.len() {
+                0 => Completion::None,
+                1 => Completion::Complete(matches.remove(0)),
+                _ => {
+                    matches.sort_by(|a, b| {
+                        match a.len().cmp(&b.len()) {
+                            Equal => b.cmp(&a),
+                            o => o
+                        }
+                    });
+                    Completion::Partial(matches)
+                }
+            }
+
         }
         None => panic!("PATH is undefined"),
     }

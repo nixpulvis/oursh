@@ -86,7 +86,8 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
                         print!("{}", text);
                         stdout.flush().unwrap();
                     },
-                    Completion::Complete(text) => {
+                    Completion::Complete(t) => {
+                        text = t;
                         print!("{}{}",
                                termion::cursor::Left(1000),  // XXX
                                termion::clear::CurrentLine);
