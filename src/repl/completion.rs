@@ -4,13 +4,13 @@
 //! example taken from the current REPL.
 //!
 //! ```
-//! use oursh::repl::completion;
+//! use oursh::repl::completion::complete;
 //!
 //! // String holding the user's input.
 //! let mut text = "car".to_string();
 //!
 //! // Perform the completion, on `\t` perhaps.
-//! text = completion::complete(&text);
+//! text = complete(&text);
 //!
 //! // The user's input is updated to the complete executable.
 //! assert_eq!("cargo", &text);
@@ -32,25 +32,17 @@ pub enum Completion {
 /// ### Examples
 ///
 /// ```
-/// use oursh::repl::completion;
+/// use oursh::repl::completion::complete;
 ///
-/// assert_eq!("pwd", completion::complete("pw"));
+/// assert_eq!("pwd", complete("pw"));
 /// ```
-pub fn complete(text: &str) -> Completion {
-    let complete = match text {
-        "la" => "ls -la".into(),
-        t @ _ => {
-            let mut matches = executable_completions(t);
-            matches.sort_by(|a, b| {
-                match a.len().cmp(&b.len()) { Equal => a.cmp(&b), o => o }
-            });
-            if matches.len() > 1 {
-                return Completion::Partial(matches);
-            }
-            matches.first().unwrap_or(&"".to_string()).clone()
-        },
-    };
-    Completion::Complete(complete)
+pub fn complete(text: &str) -> String {
+    let mut matches = executable_completions(text);
+    matches.sort_by(|a, b| {
+        match a.len().cmp(&b.len()) { Equal => b.cmp(&a), o => o }
+    });
+    matches.first().unwrap_or(&text.to_string()).clone()
+    // path_complete(text)
 }
 
 /// Return a list of the matches from the given partial program text.
@@ -58,12 +50,10 @@ pub fn complete(text: &str) -> Completion {
 /// ### Examples
 ///
 /// ```
-/// use oursh::repl::completion;
+/// use oursh::repl::completion::executable_completions;
 ///
-/// assert!(completion::executable_completions("ru")
-///     .contains(&"rustc".into()));
-/// assert!(completion::executable_completions("ru")
-///     .contains(&"ruby".into()));
+/// assert!(executable_completions("ru").contains(&"rustc".into()));
+/// assert!(executable_completions("ru").contains(&"ruby".into()));
 /// ```
 pub fn executable_completions(text: &str) -> Vec<String> {
     match env::var_os("PATH") {
@@ -93,6 +83,19 @@ pub fn executable_completions(text: &str) -> Vec<String> {
     }
 }
 
+/// Complete a path at the end of the given string.
+///
+/// ### Examples
+///
+/// ```
+/// use oursh::repl::completion::path_complete;
+///
+/// assert_eq!("/usr/bin/", path_complete("/usr/b"));
+/// assert_eq!("ls /home/", path_complete("ls /hom"));
+/// ```
+pub fn path_complete(text: &str) -> String {
+    text.into()
+}
 
 #[cfg(test)]
 mod tests {
@@ -101,5 +104,12 @@ mod tests {
     #[test]
     fn lexicographical_order() {
         assert_eq!("cargo", complete("car"));
+    }
+
+    #[test]
+    fn paths() {
+        assert_eq!("/home/", complete("/hom"));
+        assert_eq!("/usr/bin/", complete("/usr/b"));
+        assert_eq!("ls /home/", complete("ls /hom"));
     }
 }
