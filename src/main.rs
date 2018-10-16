@@ -1,6 +1,5 @@
 #![feature(alloc_system)]
 
-#[macro_use]
 extern crate oursh;
 extern crate termion;
 extern crate docopt;
