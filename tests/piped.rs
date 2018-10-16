@@ -48,8 +48,13 @@ fn subshell_command() {
 }
 
 #[test]
-fn pipeline_command() {
+fn single_pipeline_command() {
     assert_piped_oursh!("echo pi | wc -c", "3\n");
+}
+
+#[test]
+fn chained_pipeline_command() {
+    assert_piped_oursh!("cat README.md | head | wc -l", "10\n");
 }
 
 #[test]
