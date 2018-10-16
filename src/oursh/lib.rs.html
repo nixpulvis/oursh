@@ -124,6 +124,7 @@
 <span id="124">124</span>
 <span id="125">125</span>
 <span id="126">126</span>
+<span id="127">127</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! This shell should be both POSIX compatible and yet modern and exciting.</span>
 <span class="doccomment">//! Fancy features should not be prevented by POSIX compatibility. This will</span>
@@ -203,6 +204,7 @@
 <span class="doccomment">//! [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1</span>
 <span class="attribute">#![<span class="ident">feature</span>(<span class="ident">alloc_system</span>, <span class="ident">box_syntax</span>, <span class="ident">box_patterns</span>)]</span>
 <span class="attribute">#![<span class="ident">crate_type</span> <span class="op">=</span> <span class="string">&quot;dylib&quot;</span>]</span>
+<span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span>
 
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">nix</span>;
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">pwd</span>;
