@@ -170,6 +170,17 @@
 <span id="170">170</span>
 <span id="171">171</span>
 <span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! User text completion for REPL interations.</span>
 <span class="doccomment">//!</span>
@@ -193,14 +204,22 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">unix</span>::<span class="ident">fs</span>::<span class="ident">PermissionsExt</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">env</span>, <span class="ident">fs</span>};
 
+<span class="doccomment">/// The result of a query for text completion.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// A complete result is expected tob run without much thought by the</span>
+<span class="doccomment">/// user. Some care should be taken to avoid dangerous completions.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Completion</span> {
+    <span class="doccomment">/// Nothing completes the user text.</span>
     <span class="prelude-val">None</span>,
+    <span class="doccomment">/// The user text could match multiple complete values.</span>
     <span class="ident">Partial</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// A single complete value.</span>
     <span class="ident">Complete</span>(<span class="ident">String</span>),
 }
 
 <span class="kw">impl</span> <span class="ident">Completion</span> {
+    <span class="doccomment">/// Returns true if this completion is a single option.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_complete</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident">Completion</span>::<span class="prelude-val">None</span> <span class="op">|</span>
@@ -209,6 +228,8 @@
         }
     }
 
+    <span class="doccomment">/// Return the first (lexicographically) option if there are multiple</span>
+    <span class="doccomment">/// possibilities.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">first</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident">Completion</span>::<span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_owned</span>(),
@@ -222,6 +243,7 @@
         }
     }
 
+    <span class="doccomment">/// Return a list of all the possibile complete matches.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">possibilities</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident">Completion</span>::<span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[],
