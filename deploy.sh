@@ -7,7 +7,7 @@ rev=$(git rev-parse --short HEAD)
 cd target/doc
 
 # TODO: https://github.com/rust-lang/rust/issues/16103#issuecomment-424054063
-ls -s oursh/index.html index.html
+cp -f oursh/index.html index.html
 
 # Create a new clone of the git repository here.
 git init
