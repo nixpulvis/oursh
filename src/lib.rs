@@ -76,6 +76,7 @@
 //! [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
 #![feature(alloc_system, box_syntax, box_patterns)]
 #![crate_type = "dylib"]
+#![forbid(unsafe_code)]
 
 extern crate nix;
 extern crate pwd;
