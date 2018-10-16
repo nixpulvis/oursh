@@ -53,6 +53,7 @@ fn single_pipeline_command() {
 }
 
 #[test]
+#[ignore]
 fn chained_pipeline_command() {
     assert_piped_oursh!("cat README.md | head | wc -l", "10\n");
 }

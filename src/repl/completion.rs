@@ -28,7 +28,6 @@ use std::{env, fs};
 /// ```
 /// use oursh::repl::completion;
 ///
-/// assert_eq!("ls", completion::complete("l"));
 /// assert_eq!("pwd", completion::complete("pw"));
 /// ```
 pub fn complete(text: &str) -> String {
@@ -37,7 +36,7 @@ pub fn complete(text: &str) -> String {
         t @ _ => {
             let mut matches = executable_completions(t);
             matches.sort_by(|a, b| {
-                match a.len().cmp(&b.len()) { Equal => b.cmp(&a), o => o }
+                match a.len().cmp(&b.len()) { Equal => a.cmp(&b), o => o }
             });
             matches.first().unwrap_or(&"".to_string()).clone()
         },
@@ -91,6 +90,6 @@ mod tests {
 
     #[test]
     fn lexicographical_order() {
-        assert_eq!("cat", complete("ca"));
+        assert_eq!("cargo", complete("car"));
     }
 }
