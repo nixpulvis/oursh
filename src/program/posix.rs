@@ -247,6 +247,13 @@ impl super::Command for Command {
                                                        .map(|c| c as u8)
                                                        .collect::<Vec<u8>>();
                         interpreter.insert(0, '#' as u8);
+                        // XXX: This is a huge gross hack.
+                        interpreter = match &*String::from_utf8_lossy(&interpreter) {
+                            "#!ruby" => "#!/usr/bin/env ruby",
+                            "#!python" => "#!/usr/bin/env python",
+                            "#!racket" => "#!/usr/bin/env racket",
+                            i => i,
+                        }.as_bytes().to_owned();
                         file.write_all(&interpreter).unwrap();
                         file.write_all(b"\n").unwrap();
                         let program = program.1.chars()
