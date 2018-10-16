@@ -79,8 +79,9 @@ impl Job {
     fn exec(&self) {
         match execvp(&self.argv[0], &self.argv) {
             Ok(_) => unreachable!(),
-            Err(e) => {
-                println!("error: {}", e);
+            Err(_) => {
+                println!("error: {}: command not found",
+                         &self.argv[0].to_string_lossy());
                 exit(127);
             }
         }
