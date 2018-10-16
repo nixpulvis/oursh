@@ -1,5 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+#
+# Written for CS2600 Assignment 8 as myshell.py
 
 import os
 import sys

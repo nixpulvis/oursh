@@ -84,7 +84,7 @@ for Racket!
 I've built and wrote a few things about shells before:
 
 - [`rush`][rush] A glorified homework assignment for computer architecture.
-- [`myshell.py`][myshell.py] My submission for computer organization a8.
+- [`shell.py`][shell.py] My submission for computer organization a8.
 - [Building a Shell - Part 1][basp1] Start of this project.
 
 
@@ -156,5 +156,5 @@ oursh : crate
 [arch]: https://www.archlinux.org/
 [racket]: https://racket-lang.org/
 [rush]: https://github.com/nixpulvis/rush
-[myshell.py]: /doc/cs2600-a8-myshell.py
+[shell.py]: /doc/shell.py
 [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1

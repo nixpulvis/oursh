@@ -46,7 +46,7 @@
 //! I've built and wrote a few things about shells before:
 //!
 //! - [`rush`][rush] A glorified homework assignment for computer architecture.
-//! - [`myshell.py`][myshell.py] My submission for computer organization a8.
+//! - [`shell.py`][shell.py] My submission for computer organization a8.
 //! - [Building a Shell - Part 1][basp1] Start of this project.
 //!
 //! ## [POSIX Reference][posix]
@@ -72,7 +72,7 @@
 //! [fish]: https://github.com/fish-shell/fish-shell
 //! [arch]: https://www.archlinux.org/
 //! [rush]: https://github.com/nixpulvis/rush
-//! [myshell.py]: https://github.com/nixpulvis/oursh/blob/master/doc/cs2600-a8-myshell.py
+//! [shell.py]: https://github.com/nixpulvis/oursh/blob/master/doc/shell.py
 //! [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
 #![feature(alloc_system, box_syntax, box_patterns)]
 #![crate_type = "dylib"]
