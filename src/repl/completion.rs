@@ -20,6 +20,12 @@ use std::cmp::Ordering::Equal;
 use std::os::unix::fs::PermissionsExt;
 use std::{env, fs};
 
+pub enum Completion {
+    None,
+    Partial(Vec<String>),
+    Complete(String),
+}
+
 /// Return a completed (valid) program text from the partial string
 /// given.
 ///
@@ -30,17 +36,21 @@ use std::{env, fs};
 ///
 /// assert_eq!("pwd", completion::complete("pw"));
 /// ```
-pub fn complete(text: &str) -> String {
-    match text {
+pub fn complete(text: &str) -> Completion {
+    let complete = match text {
         "la" => "ls -la".into(),
         t @ _ => {
             let mut matches = executable_completions(t);
             matches.sort_by(|a, b| {
                 match a.len().cmp(&b.len()) { Equal => a.cmp(&b), o => o }
             });
+            if matches.len() > 1 {
+                return Completion::Partial(matches);
+            }
             matches.first().unwrap_or(&"".to_string()).clone()
         },
-    }
+    };
+    Completion::Complete(complete)
 }
 
 /// Return a list of the matches from the given partial program text.
