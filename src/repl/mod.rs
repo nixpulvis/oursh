@@ -3,18 +3,23 @@
 //! There will be *absolutely no* blocking STDIN/OUT/ERR on things like tab
 //! completion or other potentially slow, or user defined behavior.
 
-use std::io::{BufRead, Write, Stdin, Stdout};
-use std::process::exit;
+use std::io::{Write, Stdin, Stdout};
 use nix::unistd;
 use pwd::Passwd;
+use termion::{style, color};
+use program::Result;
+#[cfg(not(feature = "raw"))]
+use std::io::BufRead;
+#[cfg(feature = "raw")]
+use std::process::exit;
+#[cfg(feature = "raw")]
 use termion::cursor::DetectCursorPos;
+#[cfg(feature = "raw")]
 use termion::event::Key;
 #[cfg(feature = "raw")]
 use termion::input::TermRead;
 #[cfg(feature = "raw")]
 use termion::raw::IntoRawMode;
-use termion::{style, color};
-use program::Result;
 #[cfg(feature = "completion")]
 use repl::completion::*;
 #[cfg(feature = "history")]
@@ -22,6 +27,7 @@ use repl::history::History;
 
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.
+#[allow(unused_mut)]
 pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
     where F: Fn(&String) -> Result<()>
 {
@@ -45,6 +51,7 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
     let prompt_length = stdout.cursor_pos().unwrap().0;
 
     // TODO #5: We need a better state object for these values.
+    #[cfg(feature = "raw")]
     let mut text = String::new();
 
     // Iterate the keys as a user presses them.
@@ -225,7 +232,13 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
         let text = line.unwrap();
 
         // XXX: Blindly run the text.
-        runner(&text);
+        if runner(&text).is_ok() {
+            #[cfg(feature = "history")]
+            {
+                history.add(&text, 1);
+                history.reset_index();
+            }
+        }
 
         // Display a brand spanking new prompt.
         prompt.display(&mut stdout);

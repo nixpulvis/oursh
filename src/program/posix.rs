@@ -109,7 +109,7 @@
 use std::ffi::CString;
 #[cfg(feature = "bridge")]
 use std::fs::{self, File};
-use std::io::{self, Write, BufRead};
+use std::io::{Write, BufRead};
 #[cfg(feature = "bridge")]
 use std::os::unix::fs::PermissionsExt;
 use std::process::{self, Stdio};

@@ -77,7 +77,7 @@
 
 use std::ffi::CString;
 use std::fmt::Debug;
-use std::io::{self, BufRead};
+use std::io::BufRead;
 use std::result;
 use nix::unistd::Pid;
 use nix::sys::wait::WaitStatus;
