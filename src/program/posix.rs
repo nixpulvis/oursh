@@ -255,7 +255,7 @@ impl super::Command for Command {
                         // XXX: This is a huge gross hack.
                         interpreter = match &*String::from_utf8_lossy(&interpreter) {
                             "#!ruby"   => "#!/usr/bin/env ruby",
-                            "#!js"     => "#!/usr/bin/env node",
+                            "#!node"   => "#!/usr/bin/env node",
                             "#!python" => "#!/usr/bin/env python",
                             "#!racket" => "#!/usr/bin/env racket",
                             i => i,
