@@ -250,6 +250,7 @@ impl super::Command for Command {
                         let mut interpreter = interpreter.chars()
                                                        .map(|c| c as u8)
                                                        .collect::<Vec<u8>>();
+                        interpreter.insert(0, '!' as u8);
                         interpreter.insert(0, '#' as u8);
                         // XXX: This is a huge gross hack.
                         interpreter = match &*String::from_utf8_lossy(&interpreter) {
@@ -261,8 +262,6 @@ impl super::Command for Command {
                         file.write_all(&interpreter).unwrap();
                         file.write_all(b"\n").unwrap();
                         let program = program.1.chars()
-                                               .skip(1)
-                                               .skip_while(|c| *c == ' ')
                                                .map(|c| c as u8)
                                                .collect::<Vec<u8>>();
                         file.write_all(&program).unwrap();
@@ -284,8 +283,9 @@ impl super::Command for Command {
                     Err(Error::Runtime)
                 }
             },
-            _ => {
-                Ok(WaitStatus::Exited(Pid::this(), 0))
+            #[cfg(not(feature = "bridge"))]
+            Command::Bridgeshell(ref program) => {
+                unimplemented!();
             },
         }
     }

@@ -45,9 +45,10 @@ Compound: ast::Program = {
 Commands: ast::Command = {
     // TODO #15: Hopefully in fixing #8 and #10 this can play nicely.
     // NOTE: This can be successfully complied, but will break a doc tests.
-    // XXX: The trailing `.../usr/bin/env ruby#` is a hack until lexer support.
-    "{#" <i: r"![^}^#]*"> <t: r"#[^}]*"> "}" => {
-        let b = ast::BridgedProgram(Interpreter::Other(i.into()), t.into());
+    "{#!" <i: Word+> ";" <t: Word*> "}" => {
+        let i = i.into_iter().map(|w| w.0).collect::<Vec<String>>().join(" ");
+        let t = t.into_iter().map(|w| w.0).collect::<Vec<String>>().join(" ");
+        let b = ast::BridgedProgram(Interpreter::Other(i), t);
         ast::Command::Bridgeshell(box b)
     },
     "(" <p: Program> ")" => {
@@ -86,6 +87,6 @@ Command: ast::Command = Word+ => {
 };
 
 // TODO #8: Custom lexer plus proger rules needed.
-Word: ast::Word = r"[a-zA-Z0-9-_\.:/]+" => {
+Word: ast::Word = r#"[a-zA-Z0-9-_=\.:/"'$]+"# => {
     ast::Word(<>.into())
 };

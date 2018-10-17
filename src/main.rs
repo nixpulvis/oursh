@@ -72,7 +72,7 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
         let program = match parse_primary(text.as_bytes()) {
             Ok(program) => program,
             Err(e) => {
-                println!("{:?}", e);
+                println!("{:?}: {:#?}", e, text);
                 return Err(e);
             }
         };
