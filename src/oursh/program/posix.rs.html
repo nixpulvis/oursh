@@ -618,7 +618,7 @@
             },
             <span class="ident">Command</span>::<span class="ident">And</span>(<span class="kw-2">ref</span> <span class="ident">left</span>, <span class="kw-2">ref</span> <span class="ident">right</span>) <span class="op">=&gt;</span> {
                 <span class="kw">match</span> <span class="ident">left</span>.<span class="ident">run</span>() {
-                    <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">p</span>, <span class="ident">c</span>)) <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="number">0</span> <span class="op">=&gt;</span> {
+                    <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="kw">_</span>, <span class="ident">c</span>)) <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="number">0</span> <span class="op">=&gt;</span> {
                         <span class="ident">right</span>.<span class="ident">run</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">Runtime</span>)
                     },
                     <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>),
@@ -627,7 +627,7 @@
             },
             <span class="ident">Command</span>::<span class="ident">Or</span>(<span class="kw-2">ref</span> <span class="ident">left</span>, <span class="kw-2">ref</span> <span class="ident">right</span>) <span class="op">=&gt;</span> {
                 <span class="kw">match</span> <span class="ident">left</span>.<span class="ident">run</span>() {
-                    <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">p</span>, <span class="ident">c</span>)) <span class="kw">if</span> <span class="ident">c</span> <span class="op">!=</span> <span class="number">0</span> <span class="op">=&gt;</span> {
+                    <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="kw">_</span>, <span class="ident">c</span>)) <span class="kw">if</span> <span class="ident">c</span> <span class="op">!=</span> <span class="number">0</span> <span class="op">=&gt;</span> {
                         <span class="ident">right</span>.<span class="ident">run</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">Runtime</span>)
                     },
                     <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>),
@@ -725,7 +725,7 @@
                 }
             },
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>))]</span>
-            <span class="ident">Command</span>::<span class="ident">Bridgeshell</span>(<span class="kw-2">ref</span> <span class="ident">program</span>) <span class="op">=&gt;</span> {
+            <span class="ident">Command</span>::<span class="ident">Bridgeshell</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> {
                 <span class="macro">unimplemented</span><span class="macro">!</span>();
             },
         }
