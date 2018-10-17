@@ -16,6 +16,7 @@ default = ["history", "completion"]
 bridge     = []
 completion = []
 history    = []
+raw        = []
 
 [dependencies]
 docopt = "0.8"

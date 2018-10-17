@@ -3,13 +3,15 @@
 //! There will be *absolutely no* blocking STDIN/OUT/ERR on things like tab
 //! completion or other potentially slow, or user defined behavior.
 
-use std::io::{Write, Stdin, Stdout};
+use std::io::{BufRead, Write, Stdin, Stdout};
 use std::process::exit;
 use nix::unistd;
 use pwd::Passwd;
 use termion::cursor::DetectCursorPos;
 use termion::event::Key;
+#[cfg(feature = "raw")]
 use termion::input::TermRead;
+#[cfg(feature = "raw")]
 use termion::raw::IntoRawMode;
 use termion::{style, color};
 use program::Result;
@@ -31,6 +33,7 @@ pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
     let prompt = Prompt::new().sh_style();
 
     // Convert the tty's stdout into raw mode.
+    #[cfg(feature = "raw")]
     let mut stdout = stdout.into_raw_mode()
         .expect("error opening raw mode");
 
@@ -38,6 +41,7 @@ pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
     prompt.display(&mut stdout);
 
     // XXX: Hack to get the prompt length.
+    #[cfg(feature = "raw")]
     let prompt_length = stdout.cursor_pos().unwrap().0;
 
     // TODO #5: We need a better state object for these values.
@@ -45,6 +49,7 @@ pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
 
     // Iterate the keys as a user presses them.
     // TODO #5: Mouse?
+    #[cfg(feature = "raw")]
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Esc => {
@@ -212,6 +217,18 @@ pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
             },
             _ => {}
         }
+    }
+
+    #[cfg(not(feature = "raw"))]
+    for line in stdin.lock().lines() {
+        // XXX: Blindly read a full line.
+        let text = line.unwrap();
+
+        // XXX: Blindly run the text.
+        runner(&text);
+
+        // Display a brand spanking new prompt.
+        prompt.display(&mut stdout);
     }
 }
 

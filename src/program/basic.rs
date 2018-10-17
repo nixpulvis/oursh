@@ -36,7 +36,7 @@ impl super::Program for Program {
 
 
 /// A single poorly parsed command.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Command(String);
 
 impl super::Command for Command {

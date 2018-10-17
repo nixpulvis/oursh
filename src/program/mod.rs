@@ -77,7 +77,9 @@
 
 use std::ffi::CString;
 use std::fmt::Debug;
+<<<<<<< HEAD
 use std::io::BufRead;
+use std::io::{self, BufRead};
 use std::result;
 use nix::unistd::Pid;
 use nix::sys::wait::WaitStatus;
@@ -104,7 +106,7 @@ pub enum Error {
 /// - What language information do we still need to store?
 pub trait Program: Sized {
     /// The type of each of this program's commands.
-    type Command: Command;
+    type Command: Command + 'static;
 
     /// Parse a whole program from the given `reader`.
     fn parse<R: BufRead>(reader: R) -> Result<Self>;
@@ -124,6 +126,23 @@ pub trait Program: Sized {
         for command in self.commands().iter() {
             command.run_background()?;
         }
+        Ok(())
+    }
+
+    /// Run the command in a background job.
+    fn run_background(&self) -> Result<(), ()> {
+        let commands: Vec<Box<Self::Command>> = self.commands()
+                                                    .iter()
+                                                    .cloned()
+                                                    .collect();
+        thread::spawn(move || {
+            let raw = io::stdout().into_raw_mode().unwrap();
+            for command in commands {
+                raw.suspend_raw_mode();
+                command.run();
+                raw.activate_raw_mode();
+            }
+        });
         Ok(())
     }
 }
