@@ -3,6 +3,24 @@ use program::ast::Interpreter;
 
 grammar;
 
+extern {
+    type Location = usize;
+    type Error = lexer::LexicalError;
+
+    enum lexer::Tok {
+        "\n" => lexer::Tok::Newline,
+        ";"  => lexer::Tok::Newline,
+        "&"  => lexer::Tok::Amper,
+        "{"  => lexer::Tok::RBrace,
+        "}"  => lexer::Tok::LBrace,
+        "!"  => lexer::Tok::Bang,
+        "|"  => lexer::Tok::Pipe,
+        "&&" => lexer::Tok::And,
+        "||" => lexer::Tok::Or,
+        "#!" => lexer::Tok::Shebang,
+    }
+}
+
 pub Program: ast::Program = {
     // TODO #8: We need our own lexer to make this rule work.
     // <p: Program> "\n"+ <c: Commands> => {
