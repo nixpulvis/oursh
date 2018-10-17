@@ -1,7 +1,9 @@
 //! Single command programs with no features.
 use std::io::BufRead;
 use std::ffi::CString;
+use nix::sys::wait::WaitStatus;
 use job::Job;
+use program::{Result, Error};
 
 
 /// A basic program with only a single command.
@@ -18,10 +20,10 @@ impl super::Program for Program {
     ///
     /// BasicProgram::parse(b"ls" as &[u8]);
     /// ```
-    fn parse<R: BufRead>(mut reader: R) -> Result<Self, ()> {
+    fn parse<R: BufRead>(mut reader: R) -> Result<Self> {
         let mut command = String::new();
         if reader.read_to_string(&mut command).is_err() {
-            return Err(());
+            return Err(Error::Read);
         }
         Ok(Program(vec![box Command(command)]))
     }
@@ -39,10 +41,20 @@ pub struct Command(String);
 
 impl super::Command for Command {
     /// Treat each space blindly as an argument delimiter.
-    fn run(&self) -> Result<(), ()> {
-        Job::new(self.0.split_whitespace().map(|a| {
+    fn run(&self) -> Result<WaitStatus> {
+        let mut job = Job::new(self.0.split_whitespace().map(|a| {
             CString::new(a).expect("error reading argument")
-        }).collect()).run();
-        Ok(())
+        }).collect());
+
+        match job.run() {
+            Ok(WaitStatus::Exited(p, c)) if c == 0 => {
+                Ok(WaitStatus::Exited(p, c))
+            },
+            _ => Err(Error::Runtime),
+        }
+    }
+
+    fn run_background(&self) -> Result<()> {
+        unimplemented!();
     }
 }

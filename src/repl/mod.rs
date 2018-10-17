@@ -12,6 +12,7 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::{style, color};
+use program::Result;
 #[cfg(feature = "completion")]
 use repl::completion::*;
 #[cfg(feature = "history")]
@@ -19,8 +20,9 @@ use repl::history::History;
 
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.
-// TODO: The F type should be more like `Fn(&impl Read) -> Result<...>`.
-pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
+pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
+    where F: Fn(&String) -> Result<()>
+{
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
     let mut history = History::load();
@@ -54,11 +56,12 @@ pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
 
                 // Run the command.
                 stdout.suspend_raw_mode().unwrap();
-                runner(&text);
-                #[cfg(feature = "history")]
-                {
-                    history.add(&text, 1);
-                    history.reset_index();
+                if runner(&text).is_ok() {
+                    #[cfg(feature = "history")]
+                    {
+                        history.add(&text, 1);
+                        history.reset_index();
+                    }
                 }
                 stdout.activate_raw_mode().unwrap();
 

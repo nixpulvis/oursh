@@ -113,9 +113,10 @@ use std::io::{Write, BufRead};
 #[cfg(feature = "bridge")]
 use std::os::unix::fs::PermissionsExt;
 use std::process::{self, Stdio};
-use std::thread;
+use nix::unistd::Pid;
+use nix::sys::wait::WaitStatus;
 use job::Job;
-use program::Program as ProgramTrait;
+use program::{Result, Error, Program as ProgramTrait};
 #[cfg(feature = "bridge")]
 use program::ast::Interpreter;
 
@@ -128,17 +129,17 @@ pub use self::ast::Command;
 impl super::Program for Program {
     type Command = Command;
 
-    fn parse<R: BufRead>(mut reader: R) -> Result<Self, ()> {
+    fn parse<R: BufRead>(mut reader: R) -> Result<Self> {
         let mut string = String::new();
         if reader.read_to_string(&mut string).is_err() {
-            return Err(());
+            return Err(Error::Read);
         }
 
         // TODO #8: Custom lexer here.
         if let Ok(parsed) = lalrpop::ProgramParser::new().parse(&string) {
             Ok(parsed)
         } else {
-            Err(())
+            Err(Error::Parse)
         }
     }
 
@@ -149,7 +150,7 @@ impl super::Program for Program {
 
 // The semantics of a single POSIX command.
 impl super::Command for Command {
-    fn run(&self) -> Result<(), ()> {
+    fn run(&self) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref words) => {
@@ -157,37 +158,38 @@ impl super::Command for Command {
                     CString::new(&w.0 as &str)
                         .expect("error in word UTF-8")
                 }).collect();
-                Job::new(argv).run();
+                match Job::new(argv).run() {
+                    Ok(WaitStatus::Exited(p, c)) if c == 0 => {
+                        Ok(WaitStatus::Exited(p, c))
+                    },
+                    _ => Err(Error::Runtime),
+                }
             },
             Command::Compound(ref program) => {
                 for command in program.0.iter() {
-                    command.run()
-                        .expect("error running command");
+                    command.run()?;
                 }
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Not(ref command) => {
-                command.run()
-                    .expect("error running command");
                 // TODO #4: Flip status code.
+                command.run()
             },
             Command::And(ref left, ref right) => {
-                left.run()
-                    .expect("error running left command");
-                right.run()
-                    .expect("error running right command");
                 // TODO #4: Status check.
+                left.run()?;
+                right.run()?;
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Or(ref left, ref right) => {
-                left.run()
-                    .expect("error running left command");
-                right.run()
-                    .expect("error running right command");
                 // TODO #4: Status check.
+                left.run()?;
+                right.run()?;
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Subshell(ref program) => {
                 // TODO #4: Run in a *subshell* ffs.
                 program.run()
-                    .expect("error running subshell program");
             },
             Command::Pipeline(ref left, ref right) => {
                 // TODO: This is obviously a temporary hack.
@@ -219,19 +221,12 @@ impl super::Command for Command {
                             .expect("error waiting for piped command");
                     }
                 }
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Background(ref command) => {
-                let command = command.clone();
-                let handle = thread::Builder::new()
-                    // TODO: Prettier text form of the command.
-                    .name(format!("{:?}", command))
-                    .spawn(move ||
-                {
-                    // TODO #4: Suspend and restore raw mode.
-                    (*command).run()
-                        .expect("error running command in background");
-                }).expect("error spawning thread");
-                println!("[{}]", handle.thread().name().unwrap());
+                command.run_background()?;
+                println!("[?] ???");
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             #[cfg(feature = "bridge")]
             Command::Bridgeshell(ref program) => {
@@ -275,10 +270,31 @@ impl super::Command for Command {
                     child.wait()
                         .expect("error waiting for bridge process");
                 }
+                // TODO #4: Suspend and restore raw mode.
+                let mut child = process::Command::new(bridgefile)
+                    .spawn()
+                    .expect("error swawning bridge process");
+                child.wait()
+                    .expect("error waiting for bridge process");
+                Ok(WaitStatus::Exited(Pid::this(), 0))
+            },
+            _ => {
+                Ok(WaitStatus::Exited(Pid::this(), 0))
+            },
+        }
+    }
+
+    fn run_background(&self) -> Result<()> {
+        match *self {
+            Command::Simple(ref words) => {
+                let argv = words.iter().map(|w| {
+                    CString::new(&w.0 as &str)
+                        .expect("error in word UTF-8")
+                }).collect();
+                Job::new(argv).run_background().map_err(|_| Error::Runtime)
             },
             _ => unimplemented!(),
-        };
-        Ok(())
+        }
     }
 }
 

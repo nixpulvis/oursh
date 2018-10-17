@@ -20,6 +20,9 @@ pub struct Job {
     argv: Vec<CString>,
     // TODO: Call this pid?
     child: Option<Pid>,
+    // TODO: Status should be part of `child`.
+    // TODO: Use our own type, so downstream use doesn't need `nix`.
+    status: Option<WaitStatus>,
 }
 
 impl Job {
@@ -29,76 +32,74 @@ impl Job {
         Job {
             argv: argv,
             child: None,
+            status: None,
+
         }
     }
 
     /// Run a shell job, waiting for the command to finish.
-    ///
-    /// This function also does a simple lookup for builtin functions.
-    // TODO #4: Return result.
-    pub fn run(&mut self) {
-        // TODO #4: We need to implement background jobs.
-        // if is_background {
-        //     self.argv.pop();
-        //     self.fork();
-        // } else {
-            self.fork_and_wait();
-        // }
+    pub fn run(&mut self) -> nix::Result<WaitStatus> {
+        self.fork_and_wait()
     }
 
-    #[allow(unused)]
-    fn fork(&mut self) {
+    /// Run a shell job in the background.
+    pub fn run_background(&mut self) -> nix::Result<()> {
+        self.fork()
+    }
+
+    fn fork(&mut self) -> Result<(), nix::Error> {
         match fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
+                Ok(())
             },
             Ok(ForkResult::Child) => {
-                self.exec();
+                // TODO #20: When running with raw mode we could buffer
+                // this and print it later, all at once in suspended raw mode.
+                if let Err(_) = self.exec() {
+                    exit(127);
+                } else {
+                    Ok(())
+                }
             },
-            Err(e) => {
-                println!("error: {}", e)
-            }
+            Err(e) => Err(e),
         }
     }
 
-    fn fork_and_wait(&mut self) {
+    fn fork_and_wait(&mut self) -> nix::Result<WaitStatus> {
         match fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
-                self.wait();
+                self.wait()
             },
             Ok(ForkResult::Child) => {
-                self.exec();
+                if let Err(_) = self.exec() {
+                    exit(127);
+                } else {
+                    // TODO: Waiting in the child?
+                    unimplemented!();
+                }
             },
-            Err(e) => {
-                println!("error: {}", e)
-            }
+            Err(e) => Err(e),
         }
     }
 
-    fn exec(&self) {
-        match execvp(&self.argv[0], &self.argv) {
-            Ok(_) => unreachable!(),
-            Err(_) => {
-                println!("error: {}: command not found",
-                         &self.argv[0].to_string_lossy());
-                exit(127);
-            }
-        }
+    fn exec(&self) -> Result<(), nix::Error> {
+        execvp(&self.argv[0], &self.argv).map(|_| ())
     }
 
-    fn wait(&self) {
+    fn wait(&self) -> nix::Result<WaitStatus> {
         match self.child {
             Some(child) => {
                 loop {
                     match waitpid(child, None) {
-                        Ok(WaitStatus::StillAlive) => {},
                         // TODO #4: Cover other cases?
-                        _ => break,
-                    }
+                        Ok(WaitStatus::StillAlive) => {},
+                        s => return s,
+                    };
                 }
             },
-            _ => {}
+            _ => unimplemented!(),
         }
     }
 }
