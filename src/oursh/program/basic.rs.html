@@ -46,11 +46,25 @@
 <span id="46">46</span>
 <span id="47">47</span>
 <span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Single command programs with no features.</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufRead</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
+<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::<span class="ident">WaitStatus</span>;
 <span class="kw">use</span> <span class="ident">job</span>::<span class="ident">Job</span>;
+<span class="kw">use</span> <span class="ident">program</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Error</span>};
 
 
 <span class="doccomment">/// A basic program with only a single command.</span>
@@ -67,10 +81,10 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// BasicProgram::parse(b&quot;ls&quot; as &amp;[u8]);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, ()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">command</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
         <span class="kw">if</span> <span class="ident">reader</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">command</span>).<span class="ident">is_err</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">Read</span>);
         }
         <span class="prelude-val">Ok</span>(<span class="ident">Program</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">Command</span>(<span class="ident">command</span>)]))
     }
@@ -88,11 +102,21 @@
 
 <span class="kw">impl</span> <span class="kw">super</span>::<span class="ident">Command</span> <span class="kw">for</span> <span class="ident">Command</span> {
     <span class="doccomment">/// Treat each space blindly as an argument delimiter.</span>
-    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
-        <span class="ident">Job</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">split_whitespace</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
+    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">job</span> <span class="op">=</span> <span class="ident">Job</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">split_whitespace</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
             <span class="ident">CString</span>::<span class="ident">new</span>(<span class="ident">a</span>).<span class="ident">expect</span>(<span class="string">&quot;error reading argument&quot;</span>)
-        }).<span class="ident">collect</span>()).<span class="ident">run</span>();
-        <span class="prelude-val">Ok</span>(())
+        }).<span class="ident">collect</span>());
+
+        <span class="kw">match</span> <span class="ident">job</span>.<span class="ident">run</span>() {
+            <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">p</span>, <span class="ident">c</span>)) <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="number">0</span> <span class="op">=&gt;</span> {
+                <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">p</span>, <span class="ident">c</span>))
+            },
+            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">Runtime</span>),
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">run_background</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">unimplemented</span><span class="macro">!</span>();
     }
 }
 </pre>

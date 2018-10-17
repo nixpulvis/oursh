@@ -200,6 +200,26 @@
 <span id="200">200</span>
 <span id="201">201</span>
 <span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Parsing and handling program syntax(es) of the shell.</span>
 <span class="doccomment">//!</span>
@@ -281,31 +301,18 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufRead</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">result</span>;
+<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::<span class="ident">Pid</span>;
+<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::<span class="ident">WaitStatus</span>;
 
-<span class="doccomment">/// A command is a task given by the user as part of a [`Program`](Program).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Each command is handled by a `Job`, and a single command may be run</span>
-<span class="doccomment">/// multiple times each as a new `Job`. Each time a command is run, the</span>
-<span class="doccomment">/// conditions within the control of the shell are reproduced; IO redirection,</span>
-<span class="doccomment">/// working directory, and even the environment are each faithfully preserved.</span>
-<span class="doccomment">///</span>
-<span class="comment">// TODO #4: We can reasonably reproduce the redirects, pwd... but is it</span>
-<span class="comment">//          sane to try this with ENV too?</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Command</span>: <span class="ident">Debug</span> {
-    <span class="doccomment">/// Run the command, returning a result of it&#39;s work.</span>
-    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
-    <span class="doccomment">/// Return the name of this command.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This name *may* not be the same as the name given to the process by</span>
-    <span class="doccomment">/// the running `Job`.</span>
-    <span class="comment">// TODO: Ids?</span>
-    <span class="kw">fn</span> <span class="ident">name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CString</span> {
-        <span class="ident">CString</span>::<span class="ident">new</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>))
-            .<span class="ident">expect</span>(<span class="string">&quot;error in UTF-8 of format&quot;</span>)
-    }
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
+    <span class="ident">Read</span>,
+    <span class="ident">Parse</span>,
+    <span class="ident">Runtime</span>,
 }
-
 
 <span class="doccomment">/// A program is as large as a file or as small as a line.</span>
 <span class="doccomment">///</span>
@@ -323,17 +330,50 @@
     <span class="kw">type</span> <span class="ident">Command</span>: <span class="ident">Command</span>;
 
     <span class="doccomment">/// Parse a whole program from the given `reader`.</span>
-    <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, ()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Return a list of all the commands in this program.</span>
     <span class="kw">fn</span> <span class="ident">commands</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">Box</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Command</span><span class="op">&gt;</span>];
 
     <span class="doccomment">/// Run the program sequentially.</span>
-    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">command</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">commands</span>().<span class="ident">iter</span>() {
             <span class="ident">command</span>.<span class="ident">run</span>()<span class="question-mark">?</span>;
         }
+        <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
+    }
+
+    <span class="kw">fn</span> <span class="ident">run_background</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">for</span> <span class="ident">command</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">commands</span>().<span class="ident">iter</span>() {
+            <span class="ident">command</span>.<span class="ident">run_background</span>()<span class="question-mark">?</span>;
+        }
         <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="doccomment">/// A command is a task given by the user as part of a [`Program`](Program).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Each command is handled by a `Job`, and a single command may be run</span>
+<span class="doccomment">/// multiple times each as a new `Job`. Each time a command is run, the</span>
+<span class="doccomment">/// conditions within the control of the shell are reproduced; IO redirection,</span>
+<span class="doccomment">/// working directory, and even the environment are each faithfully preserved.</span>
+<span class="doccomment">///</span>
+<span class="comment">// TODO #4: We can reasonably reproduce the redirects, pwd... but is it</span>
+<span class="comment">//          sane to try this with ENV too?</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Command</span>: <span class="ident">Debug</span> {
+    <span class="doccomment">/// Run the command, returning a result of it&#39;s work.</span>
+    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span>;
+
+    <span class="kw">fn</span> <span class="ident">run_background</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Return the name of this command.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This name *may* not be the same as the name given to the process by</span>
+    <span class="doccomment">/// the running `Job`.</span>
+    <span class="comment">// TODO: Ids?</span>
+    <span class="kw">fn</span> <span class="ident">name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CString</span> {
+        <span class="ident">CString</span>::<span class="ident">new</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>))
+            .<span class="ident">expect</span>(<span class="string">&quot;error in UTF-8 of format&quot;</span>)
     }
 }
 
@@ -355,7 +395,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// parse_primary(b&quot;ls&quot; as &amp;[u8]);</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_primary</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PrimaryProgram</span>, ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_primary</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PrimaryProgram</span><span class="op">&gt;</span> {
     <span class="ident">PrimaryProgram</span>::<span class="ident">parse</span>(<span class="ident">reader</span>)
 }
 
@@ -370,7 +410,7 @@
 <span class="doccomment">/// assert!(parse::&lt;PosixProgram, &amp;[u8]&gt;(program).is_ok());</span>
 <span class="doccomment">/// // TODO: assert!(parse::&lt;BasicProgram, &amp;[u8]&gt;(program).is_err());</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Program</span>, <span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">P</span>, ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Program</span>, <span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
     <span class="ident">P</span>::<span class="ident">parse</span>(<span class="ident">reader</span>)
 }
 

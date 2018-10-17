@@ -102,6 +102,7 @@
 <span id="102">102</span>
 <span id="103">103</span>
 <span id="104">104</span>
+<span id="105">105</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Subprocess execution management.</span>
 <span class="doccomment">//!</span>
@@ -125,6 +126,9 @@
     <span class="ident">argv</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span>,
     <span class="comment">// TODO: Call this pid?</span>
     <span class="ident">child</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pid</span><span class="op">&gt;</span>,
+    <span class="comment">// TODO: Status should be part of `child`.</span>
+    <span class="comment">// TODO: Use our own type, so downstream use doesn&#39;t need `nix`.</span>
+    <span class="ident">status</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Job</span> {
@@ -134,76 +138,74 @@
         <span class="ident">Job</span> {
             <span class="ident">argv</span>: <span class="ident">argv</span>,
             <span class="ident">child</span>: <span class="prelude-val">None</span>,
+            <span class="ident">status</span>: <span class="prelude-val">None</span>,
+
         }
     }
 
     <span class="doccomment">/// Run a shell job, waiting for the command to finish.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function also does a simple lookup for builtin functions.</span>
-    <span class="comment">// TODO #4: Return result.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="comment">// TODO #4: We need to implement background jobs.</span>
-        <span class="comment">// if is_background {</span>
-        <span class="comment">//     self.argv.pop();</span>
-        <span class="comment">//     self.fork();</span>
-        <span class="comment">// } else {</span>
-            <span class="self">self</span>.<span class="ident">fork_and_wait</span>();
-        <span class="comment">// }</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">nix</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">fork_and_wait</span>()
     }
 
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">fork</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="doccomment">/// Run a shell job in the background.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_background</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">nix</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">fork</span>()
+    }
+
+    <span class="kw">fn</span> <span class="ident">fork</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">nix</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">fork</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">ForkResult</span>::<span class="ident">Parent</span> { <span class="ident">child</span>, .. }) <span class="op">=&gt;</span> {
                 <span class="self">self</span>.<span class="ident">child</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">child</span>);
+                <span class="prelude-val">Ok</span>(())
             },
             <span class="prelude-val">Ok</span>(<span class="ident">ForkResult</span>::<span class="ident">Child</span>) <span class="op">=&gt;</span> {
-                <span class="self">self</span>.<span class="ident">exec</span>();
+                <span class="comment">// TODO #20: When running with raw mode we could buffer</span>
+                <span class="comment">// this and print it later, all at once in suspended raw mode.</span>
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">exec</span>() {
+                    <span class="ident">exit</span>(<span class="number">127</span>);
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">Ok</span>(())
+                }
             },
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> {
-                <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;error: {}&quot;</span>, <span class="ident">e</span>)
-            }
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">fork_and_wait</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="kw">fn</span> <span class="ident">fork_and_wait</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">nix</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">fork</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">ForkResult</span>::<span class="ident">Parent</span> { <span class="ident">child</span>, .. }) <span class="op">=&gt;</span> {
                 <span class="self">self</span>.<span class="ident">child</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">child</span>);
-                <span class="self">self</span>.<span class="ident">wait</span>();
+                <span class="self">self</span>.<span class="ident">wait</span>()
             },
             <span class="prelude-val">Ok</span>(<span class="ident">ForkResult</span>::<span class="ident">Child</span>) <span class="op">=&gt;</span> {
-                <span class="self">self</span>.<span class="ident">exec</span>();
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">exec</span>() {
+                    <span class="ident">exit</span>(<span class="number">127</span>);
+                } <span class="kw">else</span> {
+                    <span class="comment">// TODO: Waiting in the child?</span>
+                    <span class="macro">unimplemented</span><span class="macro">!</span>();
+                }
             },
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> {
-                <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;error: {}&quot;</span>, <span class="ident">e</span>)
-            }
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">exec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="kw">match</span> <span class="ident">execvp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">argv</span>[<span class="number">0</span>], <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">argv</span>) {
-            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> {
-                <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;error: {}: command not found&quot;</span>,
-                         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">argv</span>[<span class="number">0</span>].<span class="ident">to_string_lossy</span>());
-                <span class="ident">exit</span>(<span class="number">127</span>);
-            }
-        }
+    <span class="kw">fn</span> <span class="ident">exec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">nix</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="ident">execvp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">argv</span>[<span class="number">0</span>], <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">argv</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
     }
 
-    <span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+    <span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">nix</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">child</span> {
             <span class="prelude-val">Some</span>(<span class="ident">child</span>) <span class="op">=&gt;</span> {
                 <span class="kw">loop</span> {
                     <span class="kw">match</span> <span class="ident">waitpid</span>(<span class="ident">child</span>, <span class="prelude-val">None</span>) {
-                        <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">StillAlive</span>) <span class="op">=&gt;</span> {},
                         <span class="comment">// TODO #4: Cover other cases?</span>
-                        <span class="kw">_</span> <span class="op">=&gt;</span> <span class="kw">break</span>,
-                    }
+                        <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">StillAlive</span>) <span class="op">=&gt;</span> {},
+                        <span class="ident">s</span> <span class="op">=&gt;</span> <span class="kw">return</span> <span class="ident">s</span>,
+                    };
                 }
             },
-            <span class="kw">_</span> <span class="op">=&gt;</span> {}
+            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="macro">unimplemented</span><span class="macro">!</span>(),
         }
     }
 }
