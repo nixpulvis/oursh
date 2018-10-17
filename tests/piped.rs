@@ -13,12 +13,24 @@ fn hello_world_quoted() {
 
 #[test]
 fn simple_command() {
-    assert_piped_oursh!("head README.md -n 1", "# oursh\n")
+    assert_piped_oursh!("head README.md -n 1", "# oursh\n");
 }
 
 #[test]
-fn compound_command() {
-    assert_piped_oursh!("{ echo pi; }", "pi\n")
+#[ignore]
+fn chained_command() {
+    assert_piped_oursh!("false; true; echo 1", "1\n");
+}
+
+#[test]
+fn single_compound_command() {
+    assert_piped_oursh!("{ echo pi; }", "pi\n");
+}
+
+#[test]
+#[ignore]
+fn multiple_compound_command() {
+    assert_piped_oursh!("{ echo pi; echo e; }", "pi\ne\n");
 }
 
 #[test]
