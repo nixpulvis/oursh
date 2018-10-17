@@ -23,7 +23,7 @@ Options:
 ";
 
 // Our shell, for the greater good. Ready and waiting.
-fn main() {
+fn main() -> Result<(), ()> {
     // Parse argv and exit the program with an error message if it fails.
     let args = Docopt::new(USAGE)
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
@@ -39,7 +39,7 @@ fn main() {
             .expect("error reading file");
 
         // Run the program.
-        parse_and_run(&args)(&text);
+        parse_and_run(&args)(&text)
     } else {
         // Standard input file descriptor (0), used for user input from the
         // user of the shell.
@@ -53,33 +53,30 @@ fn main() {
 
             // Start a program running repl.
             repl::start(stdin, stdout, parse_and_run(&args));
+            Ok(())
         } else {
             // Fill a string buffer from STDIN.
             let mut text = String::new();
             stdin.lock().read_to_string(&mut text).unwrap();
 
             // Run the program.
-            parse_and_run(&args)(&text);
+            parse_and_run(&args)(&text)
         }
     }
 }
 
-fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) + 'a {
+fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<(), ()> + 'a {
     move |text: &String| {
         // Parse with the primary grammar and run each command in order.
-        match parse_primary(text.as_bytes()) {
-            Ok(program) => {
-                if args.get_bool("-#") {
-                    println!("{:#?}", program);
-                }
+        let program = parse_primary(text.as_bytes())?;
 
-                program.run()
-                    .expect(&format!("error running program: {:?}", program));
-            },
-            Err(()) => {
-                println!("error parsing text: {}", text);
-            }
+        // Print the program if the flag is given.
+        if args.get_bool("-#") {
+            println!("{:#?}", program);
         }
+
+        // Run it!
+        program.run()
     }
 }
 

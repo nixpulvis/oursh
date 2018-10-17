@@ -20,7 +20,7 @@ use repl::history::History;
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.
 // TODO: The F type should be more like `Fn(&impl Read) -> Result<...>`.
-pub fn start<F: Fn(&String)>(stdin: Stdin, stdout: Stdout, runner: F) {
+pub fn start<F: Fn(&String) -> Result<(), ()>>(stdin: Stdin, stdout: Stdout, runner: F) {
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
     let mut history = History::load();
