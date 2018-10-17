@@ -6,6 +6,7 @@
 use std::io::{Write, Stdin, Stdout};
 use std::process::exit;
 use nix::unistd;
+use nix::sys::wait::WaitStatus;
 use pwd::Passwd;
 use termion::cursor::DetectCursorPos;
 use termion::event::Key;
@@ -19,7 +20,6 @@ use repl::history::History;
 
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.
-// TODO: The F type should be more like `Fn(&impl Read) -> Result<...>`.
 pub fn start<F: Fn(&String) -> Result<(), ()>>(stdin: Stdin, stdout: Stdout, runner: F) {
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
@@ -54,11 +54,12 @@ pub fn start<F: Fn(&String) -> Result<(), ()>>(stdin: Stdin, stdout: Stdout, run
 
                 // Run the command.
                 stdout.suspend_raw_mode().unwrap();
-                runner(&text);
-                #[cfg(feature = "history")]
-                {
-                    history.add(&text, 1);
-                    history.reset_index();
+                if runner(&text).is_ok() {
+                    #[cfg(feature = "history")]
+                    {
+                        history.add(&text, 1);
+                        history.reset_index();
+                    }
                 }
                 stdout.activate_raw_mode().unwrap();
 

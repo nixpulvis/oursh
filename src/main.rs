@@ -1,16 +1,18 @@
 #![feature(alloc_system)]
 
+extern crate docopt;
+extern crate nix;
 extern crate oursh;
 extern crate termion;
-extern crate docopt;
 
 use std::env;
 use std::io::{self, Read};
 use std::fs::File;
+use docopt::{Docopt, ArgvMap, Value};
+use nix::sys::wait::WaitStatus;
 use oursh::program::{parse_primary, Program};
 use oursh::repl;
 use termion::is_tty;
-use docopt::{Docopt, ArgvMap, Value};
 
 // Write the Docopt usage string.
 const USAGE: &'static str = "
@@ -76,10 +78,14 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<(), ()> + 
         }
 
         // Run it!
-        let r = program.run();
-        println!("{:#?}", r);
-
-        Ok(())
+        match program.run() {
+            Ok(WaitStatus::Exited(p, c)) if c == 0 => {
+                Ok(())
+            },
+            _ => {
+                unreachable!();
+            }
+        }
     }
 }
 
