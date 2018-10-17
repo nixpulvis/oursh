@@ -672,6 +672,9 @@
                     <span class="comment">// XXX: Length is the worlds worst hash function.</span>
                     <span class="kw">let</span> <span class="ident">bridgefile</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;/tmp/.oursh_bridge-{}&quot;</span>, <span class="ident">program</span>.<span class="number">1</span>.<span class="ident">len</span>());
                     {
+                        <span class="comment">// TODO: Use our job interface without creating any</span>
+                        <span class="comment">// fucking files... The shebang isn&#39;t even a real</span>
+                        <span class="comment">// POSIX standard.</span>
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="ident">bridgefile</span>).<span class="ident">unwrap</span>();
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">interpreter</span> <span class="op">=</span> <span class="ident">interpreter</span>.<span class="ident">chars</span>()
                                                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span> <span class="kw">as</span> <span class="ident">u8</span>)
@@ -704,14 +707,11 @@
                         .<span class="ident">expect</span>(<span class="string">&quot;error swawning bridge process&quot;</span>);
                     <span class="ident">child</span>.<span class="ident">wait</span>()
                         .<span class="ident">expect</span>(<span class="string">&quot;error waiting for bridge process&quot;</span>);
+
+                    <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">Runtime</span>)
                 }
-                <span class="comment">// TODO #4: Suspend and restore raw mode.</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">process</span>::<span class="ident">Command</span>::<span class="ident">new</span>(<span class="ident">bridgefile</span>)
-                    .<span class="ident">spawn</span>()
-                    .<span class="ident">expect</span>(<span class="string">&quot;error swawning bridge process&quot;</span>);
-                <span class="ident">child</span>.<span class="ident">wait</span>()
-                    .<span class="ident">expect</span>(<span class="string">&quot;error waiting for bridge process&quot;</span>);
-                <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
             },
             <span class="kw">_</span> <span class="op">=&gt;</span> {
                 <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
