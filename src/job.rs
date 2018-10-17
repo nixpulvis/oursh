@@ -54,6 +54,8 @@ impl Job {
                 Ok(())
             },
             Ok(ForkResult::Child) => {
+                // TODO #20: When running with raw mode we could buffer
+                // this and print it later, all at once in suspended raw mode.
                 if let Err(_) = self.exec() {
                     exit(127);
                 } else {
