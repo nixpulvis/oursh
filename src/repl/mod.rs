@@ -228,8 +228,13 @@ impl Prompt {
     }
 
     pub fn sh_style(self) -> Self {
-        let version = "4.4";
-        Prompt(format!("sh-{}$ ", version))
+        const NAME: &'static str = "oursh";
+        const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+        let version = &VERSION[0..(VERSION.len() - 2)];
+        // TODO: Add a flag for pretending to be `sh`.
+        // let name = "sh";
+        // let version = "4.4";
+        Prompt(format!("{}-{}$ ", NAME, version))
     }
 
     pub fn nixpulvis_style(self) -> Self {
