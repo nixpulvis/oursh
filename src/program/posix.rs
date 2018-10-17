@@ -237,6 +237,9 @@ impl super::Command for Command {
                     // XXX: Length is the worlds worst hash function.
                     let bridgefile = format!("/tmp/.oursh_bridge-{}", program.1.len());
                     {
+                        // TODO: Use our job interface without creating any
+                        // fucking files... The shebang isn't even a real
+                        // POSIX standard.
                         let mut file = File::create(&bridgefile).unwrap();
                         let mut interpreter = interpreter.chars()
                                                        .map(|c| c as u8)
@@ -269,14 +272,11 @@ impl super::Command for Command {
                         .expect("error swawning bridge process");
                     child.wait()
                         .expect("error waiting for bridge process");
+
+                    Ok(WaitStatus::Exited(Pid::this(), 0))
+                } else {
+                    Err(Error::Runtime)
                 }
-                // TODO #4: Suspend and restore raw mode.
-                let mut child = process::Command::new(bridgefile)
-                    .spawn()
-                    .expect("error swawning bridge process");
-                child.wait()
-                    .expect("error waiting for bridge process");
-                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             _ => {
                 Ok(WaitStatus::Exited(Pid::this(), 0))
