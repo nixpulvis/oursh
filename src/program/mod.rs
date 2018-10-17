@@ -77,8 +77,6 @@
 
 use std::ffi::CString;
 use std::fmt::Debug;
-<<<<<<< HEAD
-use std::io::BufRead;
 use std::io::{self, BufRead};
 use std::result;
 use nix::unistd::Pid;
@@ -126,23 +124,6 @@ pub trait Program: Sized {
         for command in self.commands().iter() {
             command.run_background()?;
         }
-        Ok(())
-    }
-
-    /// Run the command in a background job.
-    fn run_background(&self) -> Result<(), ()> {
-        let commands: Vec<Box<Self::Command>> = self.commands()
-                                                    .iter()
-                                                    .cloned()
-                                                    .collect();
-        thread::spawn(move || {
-            let raw = io::stdout().into_raw_mode().unwrap();
-            for command in commands {
-                raw.suspend_raw_mode();
-                command.run();
-                raw.activate_raw_mode();
-            }
-        });
         Ok(())
     }
 }

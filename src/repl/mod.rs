@@ -22,7 +22,7 @@ use repl::history::History;
 
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.
-pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
+pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
     where F: Fn(&String) -> Result<()>
 {
     // Load history from file in $HOME.
