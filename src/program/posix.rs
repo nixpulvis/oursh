@@ -177,7 +177,7 @@ impl super::Command for Command {
             },
             Command::And(ref left, ref right) => {
                 match left.run() {
-                    Ok(WaitStatus::Exited(p, c)) if c == 0 => {
+                    Ok(WaitStatus::Exited(_, c)) if c == 0 => {
                         right.run().map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
@@ -186,7 +186,7 @@ impl super::Command for Command {
             },
             Command::Or(ref left, ref right) => {
                 match left.run() {
-                    Ok(WaitStatus::Exited(p, c)) if c != 0 => {
+                    Ok(WaitStatus::Exited(_, c)) if c != 0 => {
                         right.run().map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
@@ -284,7 +284,7 @@ impl super::Command for Command {
                 }
             },
             #[cfg(not(feature = "bridge"))]
-            Command::Bridgeshell(ref program) => {
+            Command::Bridgeshell(_) => {
                 unimplemented!();
             },
         }
