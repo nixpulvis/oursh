@@ -21,6 +21,7 @@ pub struct Job {
     // TODO: Call this pid?
     child: Option<Pid>,
     // TODO: Status should be part of `child`.
+    // TODO: Use our own type, so downstream use doesn't need `nix`.
     status: Option<WaitStatus>,
 }
 
@@ -40,19 +41,8 @@ impl Job {
     ///
     /// This function also does a simple lookup for builtin functions.
     // TODO #4: Return result.
-    pub fn run(&mut self) -> Result<(), ()> {
-        // TODO #4: Proper builtins, in program module.
-        if self.argv.len() > 0 && self.argv[0].to_bytes() == b"exit" {
-            exit(0);
-        }
-
-        // // TODO #4: This is a awful background parse :P
-        // if self.argv.last().map(|s| s.to_bytes()) == Some(b"&") {
-        //     self.argv.pop();
-        //     self.fork()
-        // } else {
-            self.fork_and_wait()
-        // }
+    pub fn run(&mut self) -> nix::Result<WaitStatus> {
+        self.fork_and_wait()
     }
 
     fn fork(&mut self) -> Result<(), ()> {
@@ -75,24 +65,21 @@ impl Job {
         }
     }
 
-    fn fork_and_wait(&mut self) -> Result<(), ()> {
+    fn fork_and_wait(&mut self) -> nix::Result<WaitStatus> {
         match fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
-                // TODO: Check status.
-                self.wait().map(|s| ()).map_err(|e| ())
+                self.wait()
             },
             Ok(ForkResult::Child) => {
                 if let Err(()) = self.exec() {
                     exit(127);
                 } else {
-                    Ok(())
+                    // TODO: Waiting in the child?
+                    unimplemented!();
                 }
             },
-            Err(e) => {
-                // println!("error: {}", e);
-                Err(())
-            }
+            Err(e) => Err(e),
         }
     }
 
@@ -111,20 +98,18 @@ impl Job {
         }
     }
 
-    fn wait(&self) -> Result<(), ()> {
+    fn wait(&self) -> nix::Result<WaitStatus> {
         match self.child {
             Some(child) => {
                 loop {
                     match waitpid(child, None) {
                         // TODO #4: Cover other cases?
                         Ok(WaitStatus::StillAlive) => {},
-                        Ok(_) => return Ok(()),
-                        Err(_) => return Err(()),
+                        s => return s,
                     };
                 }
-                unreachable!();
             },
-            _ => Err(()),
+            _ => unimplemented!(),
         }
     }
 }

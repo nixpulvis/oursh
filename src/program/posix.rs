@@ -114,6 +114,8 @@ use std::io::{Write, BufRead};
 use std::os::unix::fs::PermissionsExt;
 use std::process::{self, Stdio};
 use std::thread;
+use nix::unistd::Pid;
+use nix::sys::wait::WaitStatus;
 use job::Job;
 use program::Program as ProgramTrait;
 #[cfg(feature = "bridge")]
@@ -149,7 +151,7 @@ impl super::Program for Program {
 
 // The semantics of a single POSIX command.
 impl super::Command for Command {
-    fn run(&self) -> Result<(), ()> {
+    fn run(&self) -> nix::Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref words) => {
@@ -163,7 +165,7 @@ impl super::Command for Command {
                 for command in program.0.iter() {
                     command.run()?;
                 }
-                Ok(())
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Not(ref command) => {
                 // TODO #4: Flip status code.
@@ -173,13 +175,13 @@ impl super::Command for Command {
                 // TODO #4: Status check.
                 left.run()?;
                 right.run()?;
-                Ok(())
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Or(ref left, ref right) => {
                 // TODO #4: Status check.
                 left.run()?;
                 right.run()?;
-                Ok(())
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Subshell(ref program) => {
                 // TODO #4: Run in a *subshell* ffs.
@@ -215,7 +217,7 @@ impl super::Command for Command {
                             .expect("error waiting for piped command");
                     }
                 }
-                Ok(())
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Background(ref command) => {
                 let command = command.clone();
@@ -230,7 +232,7 @@ impl super::Command for Command {
                         .expect("error running command in background");
                 }).expect("error spawning thread");
                 println!("[{}]", handle.thread().name().unwrap());
-                Ok(())
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             #[cfg(feature = "bridge")]
             Command::Bridgeshell(ref program) => {
@@ -280,9 +282,11 @@ impl super::Command for Command {
                     .expect("error swawning bridge process");
                 child.wait()
                     .expect("error waiting for bridge process");
-                Ok(())
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
-            _ => { Ok(()) }
+            _ => {
+                Ok(WaitStatus::Exited(Pid::this(), 0))
+            },
         }
     }
 }

@@ -78,6 +78,8 @@
 use std::ffi::CString;
 use std::fmt::Debug;
 use std::io::BufRead;
+use nix::unistd::Pid;
+use nix::sys::wait::WaitStatus;
 
 /// A command is a task given by the user as part of a [`Program`](Program).
 ///
@@ -90,7 +92,7 @@ use std::io::BufRead;
 //          sane to try this with ENV too?
 pub trait Command: Debug {
     /// Run the command, returning a result of it's work.
-    fn run(&self) -> Result<(), ()>;
+    fn run(&self) -> nix::Result<WaitStatus>;
 
     /// Return the name of this command.
     ///
@@ -126,11 +128,11 @@ pub trait Program: Sized {
     fn commands(&self) -> &[Box<Self::Command>];
 
     /// Run the program sequentially.
-    fn run(&self) -> Result<(), ()> {
+    fn run(&self) -> nix::Result<WaitStatus> {
         for command in self.commands().iter() {
             command.run()?;
         }
-        Ok(())
+        Ok(WaitStatus::Exited(Pid::this(), 0))
     }
 }
 

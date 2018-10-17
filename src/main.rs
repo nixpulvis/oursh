@@ -76,7 +76,10 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<(), ()> + 
         }
 
         // Run it!
-        program.run()
+        let r = program.run();
+        println!("{:#?}", r);
+
+        Ok(())
     }
 }
 

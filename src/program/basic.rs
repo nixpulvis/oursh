@@ -1,6 +1,8 @@
 //! Single command programs with no features.
 use std::io::BufRead;
 use std::ffi::CString;
+use nix::unistd::Pid;
+use nix::sys::wait::WaitStatus;
 use job::Job;
 
 
@@ -39,10 +41,10 @@ pub struct Command(String);
 
 impl super::Command for Command {
     /// Treat each space blindly as an argument delimiter.
-    fn run(&self) -> Result<(), ()> {
+    fn run(&self) -> nix::Result<WaitStatus> {
         Job::new(self.0.split_whitespace().map(|a| {
             CString::new(a).expect("error reading argument")
-        }).collect()).run();
-        Ok(())
+        }).collect()).run()?;
+        Ok(WaitStatus::Exited(Pid::this(), 0))
     }
 }
