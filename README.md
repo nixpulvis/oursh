@@ -1,5 +1,7 @@
 # oursh
 [![Build Status](https://travis-ci.org/nixpulvis/oursh.svg?branch=master)](https://travis-ci.org/nixpulvis/oursh)
+[![Documentation](https://docs.rs/oursh/badge.svg)](https://docs.rs/oursh)
+[![Dependencies](https://deps.rs/repo/github/nixpulvis/oursh/status.svg)](https://deps.rs/repo/github/nixpulvis/oursh)
 
 This shell should be both POSIX compatible and yet modern and exciting. Fancy
 features should not be prevented by POSIX compatibility. This will effect the
@@ -9,8 +11,6 @@ The name of the shell is `oursh` which is both somewhat unique, and memorable.
 It's also a nice name to play with pseudo-satirical themes... right comrade?
 It's short (ish) and sneakily fits `rs` in it, which is the extension of Rust
 programs, the language this will be written in.
-
-- [Documentation][documentation]
 
 ## Features
 
