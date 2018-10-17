@@ -34,20 +34,19 @@ fn multiple_compound_command() {
 }
 
 #[test]
-#[ignore]
 fn not_command() {
-    assert_piped_oursh!(! "not true");
+    // TODO: Test status of the `oursh` command too.
+    // `assert_piped_oursh!(! "! true");`
+    assert_piped_oursh!("! true && echo 1", "");
 }
 
 #[test]
-#[ignore]
 fn and_command() {
     assert_piped_oursh!("true && echo 1", "1\n");
     assert_piped_oursh!("false && echo 1", "");
 }
 
 #[test]
-#[ignore]
 fn or_command() {
     assert_piped_oursh!("true || echo 1", "");
     assert_piped_oursh!("false || echo 1", "1\n");

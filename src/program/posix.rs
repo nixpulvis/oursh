@@ -158,12 +158,7 @@ impl super::Command for Command {
                     CString::new(&w.0 as &str)
                         .expect("error in word UTF-8")
                 }).collect();
-                match Job::new(argv).run() {
-                    Ok(WaitStatus::Exited(p, c)) if c == 0 => {
-                        Ok(WaitStatus::Exited(p, c))
-                    },
-                    _ => Err(Error::Runtime),
-                }
+                Job::new(argv).run().map_err(|_| Error::Runtime)
             },
             Command::Compound(ref program) => {
                 for command in program.0.iter() {
@@ -172,20 +167,31 @@ impl super::Command for Command {
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Not(ref command) => {
-                // TODO #4: Flip status code.
-                command.run()
+                match command.run() {
+                    Ok(WaitStatus::Exited(p, c)) => {
+                        Ok(WaitStatus::Exited(p, (c == 0) as i32))
+                    }
+                    Ok(s) => Ok(s),
+                    Err(_) => Err(Error::Runtime),
+                }
             },
             Command::And(ref left, ref right) => {
-                // TODO #4: Status check.
-                left.run()?;
-                right.run()?;
-                Ok(WaitStatus::Exited(Pid::this(), 0))
+                match left.run() {
+                    Ok(WaitStatus::Exited(p, c)) if c == 0 => {
+                        right.run().map_err(|_| Error::Runtime)
+                    },
+                    Ok(s) => Ok(s),
+                    Err(_) => Err(Error::Runtime),
+                }
             },
             Command::Or(ref left, ref right) => {
-                // TODO #4: Status check.
-                left.run()?;
-                right.run()?;
-                Ok(WaitStatus::Exited(Pid::this(), 0))
+                match left.run() {
+                    Ok(WaitStatus::Exited(p, c)) if c != 0 => {
+                        right.run().map_err(|_| Error::Runtime)
+                    },
+                    Ok(s) => Ok(s),
+                    Err(_) => Err(Error::Runtime),
+                }
             },
             Command::Subshell(ref program) => {
                 // TODO #4: Run in a *subshell* ffs.
