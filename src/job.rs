@@ -20,6 +20,8 @@ pub struct Job {
     argv: Vec<CString>,
     // TODO: Call this pid?
     child: Option<Pid>,
+    // TODO: Status should be part of `child`.
+    status: Option<WaitStatus>,
 }
 
 impl Job {
@@ -29,6 +31,8 @@ impl Job {
         Job {
             argv: argv,
             child: None,
+            status: None,
+
         }
     }
 
@@ -36,69 +40,91 @@ impl Job {
     ///
     /// This function also does a simple lookup for builtin functions.
     // TODO #4: Return result.
-    pub fn run(&mut self) {
-        // TODO #4: We need to implement background jobs.
-        // if is_background {
+    pub fn run(&mut self) -> Result<(), ()> {
+        // TODO #4: Proper builtins, in program module.
+        if self.argv.len() > 0 && self.argv[0].to_bytes() == b"exit" {
+            exit(0);
+        }
+
+        // // TODO #4: This is a awful background parse :P
+        // if self.argv.last().map(|s| s.to_bytes()) == Some(b"&") {
         //     self.argv.pop();
-        //     self.fork();
+        //     self.fork()
         // } else {
-            self.fork_and_wait();
+            self.fork_and_wait()
         // }
     }
 
-    #[allow(unused)]
-    fn fork(&mut self) {
+    fn fork(&mut self) -> Result<(), ()> {
         match fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
+                Ok(())
             },
             Ok(ForkResult::Child) => {
-                self.exec();
+                if let Err(()) = self.exec() {
+                    exit(127);
+                } else {
+                    Ok(())
+                }
             },
             Err(e) => {
-                println!("error: {}", e)
+                println!("error: {}", e);
+                Err(())
             }
         }
     }
 
-    fn fork_and_wait(&mut self) {
+    fn fork_and_wait(&mut self) -> Result<(), ()> {
         match fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
-                self.wait();
+                // TODO: Check status.
+                self.wait().map(|s| ()).map_err(|e| ())
             },
             Ok(ForkResult::Child) => {
-                self.exec();
+                if let Err(()) = self.exec() {
+                    exit(127);
+                } else {
+                    Ok(())
+                }
             },
             Err(e) => {
-                println!("error: {}", e)
+                // println!("error: {}", e);
+                Err(())
             }
         }
     }
 
-    fn exec(&self) {
+    fn exec(&self) -> Result<(), ()> {
+        // TODO #4: Where should we handle empty commands?
+        if self.argv.len() == 0 {
+            return Err(());
+        }
+
         match execvp(&self.argv[0], &self.argv) {
-            Ok(_) => unreachable!(),
-            Err(_) => {
-                println!("error: {}: command not found",
-                         &self.argv[0].to_string_lossy());
-                exit(127);
+            Ok(_) => Ok(()),
+            Err(e) => {
+                println!("error: {}", e);
+                Err(())
             }
         }
     }
 
-    fn wait(&self) {
+    fn wait(&self) -> Result<(), ()> {
         match self.child {
             Some(child) => {
                 loop {
                     match waitpid(child, None) {
-                        Ok(WaitStatus::StillAlive) => {},
                         // TODO #4: Cover other cases?
-                        _ => break,
-                    }
+                        Ok(WaitStatus::StillAlive) => {},
+                        Ok(_) => return Ok(()),
+                        Err(_) => return Err(()),
+                    };
                 }
+                unreachable!();
             },
-            _ => {}
+            _ => Err(()),
         }
     }
 }

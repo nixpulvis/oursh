@@ -157,37 +157,33 @@ impl super::Command for Command {
                     CString::new(&w.0 as &str)
                         .expect("error in word UTF-8")
                 }).collect();
-                Job::new(argv).run();
+                Job::new(argv).run()
             },
             Command::Compound(ref program) => {
                 for command in program.0.iter() {
-                    command.run()
-                        .expect("error running command");
+                    command.run()?;
                 }
+                Ok(())
             },
             Command::Not(ref command) => {
-                command.run()
-                    .expect("error running command");
                 // TODO #4: Flip status code.
+                command.run()
             },
             Command::And(ref left, ref right) => {
-                left.run()
-                    .expect("error running left command");
-                right.run()
-                    .expect("error running right command");
                 // TODO #4: Status check.
+                left.run()?;
+                right.run()?;
+                Ok(())
             },
             Command::Or(ref left, ref right) => {
-                left.run()
-                    .expect("error running left command");
-                right.run()
-                    .expect("error running right command");
                 // TODO #4: Status check.
+                left.run()?;
+                right.run()?;
+                Ok(())
             },
             Command::Subshell(ref program) => {
                 // TODO #4: Run in a *subshell* ffs.
                 program.run()
-                    .expect("error running subshell program");
             },
             Command::Pipeline(ref left, ref right) => {
                 // TODO: This is obviously a temporary hack.
@@ -219,6 +215,7 @@ impl super::Command for Command {
                             .expect("error waiting for piped command");
                     }
                 }
+                Ok(())
             },
             Command::Background(ref command) => {
                 let command = command.clone();
@@ -228,10 +225,12 @@ impl super::Command for Command {
                     .spawn(move ||
                 {
                     // TODO #4: Suspend and restore raw mode.
+                    // TODO: Error handling?
                     (*command).run()
                         .expect("error running command in background");
                 }).expect("error spawning thread");
                 println!("[{}]", handle.thread().name().unwrap());
+                Ok(())
             },
             #[cfg(feature = "bridge")]
             Command::Bridgeshell(ref program) => {
@@ -275,10 +274,16 @@ impl super::Command for Command {
                     child.wait()
                         .expect("error waiting for bridge process");
                 }
+                // TODO #4: Suspend and restore raw mode.
+                let mut child = process::Command::new(bridgefile)
+                    .spawn()
+                    .expect("error swawning bridge process");
+                child.wait()
+                    .expect("error waiting for bridge process");
+                Ok(())
             },
-            _ => unimplemented!(),
-        };
-        Ok(())
+            _ => { Ok(()) }
+        }
     }
 }
 
