@@ -78,33 +78,18 @@
 use std::ffi::CString;
 use std::fmt::Debug;
 use std::io::BufRead;
+use std::result;
 use nix::unistd::Pid;
 use nix::sys::wait::WaitStatus;
 
-/// A command is a task given by the user as part of a [`Program`](Program).
-///
-/// Each command is handled by a `Job`, and a single command may be run
-/// multiple times each as a new `Job`. Each time a command is run, the
-/// conditions within the control of the shell are reproduced; IO redirection,
-/// working directory, and even the environment are each faithfully preserved.
-///
-// TODO #4: We can reasonably reproduce the redirects, pwd... but is it
-//          sane to try this with ENV too?
-pub trait Command: Debug {
-    /// Run the command, returning a result of it's work.
-    fn run(&self) -> nix::Result<WaitStatus>;
+pub type Result<T> = result::Result<T, Error>;
 
-    /// Return the name of this command.
-    ///
-    /// This name *may* not be the same as the name given to the process by
-    /// the running `Job`.
-    // TODO: Ids?
-    fn name(&self) -> CString {
-        CString::new(format!("{:?}", self))
-            .expect("error in UTF-8 of format")
-    }
+#[derive(Debug)]
+pub enum Error {
+    Read,
+    Parse,
+    Runtime,
 }
-
 
 /// A program is as large as a file or as small as a line.
 ///
@@ -122,17 +107,41 @@ pub trait Program: Sized {
     type Command: Command;
 
     /// Parse a whole program from the given `reader`.
-    fn parse<R: BufRead>(reader: R) -> Result<Self, ()>;
+    fn parse<R: BufRead>(reader: R) -> Result<Self>;
 
     /// Return a list of all the commands in this program.
     fn commands(&self) -> &[Box<Self::Command>];
 
     /// Run the program sequentially.
-    fn run(&self) -> nix::Result<WaitStatus> {
+    fn run(&self) -> Result<WaitStatus> {
         for command in self.commands().iter() {
             command.run()?;
         }
         Ok(WaitStatus::Exited(Pid::this(), 0))
+    }
+}
+
+/// A command is a task given by the user as part of a [`Program`](Program).
+///
+/// Each command is handled by a `Job`, and a single command may be run
+/// multiple times each as a new `Job`. Each time a command is run, the
+/// conditions within the control of the shell are reproduced; IO redirection,
+/// working directory, and even the environment are each faithfully preserved.
+///
+// TODO #4: We can reasonably reproduce the redirects, pwd... but is it
+//          sane to try this with ENV too?
+pub trait Command: Debug {
+    /// Run the command, returning a result of it's work.
+    fn run(&self) -> Result<WaitStatus>;
+
+    /// Return the name of this command.
+    ///
+    /// This name *may* not be the same as the name given to the process by
+    /// the running `Job`.
+    // TODO: Ids?
+    fn name(&self) -> CString {
+        CString::new(format!("{:?}", self))
+            .expect("error in UTF-8 of format")
     }
 }
 
@@ -154,7 +163,7 @@ pub type AlternateProgram = BasicProgram;
 ///
 /// parse_primary(b"ls" as &[u8]);
 /// ```
-pub fn parse_primary<R: BufRead>(reader: R) -> Result<PrimaryProgram, ()> {
+pub fn parse_primary<R: BufRead>(reader: R) -> Result<PrimaryProgram> {
     PrimaryProgram::parse(reader)
 }
 
@@ -169,7 +178,7 @@ pub fn parse_primary<R: BufRead>(reader: R) -> Result<PrimaryProgram, ()> {
 /// assert!(parse::<PosixProgram, &[u8]>(program).is_ok());
 /// // TODO: assert!(parse::<BasicProgram, &[u8]>(program).is_err());
 /// ```
-pub fn parse<P: Program, R: BufRead>(reader: R) -> Result<P, ()> {
+pub fn parse<P: Program, R: BufRead>(reader: R) -> Result<P> {
     P::parse(reader)
 }
 

@@ -9,8 +9,7 @@ use std::env;
 use std::io::{self, Read};
 use std::fs::File;
 use docopt::{Docopt, ArgvMap, Value};
-use nix::sys::wait::WaitStatus;
-use oursh::program::{parse_primary, Program};
+use oursh::program::{Result, parse_primary, Program};
 use oursh::repl;
 use termion::is_tty;
 
@@ -25,7 +24,7 @@ Options:
 ";
 
 // Our shell, for the greater good. Ready and waiting.
-fn main() -> Result<(), ()> {
+fn main() -> Result<()> {
     // Parse argv and exit the program with an error message if it fails.
     let args = Docopt::new(USAGE)
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
@@ -67,7 +66,7 @@ fn main() -> Result<(), ()> {
     }
 }
 
-fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<(), ()> + 'a {
+fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
     move |text: &String| {
         // Parse with the primary grammar and run each command in order.
         let program = parse_primary(text.as_bytes())?;
@@ -78,14 +77,7 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<(), ()> + 
         }
 
         // Run it!
-        match program.run() {
-            Ok(WaitStatus::Exited(p, c)) if c == 0 => {
-                Ok(())
-            },
-            _ => {
-                unreachable!();
-            }
-        }
+        program.run().map(|_| ())
     }
 }
 

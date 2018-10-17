@@ -42,9 +42,7 @@ impl Job {
     /// This function also does a simple lookup for builtin functions.
     // TODO #4: Return result.
     pub fn run(&mut self) -> nix::Result<WaitStatus> {
-        let s = self.fork_and_wait();
-        println!("{:?}", s);
-        s
+        self.fork_and_wait()
     }
 
     fn fork(&mut self) -> Result<(), ()> {

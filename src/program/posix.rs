@@ -117,7 +117,7 @@ use std::thread;
 use nix::unistd::Pid;
 use nix::sys::wait::WaitStatus;
 use job::Job;
-use program::Program as ProgramTrait;
+use program::{Result, Error, Program as ProgramTrait};
 #[cfg(feature = "bridge")]
 use program::ast::Interpreter;
 
@@ -130,17 +130,17 @@ pub use self::ast::Command;
 impl super::Program for Program {
     type Command = Command;
 
-    fn parse<R: BufRead>(mut reader: R) -> Result<Self, ()> {
+    fn parse<R: BufRead>(mut reader: R) -> Result<Self> {
         let mut string = String::new();
         if reader.read_to_string(&mut string).is_err() {
-            return Err(());
+            return Err(Error::Read);
         }
 
         // TODO #8: Custom lexer here.
         if let Ok(parsed) = lalrpop::ProgramParser::new().parse(&string) {
             Ok(parsed)
         } else {
-            Err(())
+            Err(Error::Parse)
         }
     }
 
@@ -151,7 +151,7 @@ impl super::Program for Program {
 
 // The semantics of a single POSIX command.
 impl super::Command for Command {
-    fn run(&self) -> nix::Result<WaitStatus> {
+    fn run(&self) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref words) => {
@@ -159,7 +159,12 @@ impl super::Command for Command {
                     CString::new(&w.0 as &str)
                         .expect("error in word UTF-8")
                 }).collect();
-                Job::new(argv).run()
+                match Job::new(argv).run() {
+                    Ok(WaitStatus::Exited(p, c)) if c == 0 => {
+                        Ok(WaitStatus::Exited(p, c))
+                    },
+                    _ => Err(Error::Runtime),
+                }
             },
             Command::Compound(ref program) => {
                 for command in program.0.iter() {

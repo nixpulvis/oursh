@@ -6,13 +6,13 @@
 use std::io::{Write, Stdin, Stdout};
 use std::process::exit;
 use nix::unistd;
-use nix::sys::wait::WaitStatus;
 use pwd::Passwd;
 use termion::cursor::DetectCursorPos;
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::{style, color};
+use program::Result;
 #[cfg(feature = "completion")]
 use repl::completion::*;
 #[cfg(feature = "history")]
@@ -20,7 +20,9 @@ use repl::history::History;
 
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.
-pub fn start<F: Fn(&String) -> Result<(), ()>>(stdin: Stdin, stdout: Stdout, runner: F) {
+pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
+    where F: Fn(&String) -> Result<()>
+{
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
     let mut history = History::load();
