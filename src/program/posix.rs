@@ -113,7 +113,6 @@ use std::io::{Write, BufRead};
 #[cfg(feature = "bridge")]
 use std::os::unix::fs::PermissionsExt;
 use std::process::{self, Stdio};
-use std::thread;
 use nix::unistd::Pid;
 use nix::sys::wait::WaitStatus;
 use job::Job;
@@ -225,18 +224,8 @@ impl super::Command for Command {
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Background(ref command) => {
-                let command = command.clone();
-                let handle = thread::Builder::new()
-                    // TODO: Prettier text form of the command.
-                    .name(format!("{:?}", command))
-                    .spawn(move ||
-                {
-                    // TODO #4: Suspend and restore raw mode.
-                    // TODO: Error handling?
-                    (*command).run()
-                        .expect("error running command in background");
-                }).expect("error spawning thread");
-                println!("[{}]", handle.thread().name().unwrap());
+                command.run_background()?;
+                println!("[?] ???");
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             #[cfg(feature = "bridge")]
@@ -292,6 +281,19 @@ impl super::Command for Command {
             _ => {
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
+        }
+    }
+
+    fn run_background(&self) -> Result<()> {
+        match *self {
+            Command::Simple(ref words) => {
+                let argv = words.iter().map(|w| {
+                    CString::new(&w.0 as &str)
+                        .expect("error in word UTF-8")
+                }).collect();
+                Job::new(argv).run_background().map_err(|_| Error::Runtime)
+            },
+            _ => unimplemented!(),
         }
     }
 }

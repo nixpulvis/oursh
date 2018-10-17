@@ -119,6 +119,13 @@ pub trait Program: Sized {
         }
         Ok(WaitStatus::Exited(Pid::this(), 0))
     }
+
+    fn run_background(&self) -> Result<()> {
+        for command in self.commands().iter() {
+            command.run_background()?;
+        }
+        Ok(())
+    }
 }
 
 /// A command is a task given by the user as part of a [`Program`](Program).
@@ -133,6 +140,8 @@ pub trait Program: Sized {
 pub trait Command: Debug {
     /// Run the command, returning a result of it's work.
     fn run(&self) -> Result<WaitStatus>;
+
+    fn run_background(&self) -> Result<()>;
 
     /// Return the name of this command.
     ///

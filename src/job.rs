@@ -38,30 +38,29 @@ impl Job {
     }
 
     /// Run a shell job, waiting for the command to finish.
-    ///
-    /// This function also does a simple lookup for builtin functions.
-    // TODO #4: Return result.
     pub fn run(&mut self) -> nix::Result<WaitStatus> {
         self.fork_and_wait()
     }
 
-    fn fork(&mut self) -> Result<(), ()> {
+    /// Run a shell job in the background.
+    pub fn run_background(&mut self) -> nix::Result<()> {
+        self.fork()
+    }
+
+    fn fork(&mut self) -> Result<(), nix::Error> {
         match fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
                 Ok(())
             },
             Ok(ForkResult::Child) => {
-                if let Err(()) = self.exec() {
+                if let Err(_) = self.exec() {
                     exit(127);
                 } else {
                     Ok(())
                 }
             },
-            Err(e) => {
-                println!("error: {}", e);
-                Err(())
-            }
+            Err(e) => Err(e),
         }
     }
 
@@ -72,7 +71,7 @@ impl Job {
                 self.wait()
             },
             Ok(ForkResult::Child) => {
-                if let Err(()) = self.exec() {
+                if let Err(_) = self.exec() {
                     exit(127);
                 } else {
                     // TODO: Waiting in the child?
@@ -83,19 +82,8 @@ impl Job {
         }
     }
 
-    fn exec(&self) -> Result<(), ()> {
-        // TODO #4: Where should we handle empty commands?
-        if self.argv.len() == 0 {
-            return Err(());
-        }
-
-        match execvp(&self.argv[0], &self.argv) {
-            Ok(_) => Ok(()),
-            Err(e) => {
-                println!("error: {}", e);
-                Err(())
-            }
-        }
+    fn exec(&self) -> Result<(), nix::Error> {
+        execvp(&self.argv[0], &self.argv).map(|_| ())
     }
 
     fn wait(&self) -> nix::Result<WaitStatus> {
