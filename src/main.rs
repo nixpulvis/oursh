@@ -69,7 +69,13 @@ fn main() -> Result<()> {
 fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
     move |text: &String| {
         // Parse with the primary grammar and run each command in order.
-        let program = parse_primary(text.as_bytes())?;
+        let program = match parse_primary(text.as_bytes()) {
+            Ok(program) => program,
+            Err(e) => {
+                println!("{:?}", e);
+                return Err(e);
+            }
+        };
 
         // Print the program if the flag is given.
         if args.get_bool("-#") {
