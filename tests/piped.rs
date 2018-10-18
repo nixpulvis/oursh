@@ -17,7 +17,6 @@ fn simple_command() {
 }
 
 #[test]
-#[ignore]
 fn chained_command() {
     assert_piped_oursh!("false; true; echo 1", "1\n");
 }
@@ -28,7 +27,6 @@ fn single_compound_command() {
 }
 
 #[test]
-#[ignore]
 fn multiple_compound_command() {
     assert_piped_oursh!("{ echo pi; echo e; }", "pi\ne\n");
 }

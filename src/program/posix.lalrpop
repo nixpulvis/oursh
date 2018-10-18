@@ -34,8 +34,8 @@ List: ast::Program = {
 }
 
 Compound: ast::Program = {
-    <c: Compound> ";" <cs: Commands> => {
-        c.push(box cs.clone())
+    <cs: Commands> ";" <c: Compound> => {
+        c.insert(box cs.clone())
     },
     <cs: Commands> ";" => {
         ast::Program(vec![box cs])

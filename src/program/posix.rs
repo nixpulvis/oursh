@@ -436,6 +436,11 @@ pub mod ast {
             self.0.push(command);
             self
         }
+
+        pub(crate) fn insert(mut self, command: Box<Command>) -> Self {
+            self.0.insert(0, command);
+            self
+        }
     }
 }
 
