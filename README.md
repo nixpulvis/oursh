@@ -35,7 +35,7 @@ programs, the language this will be written in.
 - [ ] `man` / `-h` / `--help` parsing
 - [ ] Multi-line input
 - [ ] Modern scripting language (types, higher-order functions, threading?, etc)
-- [ ] obfuscated strings (`!'password'!`)
+- [ ] Obfuscated strings (`!'password'!`)
 - [ ] mosh like remote session support
 - [ ] Smart history, sync'd across devices
 - [ ] Pipe old commands without rerunning

@@ -5,11 +5,11 @@ extern crate nix;
 extern crate oursh;
 extern crate termion;
 
-use std::env;
+use std::{env, process};
 use std::io::{self, Read};
 use std::fs::File;
 use docopt::{Docopt, ArgvMap, Value};
-use oursh::program::{Result, parse_primary, Program};
+use oursh::program::{Result, Error, Program, parse_primary};
 use oursh::repl;
 use termion::is_tty;
 
@@ -61,7 +61,19 @@ fn main() -> Result<()> {
             stdin.lock().read_to_string(&mut text).unwrap();
 
             // Run the program.
-            parse_and_run(&args)(&text)
+            match parse_and_run(&args)(&text) {
+                Ok(u) => Ok(u),
+                Err(Error::Read) => {
+                    process::exit(1);
+                },
+                Err(Error::Parse) => {
+                    process::exit(2);
+                },
+                Err(Error::Runtime) => {
+                    // TODO: Exit with the last status code?
+                    process::exit(127);
+                }
+            }
         }
     }
 }
