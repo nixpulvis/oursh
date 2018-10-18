@@ -1,6 +1,6 @@
 # oursh
-[![Build Status](https://travis-ci.org/nixpulvis/oursh.svg?branch=master)](https://travis-ci.org/nixpulvis/oursh)
 [![Documentation](https://docs.rs/oursh/badge.svg)](https://docs.rs/oursh)
+[![Build Status](https://travis-ci.org/nixpulvis/oursh.svg?branch=master)](https://travis-ci.org/nixpulvis/oursh)
 [![Dependencies](https://deps.rs/repo/github/nixpulvis/oursh/status.svg)](https://deps.rs/repo/github/nixpulvis/oursh)
 
 This shell should be both POSIX compatible and yet modern and exciting. Fancy
