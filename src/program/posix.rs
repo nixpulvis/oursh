@@ -237,8 +237,8 @@ impl super::Command for Command {
                 }
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
-            Command::Background(ref command) => {
-                command.run_background()?;
+            Command::Background(ref program) => {
+                program.run_background()?;
                 println!("[?] ???");
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
