@@ -125,7 +125,15 @@ use program::ast::Interpreter;
 pub use self::ast::Program;
 pub use self::ast::Command;
 
-// The syntax and semantics of a single POSIX command.
+/// The syntax and semantics of a single POSIX command.
+///
+/// ```
+/// use std::io::Read;
+/// use oursh::program::Program as ProgramTrait;
+/// use oursh::program::posix::ast::Program;
+///
+/// assert!(Program::parse(b"ls" as &[u8]).is_ok());
+/// ```
 impl super::Program for Program {
     type Command = Command;
 
