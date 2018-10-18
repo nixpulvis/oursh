@@ -58,15 +58,14 @@ pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
                 stdout.suspend_raw_mode().unwrap();
                 if runner(&text).is_ok() {
                     #[cfg(feature = "history")]
-                    {
-                        history.add(&text, 1);
-                        history.reset_index();
-                    }
+                    history.add(&text, 1);
                 }
                 stdout.activate_raw_mode().unwrap();
 
                 // Reset for the next program.
                 text.clear();
+                #[cfg(feature = "history")]
+                history.reset_index();
 
                 // Print a boring static prompt.
                 prompt.display(&mut stdout);
