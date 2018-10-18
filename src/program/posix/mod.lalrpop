@@ -1,31 +1,45 @@
 use program::posix::ast;
+use program::posix::lex;
 use program::ast::Interpreter;
 
-grammar;
+grammar<'input>(text: &'input str);
 
 extern {
     type Location = usize;
-    type Error = lexer::LexicalError;
+    type Error = lex::Error;
 
-    enum lexer::Tok {
-        "\n" => lexer::Tok::Newline,
-        ";"  => lexer::Tok::Newline,
-        "&"  => lexer::Tok::Amper,
-        "{"  => lexer::Tok::RBrace,
-        "}"  => lexer::Tok::LBrace,
-        "!"  => lexer::Tok::Bang,
-        "|"  => lexer::Tok::Pipe,
-        "&&" => lexer::Tok::And,
-        "||" => lexer::Tok::Or,
-        "#!" => lexer::Tok::Shebang,
+    enum lex::Tok<'input> {
+        " "    => lex::Tok::Space,
+        "\t"   => lex::Tok::Tab,
+        "\n"   => lex::Tok::Linefeed,
+        ";"    => lex::Tok::Linefeed,
+        "&"    => lex::Tok::Amper,
+        "{"    => lex::Tok::RBrace,
+        "}"    => lex::Tok::LBrace,
+        "("    => lex::Tok::RParen,
+        ")"    => lex::Tok::LParen,
+        "`"    => lex::Tok::Backtick,
+        "!"    => lex::Tok::Bang,
+        "|"    => lex::Tok::Pipe,
+        "$"    => lex::Tok::Dollar,
+        "="    => lex::Tok::Equals,
+        "\\"   => lex::Tok::Backslack,
+        "\""   => lex::Tok::DoubleQuote,
+        "'"    => lex::Tok::SingleQuote,
+        ">"    => lex::Tok::RCaret,
+        "<"    => lex::Tok::LCaret,
+        "&&"   => lex::Tok::And,
+        "||"   => lex::Tok::Or,
+        "WORD" => lex::Tok::Word(<&'input str>),
+        "#!"   => lex::Tok::Shebang,
     }
 }
 
 pub Program: ast::Program = {
-    // TODO #8: We need our own lexer to make this rule work.
-    // <p: Program> "\n"+ <c: Commands> => {
-    //     p.push(box c.clone());
-    // },
+    <p: Program> "\n" <c: Complete> => {
+        println!("hit");
+        p.append(&c)
+    },
     Complete => <>,
 }
 
@@ -40,7 +54,7 @@ Complete: ast::Program = {
 
 List: ast::Program = {
     <l: List> ";" <cs: Commands> => {
-        l.push(box cs.clone())
+        l.push(&cs)
     },
     <l: List> "&" <cs: Commands> => {
         let bg = ast::Command::Background(box l);
@@ -53,7 +67,7 @@ List: ast::Program = {
 
 Compound: ast::Program = {
     <cs: Commands> ";" <c: Compound> => {
-        c.insert(box cs.clone())
+        c.insert(&cs)
     },
     <cs: Commands> ";" => {
         ast::Program(vec![box cs])
@@ -63,9 +77,9 @@ Compound: ast::Program = {
 Commands: ast::Command = {
     // TODO #15: Hopefully in fixing #8 and #10 this can play nicely.
     // NOTE: This can be successfully complied, but will break a doc tests.
-    "{#!" <i: Word+> ";" <t: Word*> "}" => {
-        let i = i.into_iter().map(|w| w.0).collect::<Vec<String>>().join(" ");
-        let t = t.into_iter().map(|w| w.0).collect::<Vec<String>>().join(" ");
+    "{" "#!" <i: "WORD"+> ";" <t: "WORD"*> "}" => {
+        let i = i.join(" ");
+        let t = t.join(" ");
         let b = ast::BridgedProgram(Interpreter::Other(i), t);
         ast::Command::Bridgeshell(box b)
     },
@@ -98,13 +112,13 @@ PipelineSeq: ast::Command = {
     <c: Command> => c,
 }
 
-// TODO #8: We *really* need a custom lexer so we can split this
-// on something.
-Command: ast::Command = Word+ => {
-    ast::Command::Simple(<>)
-};
-
-// TODO #8: Custom lexer plus proger rules needed.
-Word: ast::Word = r#"[a-zA-Z0-9-_=\.:/"'#$\(\)]+"# => {
-    ast::Word(<>.into())
+Command: ast::Command = {
+    <ws: ("WORD" " ")+> <w: "WORD"> => {
+        ast::Command::Simple(ws.iter().map(|(w, _)| {
+            ast::Word(w.to_string())
+        }).collect())
+    },
+    "WORD" => {
+        ast::Command::Simple(vec![ast::Word(<>.to_string())])
+    },
 };
