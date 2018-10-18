@@ -20,8 +20,8 @@ programs, the language this will be written in.
     - [ ] Variables `echo $foo`
     - [ ] Environment `echo $TERM`
     - [ ] Special variables `echo $?; echo $1`
-    - [ ] Compound commands `{ ls; date; }`
-    - [ ] Boolean status syntax `! true && false || true`
+    - [x] Compound commands `{ ls; date; }`
+    - [x] Boolean status syntax `! true && false || true`
     - [x] Subshells `(sleep 1; date)`
     - [ ] Background jobs `{ sleep 1; date; }& date`
 - [ ] Shebang block bridged programs
