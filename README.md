@@ -34,7 +34,11 @@ programs, the language this will be written in.
     - [ ] POSIX `sh` completion
 - [ ] `man` / `-h` / `--help` parsing
 - [ ] Multi-line input
-- [ ] Modern scripting language (types, higher-order functions, threading?, etc)
+- [ ] Modern scripting language
+    - [ ] Macros
+    - [ ] Types
+    - [ ] Higher-order functions
+    - [ ] Threading?
 - [ ] Obfuscated strings (`!'password'!`)
 - [ ] mosh like remote session support
 - [ ] Smart history, sync'd across devices
