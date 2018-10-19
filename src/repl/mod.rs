@@ -4,15 +4,22 @@
 //! completion or other potentially slow, or user defined behavior.
 
 use std::io::{Write, Stdin, Stdout};
-use std::process::exit;
 use nix::unistd;
 use pwd::Passwd;
-use termion::cursor::DetectCursorPos;
-use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
 use termion::{style, color};
 use program::Result;
+#[cfg(not(feature = "raw"))]
+use std::io::BufRead;
+#[cfg(feature = "raw")]
+use std::process::exit;
+#[cfg(feature = "raw")]
+use termion::cursor::DetectCursorPos;
+#[cfg(feature = "raw")]
+use termion::event::Key;
+#[cfg(feature = "raw")]
+use termion::input::TermRead;
+#[cfg(feature = "raw")]
+use termion::raw::IntoRawMode;
 #[cfg(feature = "completion")]
 use repl::completion::*;
 #[cfg(feature = "history")]
@@ -20,7 +27,8 @@ use repl::history::History;
 
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.
-pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
+#[allow(unused_mut)]
+pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
     where F: Fn(&String) -> Result<()>
 {
     // Load history from file in $HOME.
@@ -31,6 +39,7 @@ pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
     let prompt = Prompt::new().sh_style();
 
     // Convert the tty's stdout into raw mode.
+    #[cfg(feature = "raw")]
     let mut stdout = stdout.into_raw_mode()
         .expect("error opening raw mode");
 
@@ -38,13 +47,16 @@ pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
     prompt.display(&mut stdout);
 
     // XXX: Hack to get the prompt length.
+    #[cfg(feature = "raw")]
     let prompt_length = stdout.cursor_pos().unwrap().0;
 
     // TODO #5: We need a better state object for these values.
+    #[cfg(feature = "raw")]
     let mut text = String::new();
 
     // Iterate the keys as a user presses them.
     // TODO #5: Mouse?
+    #[cfg(feature = "raw")]
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Esc => {
@@ -211,6 +223,24 @@ pub fn start<F>(stdin: Stdin, stdout: Stdout, runner: F)
             },
             _ => {}
         }
+    }
+
+    #[cfg(not(feature = "raw"))]
+    for line in stdin.lock().lines() {
+        // XXX: Blindly read a full line.
+        let text = line.unwrap();
+
+        // XXX: Blindly run the text.
+        if runner(&text).is_ok() {
+            #[cfg(feature = "history")]
+            {
+                history.add(&text, 1);
+                history.reset_index();
+            }
+        }
+
+        // Display a brand spanking new prompt.
+        prompt.display(&mut stdout);
     }
 }
 
