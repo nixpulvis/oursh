@@ -104,7 +104,7 @@ pub enum Error {
 /// - What language information do we still need to store?
 pub trait Program: Sized {
     /// The type of each of this program's commands.
-    type Command: Command + 'static;
+    type Command: Command;
 
     /// Parse a whole program from the given `reader`.
     fn parse<R: BufRead>(reader: R) -> Result<Self>;
