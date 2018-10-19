@@ -16,7 +16,7 @@ maintenance = { status = "dexperimental" }
 travis-ci = { repository = "https://github.com/nixpulvis/oursh" }
 
 [features]
-default = ["history", "completion"]
+default = ["raw", "history", "completion"]
 
 bridge     = []
 completion = []
