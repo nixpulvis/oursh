@@ -112,9 +112,9 @@ use std::fs::{self, File};
 use std::io::{Write, BufRead};
 #[cfg(feature = "bridge")]
 use std::os::unix::fs::PermissionsExt;
-use std::process::{self, Stdio};
-use nix::unistd::Pid;
 use nix::sys::wait::WaitStatus;
+use nix::unistd::Pid;
+use std::process::{self, Stdio};
 use job::Job;
 use program::{Result, Error, Program as ProgramTrait};
 #[cfg(feature = "bridge")]
@@ -156,17 +156,33 @@ impl super::Program for Program {
     }
 }
 
+// TODO: lazy_static.
+// const BUILTINS: HashMap<&'static str, &'static Builtin> = HashMap::new(...);
+
 // The semantics of a single POSIX command.
 impl super::Command for Command {
     fn run(&self) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref words) => {
-                let argv = words.iter().map(|w| {
+                let argv: Vec<CString> = words.iter().map(|w| {
                     CString::new(&w.0 as &str)
                         .expect("error in word UTF-8")
                 }).collect();
-                Job::new(argv).run().map_err(|_| Error::Runtime)
+
+                if let Some(command) = argv.first() {
+                    match command.to_string_lossy().as_ref() {
+                        "exit" => {
+                            return Exit::run(argv.clone())
+                        },
+                        _ => {
+                            return Job::new(argv.clone()).run()
+                                          .map_err(|_| Error::Runtime)
+                        },
+                    }
+                } else {
+                    Ok(WaitStatus::Exited(Pid::this(), 0))
+                }
             },
             Command::Compound(ref program) => {
                 for command in program.0.iter() {
@@ -302,14 +318,34 @@ impl super::Command for Command {
     fn run_background(&self) -> Result<()> {
         match *self {
             Command::Simple(ref words) => {
-                let argv = words.iter().map(|w| {
-                    CString::new(&w.0 as &str)
-                        .expect("error in word UTF-8")
-                }).collect();
-                Job::new(argv).run_background().map_err(|_| Error::Runtime)
+                unimplemented!();
+                // let argv: Vec<CString> = words.iter().map(|w| {
+                //     CString::new(&w.0 as &str)
+                //         .expect("error in word UTF-8")
+                // }).collect();
+
+                // match argv.first() {
+                //     Some(command) => {
+                //         Job::new(argv).run_background()
+                //                       .map_err(|_| Error::Runtime)
+                //     }
+                //     None => Ok(())
+                // }
             },
             _ => unimplemented!(),
         }
+    }
+}
+
+trait Builtin {
+    fn run(argv: Vec<CString>) -> Result<WaitStatus>;
+}
+
+struct Exit;
+
+impl Builtin for Exit {
+    fn run(argv: Vec<CString>) -> Result<WaitStatus> {
+        process::exit(0)
     }
 }
 
