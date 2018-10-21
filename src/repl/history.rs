@@ -2,6 +2,7 @@
 use std::fs::File;
 use std::path::Path;
 use std::io::prelude::*;
+use std::env;
 
 /// The history of a user's provided commands.
 #[derive(Debug)]
@@ -68,8 +69,10 @@ impl History {
 
     pub fn load() -> Self {
         let mut history = History(None, vec![]);
-        if Path::new("/home/nixpulvis/.oursh_history").exists() {
-            let mut f = File::open("/home/nixpulvis/.oursh_history")
+        let home = env::var("HOME").expect("HOME variable not set.");
+        let history_path = format!("{}/.oursh_history", home);
+        if Path::new(&history_path).exists() {
+            let mut f = File::open(&history_path)
                 .expect("error cannot find history");
             let mut contents = String::new();
             f.read_to_string(&mut contents)
@@ -98,7 +101,9 @@ impl History {
     }
 
     pub fn save(&self) {
-        let mut f = File::create("/home/nixpulvis/.oursh_history")
+        let home = env::var("HOME").expect("HOME variable not set.");
+        let history_path = format!("{}/.oursh_history", home);
+        let mut f = File::create(&history_path)
             .expect("error cannot find history");
         for (text, _) in self.1.iter() {
             f.write_all(text.as_bytes())
