@@ -171,16 +171,19 @@ impl super::Command for Command {
                         .expect("error in word UTF-8")
                 }).collect();
 
-                if let Some(command) = argv.first() {
+                if let Some(command) = argv.clone().first() {
                     match command.to_string_lossy().as_ref() {
+                        ":" => {
+                            return Null::run(argv)
+                        }
                         "exit" => {
-                            return Exit::run(argv.clone())
+                            return Exit::run(argv)
                         },
                         "cd" => {
-                            return Cd::run(argv.clone())
+                            return Cd::run(argv)
                         },
                         _ => {
-                            return Job::new(argv.clone()).run()
+                            return Job::new(argv).run()
                                           .map_err(|_| Error::Runtime)
                         },
                     }
@@ -379,6 +382,14 @@ impl Builtin for Cd {
                 Ok(WaitStatus::Exited(Pid::this(), 1))
             }
         }
+    }
+}
+
+struct Null;
+
+impl Builtin for Null {
+    fn run(argv: Vec<CString>) -> Result<WaitStatus> {
+        Ok(WaitStatus::Exited(Pid::this(), 0))
     }
 }
 
