@@ -88,7 +88,7 @@ impl<'input> Lexer<'input> {
     }
 
     pub fn word(&mut self, start: usize) -> Result<(usize, Tok<'input>, usize), Error> {
-        let (mut end, mut ident) = self.take_while(start, is_ident_continue);
+        let (end, _) = self.take_while(start, is_ident_continue);
         Ok((start, Tok::Word(&self.input[start..end]), end))
     }
 
