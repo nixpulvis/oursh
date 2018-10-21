@@ -92,13 +92,24 @@ impl<'input> Lexer<'input> {
         Ok((start, Tok::Word(&self.input[start..end]), end))
     }
 
-    pub fn shebang_block(&mut self, start: usize) -> Option<(usize, Tok<'input>, usize)> {
-        let (end, line) = self.take_until(start, |ch| ch == '\n');
+    pub fn block(&mut self, start: usize) -> Result<(usize, Tok<'input>, usize), Error> {
+        if let Some((_, '#')) = self.lookahead {
+            // TODO: Matching '}' detection.
+            let (end, interp) = self.take_until(start, |c| c == ';' || c == '\n');
+            debug!("{:?}, {:?}", end, interp);
 
-        if line.starts_with("{#!") {
-            Some((start, Tok::Shebang, end))
+            debug!("before {:?}", self.lookahead);
+            self.advance();  // Move past the delim.
+            debug!("after {:?}", self.lookahead);
+
+            // TODO: Other kinds of shebang `{#!}`, `{#}`.
+            if interp.starts_with("{#!") {
+                Ok((start, Tok::Shebang, end))
+            } else {
+                Err(Error)
+            }
         } else {
-            None
+            Ok((start, Tok::LBrace, start+1))
         }
     }
 }
@@ -129,11 +140,11 @@ impl<'input> Iterator for Lexer<'input> {
     type Item = Span<'input>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        debug!("starting at: {:?}", self.lookahead);
         while let Some((i, c)) = self.advance() {
             let tok = match c {
                 '\n' => Some(Ok((i, Tok::Linefeed, i+1))),
-                '}'  => Some(Ok((i, Tok::RBrace, i+1))),
-                '{'  => Some(Ok((i, Tok::LBrace, i+1))),
+                ';'  => Some(Ok((i, Tok::Linefeed, i+1))),
                 ')'  => Some(Ok((i, Tok::RParen, i+1))),
                 '('  => Some(Ok((i, Tok::LParen, i+1))),
                 '`'  => Some(Ok((i, Tok::Backtick, i+1))),
@@ -163,12 +174,8 @@ impl<'input> Iterator for Lexer<'input> {
                     }
                 },
                 // TODO: Compund syntax.
-                '{' => {
-                    match self.shebang_block(i) {
-                        Some(token) => Some(Ok(token)),
-                        None => continue,
-                    }
-                },
+                '{' => Some(self.block(i)),
+                '}' => Some(Ok((i, Tok::RBrace, i+1))),
                 // XXX: ident isn't even the correct name...
                 c if is_ident_start(c) => {
                     let tok = self.word(i);

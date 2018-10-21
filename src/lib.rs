@@ -106,10 +106,14 @@ macro_rules! debug {
             eprintln!("-----");
         }
     };
-    ($format:expr, $e:expr) => {
+    ($format:expr, $($e:expr),*) => {
         if let Ok(_level) = ::std::env::var("LOG") {
-            eprintln!("----- {} -----", stringify!($e));
-            eprintln!($format, $e);
+            eprint!("----- ");
+            $(
+                eprint!("{} ", stringify!($e));
+            )*
+            eprintln!("-----");
+            eprintln!($format, $($e),*);
             eprintln!("-----");
         }
     };
