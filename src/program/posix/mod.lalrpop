@@ -23,7 +23,8 @@ extern {
         "|"    => lex::Tok::Pipe,
         "$"    => lex::Tok::Dollar,
         "="    => lex::Tok::Equals,
-        "\\"   => lex::Tok::Backslack,
+        "/"    => lex::Tok::Slash,
+        "\\"   => lex::Tok::Backslash,
         "\""   => lex::Tok::DoubleQuote,
         "'"    => lex::Tok::SingleQuote,
         ">"    => lex::Tok::RCaret,
@@ -114,9 +115,11 @@ PipelineSeq: ast::Command = {
 
 Command: ast::Command = {
     <ws: ("WORD" " ")+> <w: "WORD"> => {
-        ast::Command::Simple(ws.iter().map(|(w, _)| {
+        let mut ws: Vec<ast::Word> = ws.iter().map(|(w, _)| {
             ast::Word(w.to_string())
-        }).collect())
+        }).collect();
+        ws.push(ast::Word(w.to_string()));
+        ast::Command::Simple(ws)
     },
     "WORD" => {
         ast::Command::Simple(vec![ast::Word(<>.to_string())])
