@@ -26,8 +26,6 @@ macro_rules! shell {
     (> $executable:expr, $filename:expr) => {{
         use std::process::{Command, Stdio};
 
-        println!("hit");
-
         let mut child = Command::new($executable)
             .arg($filename)
             .stdout(Stdio::piped())
@@ -43,14 +41,25 @@ macro_rules! shell {
 }
 
 #[macro_export]
-// Run `oursh` and collect it's output for testing... Mmmmm testing.
-macro_rules! oursh {
+macro_rules! oursh_release {
     ($text:expr) => {{
         shell!("target/release/oursh", $text)
     }};
     // Run `oursh` on a script file argument and collect it's output.
     (> $filename:expr) => {{
         shell!(> "target/release/oursh", $filename)
+    }};
+}
+
+/// Run `oursh` and collect it's output for testing... Mmmmm testing.
+#[macro_export]
+macro_rules! oursh {
+    ($text:expr) => {{
+        shell!("target/debug/oursh", $text)
+    }};
+    // Run `oursh` on a script file argument and collect it's output.
+    (> $filename:expr) => {{
+        shell!(> "target/debug/oursh", $filename)
     }};
 }
 

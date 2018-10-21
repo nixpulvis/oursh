@@ -11,7 +11,7 @@ mod common;
 #[bench]
 fn oursh_script(b: &mut Bencher) {
     b.iter(|| {
-        assert_oursh!(> "scripts/hello_world.sh", "hello world\n")
+        oursh_release!(> "scripts/hello_world.sh");
     })
 }
 
