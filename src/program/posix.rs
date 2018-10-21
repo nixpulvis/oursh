@@ -106,6 +106,7 @@
 //!
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
+use std::env;
 use std::ffi::CString;
 #[cfg(feature = "bridge")]
 use std::fs::{self, File};
@@ -113,7 +114,7 @@ use std::io::{Write, BufRead};
 #[cfg(feature = "bridge")]
 use std::os::unix::fs::PermissionsExt;
 use nix::sys::wait::WaitStatus;
-use nix::unistd::Pid;
+use nix::unistd::{chdir, Pid};
 use std::process::{self, Stdio};
 use job::Job;
 use program::{Result, Error, Program as ProgramTrait};
@@ -174,6 +175,9 @@ impl super::Command for Command {
                     match command.to_string_lossy().as_ref() {
                         "exit" => {
                             return Exit::run(argv.clone())
+                        },
+                        "cd" => {
+                            return Cd::run(argv.clone())
                         },
                         _ => {
                             return Job::new(argv.clone()).run()
@@ -346,6 +350,35 @@ struct Exit;
 impl Builtin for Exit {
     fn run(argv: Vec<CString>) -> Result<WaitStatus> {
         process::exit(0)
+    }
+}
+
+struct Cd;
+
+impl Builtin for Cd {
+    fn run(argv: Vec<CString>) -> Result<WaitStatus> {
+        match argv.len() {
+            0 => {
+                panic!("command name not passed in argv[0]");
+            },
+            1 => {
+                let home = match env::var("HOME") {
+                    Ok(path) => path,
+                    Err(_) => return Err(Error::Runtime),
+                };
+                chdir(home.as_str()).map(|_| WaitStatus::Exited(Pid::this(), 0))
+                          .map_err(|_| Error::Runtime)
+            },
+            2 => {
+                chdir(&*argv[1].to_string_lossy().as_ref())
+                    .map(|_| WaitStatus::Exited(Pid::this(), 0))
+                    .map_err(|_| Error::Runtime)
+            },
+            _ => {
+                eprintln!("too many arguments");
+                Ok(WaitStatus::Exited(Pid::this(), 1))
+            }
+        }
     }
 }
 
