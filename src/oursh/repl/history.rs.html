@@ -108,11 +108,17 @@
 <span id="108">108</span>
 <span id="109">109</span>
 <span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Keeps a record of previous commands, used for completion and archeology.</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">env</span>;
 
 <span class="doccomment">/// The history of a user&#39;s provided commands.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -179,8 +185,10 @@
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">history</span> <span class="op">=</span> <span class="ident">History</span>(<span class="prelude-val">None</span>, <span class="macro">vec</span><span class="macro">!</span>[]);
-        <span class="kw">if</span> <span class="ident">Path</span>::<span class="ident">new</span>(<span class="string">&quot;/home/nixpulvis/.oursh_history&quot;</span>).<span class="ident">exists</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">open</span>(<span class="string">&quot;/home/nixpulvis/.oursh_history&quot;</span>)
+        <span class="kw">let</span> <span class="ident">home</span> <span class="op">=</span> <span class="ident">env</span>::<span class="ident">var</span>(<span class="string">&quot;HOME&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;HOME variable not set.&quot;</span>);
+        <span class="kw">let</span> <span class="ident">history_path</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}/.oursh_history&quot;</span>, <span class="ident">home</span>);
+        <span class="kw">if</span> <span class="ident">Path</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">history_path</span>).<span class="ident">exists</span>() {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">history_path</span>)
                 .<span class="ident">expect</span>(<span class="string">&quot;error cannot find history&quot;</span>);
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">contents</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
             <span class="ident">f</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">contents</span>)
@@ -209,7 +217,9 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">save</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">create</span>(<span class="string">&quot;/home/nixpulvis/.oursh_history&quot;</span>)
+        <span class="kw">let</span> <span class="ident">home</span> <span class="op">=</span> <span class="ident">env</span>::<span class="ident">var</span>(<span class="string">&quot;HOME&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;HOME variable not set.&quot;</span>);
+        <span class="kw">let</span> <span class="ident">history_path</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}/.oursh_history&quot;</span>, <span class="ident">home</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="ident">history_path</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;error cannot find history&quot;</span>);
         <span class="kw">for</span> (<span class="ident">text</span>, <span class="kw">_</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="number">1</span>.<span class="ident">iter</span>() {
             <span class="ident">f</span>.<span class="ident">write_all</span>(<span class="ident">text</span>.<span class="ident">as_bytes</span>())
