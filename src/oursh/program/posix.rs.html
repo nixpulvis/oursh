@@ -532,6 +532,24 @@
 <span id="532">532</span>
 <span id="533">533</span>
 <span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -887,7 +905,25 @@
 
 <span class="kw">impl</span> <span class="ident">Builtin</span> <span class="kw">for</span> <span class="ident">Exit</span> {
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="ident">argv</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
-        <span class="ident">process</span>::<span class="ident">exit</span>(<span class="number">0</span>)
+        <span class="kw">match</span> <span class="ident">argv</span>.<span class="ident">len</span>() {
+            <span class="number">0</span> <span class="op">=&gt;</span> {
+                <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;command name not passed in argv[0]&quot;</span>);
+            },
+            <span class="number">1</span> <span class="op">=&gt;</span> {
+                <span class="ident">process</span>::<span class="ident">exit</span>(<span class="number">0</span>)
+            },
+            <span class="number">2</span> <span class="op">=&gt;</span> {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">n</span>) <span class="op">=</span> <span class="ident">str</span>::<span class="ident">parse</span>(<span class="ident">argv</span>[<span class="number">1</span>].<span class="ident">to_str</span>().<span class="ident">unwrap</span>()) {
+                    <span class="ident">process</span>::<span class="ident">exit</span>(<span class="ident">n</span>)
+                } <span class="kw">else</span> {
+                    <span class="ident">process</span>::<span class="ident">exit</span>(<span class="number">2</span>)
+                }
+            },
+            <span class="kw">_</span> <span class="op">=&gt;</span> {
+                <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;too many arguments&quot;</span>);
+                <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">1</span>))
+            }
+        }
     }
 }
 
