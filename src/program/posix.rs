@@ -352,7 +352,25 @@ struct Exit;
 
 impl Builtin for Exit {
     fn run(argv: Vec<CString>) -> Result<WaitStatus> {
-        process::exit(0)
+        match argv.len() {
+            0 => {
+                panic!("command name not passed in argv[0]");
+            },
+            1 => {
+                process::exit(0)
+            },
+            2 => {
+                if let Ok(n) = str::parse(argv[1].to_str().unwrap()) {
+                    process::exit(n)
+                } else {
+                    process::exit(2)
+                }
+            },
+            _ => {
+                eprintln!("too many arguments");
+                Ok(WaitStatus::Exited(Pid::this(), 1))
+            }
+        }
     }
 }
 
