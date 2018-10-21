@@ -12,7 +12,7 @@ extern {
         " "    => lex::Tok::Space,
         "\t"   => lex::Tok::Tab,
         "\n"   => lex::Tok::Linefeed,
-        ";"    => lex::Tok::Linefeed,
+        ";"    => lex::Tok::Semi,
         "&"    => lex::Tok::Amper,
         "{"    => lex::Tok::LBrace,
         "}"    => lex::Tok::RBrace,
@@ -38,9 +38,9 @@ extern {
 
 pub Program: ast::Program = {
     <p: Program> "\n" <c: Complete> => {
-        println!("hit");
         p.append(&c)
     },
+    <p: Program> "\n" => p,
     Complete => <>,
 }
 

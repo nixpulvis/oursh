@@ -11,6 +11,7 @@ pub enum Tok<'input> {
     Space,
     Tab,
     Linefeed,
+    Semi,
     Amper,
     RBrace,
     LBrace,
@@ -117,7 +118,7 @@ impl<'input> Lexer<'input> {
 fn is_ident_start(ch: char) -> bool {
     // TODO: Unicode?
     match ch {
-        '-' | '_' | '.' |
+        '-' | '_' | '.' | ':' |
         'a'...'z' | 'A'...'Z' |
         '0'...'9' => true,
         _ => false,
@@ -144,7 +145,7 @@ impl<'input> Iterator for Lexer<'input> {
         while let Some((i, c)) = self.advance() {
             let tok = match c {
                 '\n' => Some(Ok((i, Tok::Linefeed, i+1))),
-                ';'  => Some(Ok((i, Tok::Linefeed, i+1))),
+                ';'  => Some(Ok((i, Tok::Semi, i+1))),
                 ')'  => Some(Ok((i, Tok::RParen, i+1))),
                 '('  => Some(Ok((i, Tok::LParen, i+1))),
                 '`'  => Some(Ok((i, Tok::Backtick, i+1))),
