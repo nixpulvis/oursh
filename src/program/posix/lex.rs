@@ -106,7 +106,9 @@ impl<'input> Lexer<'input> {
 fn is_ident_start(ch: char) -> bool {
     // TODO: Unicode?
     match ch {
-        '-' | '_' | '.' | 'a'...'z' | 'A'...'Z' => true,
+        '-' | '_' | '.' |
+        'a'...'z' | 'A'...'Z' |
+        '0'...'9' => true,
         _ => false,
     }
 }
@@ -114,7 +116,7 @@ fn is_ident_start(ch: char) -> bool {
 fn is_ident_continue(ch: char) -> bool {
     // TODO: Unicode?
     match ch {
-        '0'...'9' | '\'' => true,
+        '\'' => true,
         ch => is_ident_start(ch),
     }
 }
@@ -130,16 +132,12 @@ impl<'input> Iterator for Lexer<'input> {
         while let Some((i, c)) = self.advance() {
             let tok = match c {
                 '\n' => Some(Ok((i, Tok::Linefeed, i+1))),
-                // TODO: And,
-                '&'  => Some(Ok((i, Tok::Amper, i+1))),
                 '}'  => Some(Ok((i, Tok::RBrace, i+1))),
                 '{'  => Some(Ok((i, Tok::LBrace, i+1))),
                 ')'  => Some(Ok((i, Tok::RParen, i+1))),
                 '('  => Some(Ok((i, Tok::LParen, i+1))),
                 '`'  => Some(Ok((i, Tok::Backtick, i+1))),
                 '!'  => Some(Ok((i, Tok::Bang, i+1))),
-                // TODO: Or,
-                '|'  => Some(Ok((i, Tok::Pipe, i+1))),
                 '$'  => Some(Ok((i, Tok::Dollar, i+1))),
                 '='  => Some(Ok((i, Tok::Equals, i+1))),
                 '/'  => Some(Ok((i, Tok::Slash, i+1))),
@@ -148,12 +146,30 @@ impl<'input> Iterator for Lexer<'input> {
                 '\'' => Some(Ok((i, Tok::DoubleQuote, i+1))),
                 '>'  => Some(Ok((i, Tok::RCaret, i+1))),
                 '<'  => Some(Ok((i, Tok::LCaret, i+1))),
+                '&' => {
+                    if let Some((_, '&')) = self.lookahead {
+                        self.advance();
+                        Some(Ok((i, Tok::And, i+2)))
+                    } else {
+                        Some(Ok((i, Tok::Amper, i+1)))
+                    }
+                },
+                '|' => {
+                    if let Some((_, '|')) = self.lookahead {
+                        self.advance();
+                        Some(Ok((i, Tok::Or, i+2)))
+                    } else {
+                        Some(Ok((i, Tok::Pipe, i+1)))
+                    }
+                },
+                // TODO: Compund syntax.
                 '{' => {
                     match self.shebang_block(i) {
                         Some(token) => Some(Ok(token)),
                         None => continue,
                     }
                 },
+                // XXX: ident isn't even the correct name...
                 c if is_ident_start(c) => {
                     let tok = self.word(i);
                     Some(tok)
