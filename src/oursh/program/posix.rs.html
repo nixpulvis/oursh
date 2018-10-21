@@ -488,6 +488,39 @@
 <span id="488">488</span>
 <span id="489">489</span>
 <span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -597,6 +630,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/</span>
 
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">env</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::{<span class="self">self</span>, <span class="ident">File</span>};
@@ -604,7 +638,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">unix</span>::<span class="ident">fs</span>::<span class="ident">PermissionsExt</span>;
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::<span class="ident">WaitStatus</span>;
-<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::<span class="ident">Pid</span>;
+<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::{<span class="ident">chdir</span>, <span class="ident">Pid</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>::{<span class="self">self</span>, <span class="ident">Stdio</span>};
 <span class="kw">use</span> <span class="ident">job</span>::<span class="ident">Job</span>;
 <span class="kw">use</span> <span class="ident">program</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Error</span>, <span class="ident">Program</span> <span class="kw">as</span> <span class="ident">ProgramTrait</span>};
@@ -665,6 +699,9 @@
                     <span class="kw">match</span> <span class="ident">command</span>.<span class="ident">to_string_lossy</span>().<span class="ident">as_ref</span>() {
                         <span class="string">&quot;exit&quot;</span> <span class="op">=&gt;</span> {
                             <span class="kw">return</span> <span class="ident">Exit</span>::<span class="ident">run</span>(<span class="ident">argv</span>.<span class="ident">clone</span>())
+                        },
+                        <span class="string">&quot;cd&quot;</span> <span class="op">=&gt;</span> {
+                            <span class="kw">return</span> <span class="ident">Cd</span>::<span class="ident">run</span>(<span class="ident">argv</span>.<span class="ident">clone</span>())
                         },
                         <span class="kw">_</span> <span class="op">=&gt;</span> {
                             <span class="kw">return</span> <span class="ident">Job</span>::<span class="ident">new</span>(<span class="ident">argv</span>.<span class="ident">clone</span>()).<span class="ident">run</span>()
@@ -837,6 +874,35 @@
 <span class="kw">impl</span> <span class="ident">Builtin</span> <span class="kw">for</span> <span class="ident">Exit</span> {
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="ident">argv</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
         <span class="ident">process</span>::<span class="ident">exit</span>(<span class="number">0</span>)
+    }
+}
+
+<span class="kw">struct</span> <span class="ident">Cd</span>;
+
+<span class="kw">impl</span> <span class="ident">Builtin</span> <span class="kw">for</span> <span class="ident">Cd</span> {
+    <span class="kw">fn</span> <span class="ident">run</span>(<span class="ident">argv</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="ident">argv</span>.<span class="ident">len</span>() {
+            <span class="number">0</span> <span class="op">=&gt;</span> {
+                <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;command name not passed in argv[0]&quot;</span>);
+            },
+            <span class="number">1</span> <span class="op">=&gt;</span> {
+                <span class="kw">let</span> <span class="ident">home</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">env</span>::<span class="ident">var</span>(<span class="string">&quot;HOME&quot;</span>) {
+                    <span class="prelude-val">Ok</span>(<span class="ident">path</span>) <span class="op">=&gt;</span> <span class="ident">path</span>,
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">Runtime</span>),
+                };
+                <span class="ident">chdir</span>(<span class="ident">home</span>.<span class="ident">as_str</span>()).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
+                          .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">Runtime</span>)
+            },
+            <span class="number">2</span> <span class="op">=&gt;</span> {
+                <span class="ident">chdir</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">argv</span>[<span class="number">1</span>].<span class="ident">to_string_lossy</span>().<span class="ident">as_ref</span>())
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">Runtime</span>)
+            },
+            <span class="kw">_</span> <span class="op">=&gt;</span> {
+                <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;too many arguments&quot;</span>);
+                <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">1</span>))
+            }
+        }
     }
 }
 
