@@ -1,13 +1,23 @@
+//! Commands that are run from the shell directly, without forking another
+//! process.
+//!
+//! These commands take precedence over any executables with the same name
+//! in the `$PATH`.
 use std::ffi::CString;
 use std::{env, process};
 use nix::unistd::{chdir, Pid};
 use nix::sys::wait::WaitStatus;
 use program::{Result, Error};
 
+/// A builtin is a custom shell command, often changing the state of the
+/// shell in some way.
 pub trait Builtin {
+    /// Execute the shell builtin command, returning a retult of the
+    /// completion.
     fn run(argv: Vec<CString>) -> Result<WaitStatus>;
 }
 
+/// Exit builtin, alternative to ctrl-d.
 pub struct Exit;
 
 impl Builtin for Exit {
@@ -34,6 +44,7 @@ impl Builtin for Exit {
     }
 }
 
+/// Change directory (`cd`) builtin.
 pub struct Cd;
 
 impl Builtin for Cd {
@@ -64,6 +75,7 @@ impl Builtin for Cd {
     }
 }
 
+/// Noop builtin, same idea as `true`.
 pub struct Null;
 
 impl Builtin for Null {
