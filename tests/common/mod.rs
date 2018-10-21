@@ -1,6 +1,6 @@
 #[macro_export]
 // Run `oursh` and collect it's output for testing... Mmmmm testing.
-macro_rules! piped_oursh {
+macro_rules! oursh {
     ($text:expr) => {{
         use std::io::Write;
         use std::process::{Command, Stdio};
@@ -23,55 +23,9 @@ macro_rules! piped_oursh {
             .expect("error reading stdout");
 
         output
-    }}
-}
-
-#[macro_export]
-macro_rules! assert_piped_oursh {
-    (! $text:expr) => {{
-        use std::process::Output;
-
-        let Output { status, .. } = piped_oursh!($text);
-        assert!(!status.success());
     }};
-    ($text:expr) => {{
-        use std::process::Output;
-
-        let Output { status, stdout, stderr } = piped_oursh!($text);
-        let stdout = String::from_utf8_lossy(&stdout);
-        let stderr = String::from_utf8_lossy(&stderr);
-        println!("stdout: {}\nstderr: {}", stdout, stderr);
-        assert!(status.success());
-        assert!(stderr.is_empty());
-    }};
-    ($text:expr, $stdout:expr) => {{
-        use std::process::Output;
-
-        let Output { status, stdout, stderr } = piped_oursh!($text);
-        let stdout = String::from_utf8_lossy(&stdout);
-        let stderr = String::from_utf8_lossy(&stderr);
-        println!("stdout: {}\nstderr: {}", stdout, stderr);
-        assert!(status.success());
-        assert_eq!($stdout, stdout);
-        assert!(stderr.is_empty());
-    }};
-    ($text:expr, $stdout:expr, $stderr:expr) => {{
-        use std::process::Output;
-
-        let Output { status, stdout, stderr } = piped_oursh!($text);
-        let stdout = String::from_utf8_lossy(&stdout);
-        let stderr = String::from_utf8_lossy(&stderr);
-        println!("stdout: {}\nstderr: {}", stdout, stderr);
-        assert!(status.success());
-        assert_eq!($stdout, stdout);
-        assert_eq!($stderr, stderr);
-    }};
-}
-
-#[macro_export]
-// Run `oursh` on a script file argument and collect it's output.
-macro_rules! script_oursh {
-    ($filename:expr) => {{
+    // Run `oursh` on a script file argument and collect it's output.
+    (> $filename:expr) => {{
         use std::process::{Command, Stdio};
 
         let mut child = Command::new("target/debug/oursh")
@@ -85,38 +39,85 @@ macro_rules! script_oursh {
             .expect("error reading stdout");
 
         output
-    }}
+    }};
 }
 
 #[macro_export]
-macro_rules! assert_script_oursh {
+macro_rules! assert_oursh {
     (! $text:expr) => {{
         use std::process::Output;
 
-        let Output { status, .. } = script_oursh!($text);
+        let Output { status, .. } = oursh!($text);
         assert!(!status.success());
     }};
     ($text:expr) => {{
         use std::process::Output;
 
-        let Output { status, stderr, .. } = script_oursh!($text);
+        let Output { status, stdout, stderr } = oursh!($text);
+        let stdout = String::from_utf8_lossy(&stdout);
+        let stderr = String::from_utf8_lossy(&stderr);
+        println!("stdout: {}\nstderr: {}", stdout, stderr);
         assert!(status.success());
         assert!(stderr.is_empty());
     }};
     ($text:expr, $stdout:expr) => {{
         use std::process::Output;
 
-        let Output { status, stdout, stderr } = script_oursh!($text);
+        let Output { status, stdout, stderr } = oursh!($text);
+        let stdout = String::from_utf8_lossy(&stdout);
+        let stderr = String::from_utf8_lossy(&stderr);
+        println!("stdout: {}\nstderr: {}", stdout, stderr);
         assert!(status.success());
-        assert_eq!($stdout, String::from_utf8_lossy(&stdout));
+        assert_eq!($stdout, stdout);
         assert!(stderr.is_empty());
     }};
     ($text:expr, $stdout:expr, $stderr:expr) => {{
         use std::process::Output;
 
-        let Output { status, stdout, stderr } = script_oursh!($text);
+        let Output { status, stdout, stderr } = oursh!($text);
+        let stdout = String::from_utf8_lossy(&stdout);
+        let stderr = String::from_utf8_lossy(&stderr);
+        println!("stdout: {}\nstderr: {}", stdout, stderr);
         assert!(status.success());
-        assert_eq!($stdout, String::from_utf8_lossy(&stdout));
-        assert_eq!($stderr, String::from_utf8_lossy(&stderr));
+        assert_eq!($stdout, stdout);
+        assert_eq!($stderr, stderr);
+    }};
+    (> ! $filename:expr) => {{
+        use std::process::Output;
+
+        let Output { status, .. } = oursh!(> $filename);
+        assert!(!status.success());
+    }};
+    (> $filename:expr) => {{
+        use std::process::Output;
+
+        let Output { status, stdout, stderr } = oursh!($filename);
+        let stdout = String::from_utf8_lossy(&stdout);
+        let stderr = String::from_utf8_lossy(&stderr);
+        println!("stdout: {}\nstderr: {}", stdout, stderr);
+        assert!(status.success());
+        assert!(stderr.is_empty());
+    }};
+    (> $filename:expr, $stdout:expr) => {{
+        use std::process::Output;
+
+        let Output { status, stdout, stderr } = oursh!(> $filename);
+        let stdout = String::from_utf8_lossy(&stdout);
+        let stderr = String::from_utf8_lossy(&stderr);
+        println!("stdout: {}\nstderr: {}", stdout, stderr);
+        assert!(status.success());
+        assert_eq!($stdout, stdout);
+        assert!(stderr.is_empty());
+    }};
+    (> $filename:expr, $stdout:expr, $stderr:expr) => {{
+        use std::process::Output;
+
+        let Output { status, stdout, stderr } = oursh!($filename);
+        let stdout = String::from_utf8_lossy(&stdout);
+        let stderr = String::from_utf8_lossy(&stderr);
+        println!("stdout: {}\nstderr: {}", stdout, stderr);
+        assert!(status.success());
+        assert_eq!($stdout, stdout);
+        assert_eq!($stderr, stderr);
     }};
 }
