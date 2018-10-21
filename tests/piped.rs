@@ -6,6 +6,23 @@ fn hello_world() {
 }
 
 #[test]
+fn builtins() {
+    assert_piped_oursh!(":");
+    // assert_piped_oursh!("cd /; cd /home; cd -", "/\n");
+    // assert_piped_oursh!("cd /; pwd", "/\n");
+    // assert_piped_oursh!("cd a b");  // TODO: Check output status somehow.
+    // assert_piped_oursh!("cd; pwd", "$HOME\n");
+    assert_piped_oursh!("exit");
+    assert_piped_oursh!(! "exit 1");
+}
+
+#[test]
+#[ignore]
+fn forkbomb() {
+    assert_piped_oursh!(":(){ :|: & };:");
+}
+
+#[test]
 #[ignore]
 fn hello_world_quoted() {
     assert_piped_oursh!("echo \"hello world\"", "hello world\n");
