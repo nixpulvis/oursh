@@ -1,11 +1,10 @@
 #[macro_export]
-// Run `oursh` and collect it's output for testing... Mmmmm testing.
-macro_rules! oursh {
-    ($text:expr) => {{
+macro_rules! shell {
+    ($executable:expr, $text:expr) => {{
         use std::io::Write;
         use std::process::{Command, Stdio};
 
-        let mut child = Command::new("target/debug/oursh")
+        let mut child = Command::new($executable)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -24,11 +23,12 @@ macro_rules! oursh {
 
         output
     }};
-    // Run `oursh` on a script file argument and collect it's output.
-    (> $filename:expr) => {{
+    (> $executable:expr, $filename:expr) => {{
         use std::process::{Command, Stdio};
 
-        let mut child = Command::new("target/debug/oursh")
+        println!("hit");
+
+        let mut child = Command::new($executable)
             .arg($filename)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -39,6 +39,18 @@ macro_rules! oursh {
             .expect("error reading stdout");
 
         output
+    }};
+}
+
+#[macro_export]
+// Run `oursh` and collect it's output for testing... Mmmmm testing.
+macro_rules! oursh {
+    ($text:expr) => {{
+        shell!("target/release/oursh", $text)
+    }};
+    // Run `oursh` on a script file argument and collect it's output.
+    (> $filename:expr) => {{
+        shell!(> "target/release/oursh", $filename)
     }};
 }
 
