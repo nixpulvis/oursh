@@ -71,17 +71,39 @@
 <span id="71">71</span>
 <span id="72">72</span>
 <span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
 </pre><pre class="rust ">
+<span class="doccomment">//! Commands that are run from the shell directly, without forking another</span>
+<span class="doccomment">//! process.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! These commands take precedence over any executables with the same name</span>
+<span class="doccomment">//! in the `$PATH`.</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">env</span>, <span class="ident">process</span>};
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::{<span class="ident">chdir</span>, <span class="ident">Pid</span>};
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::<span class="ident">WaitStatus</span>;
 <span class="kw">use</span> <span class="ident">program</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Error</span>};
 
+<span class="doccomment">/// A builtin is a custom shell command, often changing the state of the</span>
+<span class="doccomment">/// shell in some way.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Builtin</span> {
+    <span class="doccomment">/// Execute the shell builtin command, returning a retult of the</span>
+    <span class="doccomment">/// completion.</span>
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="ident">argv</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span>;
 }
 
+<span class="doccomment">/// Exit builtin, alternative to ctrl-d.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Exit</span>;
 
 <span class="kw">impl</span> <span class="ident">Builtin</span> <span class="kw">for</span> <span class="ident">Exit</span> {
@@ -108,6 +130,7 @@
     }
 }
 
+<span class="doccomment">/// Change directory (`cd`) builtin.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cd</span>;
 
 <span class="kw">impl</span> <span class="ident">Builtin</span> <span class="kw">for</span> <span class="ident">Cd</span> {
@@ -138,6 +161,7 @@
     }
 }
 
+<span class="doccomment">/// Noop builtin, same idea as `true`.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Null</span>;
 
 <span class="kw">impl</span> <span class="ident">Builtin</span> <span class="kw">for</span> <span class="ident">Null</span> {

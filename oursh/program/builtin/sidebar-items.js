@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Cd",""],["Exit",""],["Null",""]],"trait":[["Builtin",""]]});
+initSidebarItems({"struct":[["Cd","Change directory (`cd`) builtin."],["Exit","Exit builtin, alternative to ctrl-d."],["Null","Noop builtin, same idea as `true`."]],"trait":[["Builtin","A builtin is a custom shell command, often changing the state of the shell in some way."]]});
