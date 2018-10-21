@@ -128,7 +128,7 @@ impl<'input> Iterator for Lexer<'input> {
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some((i, c)) = self.advance() {
-            return match c {
+            let tok = match c {
                 '\n' => Some(Ok((i, Tok::Linefeed, i+1))),
                 // TODO: And,
                 '&'  => Some(Ok((i, Tok::Amper, i+1))),
@@ -159,10 +159,12 @@ impl<'input> Iterator for Lexer<'input> {
                     Some(tok)
                 },
                 c if is_whitespace(c) => {
-                    Some(Ok((i, Tok::Space, i+1)))
+                    continue;
                 },
                 c => panic!("unexpected char {:?}", c),
-            }
+            };
+            debug!("emit: {:?}", tok);
+            return tok;
         }
         None
     }

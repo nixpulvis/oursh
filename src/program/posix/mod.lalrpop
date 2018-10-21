@@ -114,14 +114,7 @@ PipelineSeq: ast::Command = {
 }
 
 Command: ast::Command = {
-    <ws: ("WORD" " ")+> <w: "WORD"> => {
-        let mut ws: Vec<ast::Word> = ws.iter().map(|(w, _)| {
-            ast::Word(w.to_string())
-        }).collect();
-        ws.push(ast::Word(w.to_string()));
-        ast::Command::Simple(ws)
-    },
-    "WORD" => {
-        ast::Command::Simple(vec![ast::Word(<>.to_string())])
-    },
-};
+    "WORD"+ => ast::Command::Simple(<>.iter().map(|w| {
+        ast::Word(w.to_string())
+    }).collect())
+}
