@@ -174,7 +174,6 @@ impl<'input> Iterator for Lexer<'input> {
                         Some(Ok((i, Tok::Pipe, i+1)))
                     }
                 },
-                // TODO: Compund syntax.
                 '{' => Some(self.block(i)),
                 '}' => Some(Ok((i, Tok::RBrace, i+1))),
                 // XXX: ident isn't even the correct name...
