@@ -116,21 +116,25 @@ pub struct Word(pub String);
 
 impl Command {
     pub(crate) fn push(mut self, command: &Command) -> Self {
-        if let Command::Compound(ref mut v) = self {
-            v.push(box command.clone());
+        match self {
+            Command::Compound(ref mut c) => {
+                c.push(box command.clone());
+            },
+            c @ _ => {
+                return Command::Compound(vec![box c, box command.clone()]);
+            },
         }
-        self
-    }
 
-    pub(crate) fn insert(mut self, command: &Command) -> Self {
-        if let Command::Compound(ref mut v) = self {
-            v.insert(0, box command.clone());
-        }
         self
     }
 }
 
 impl Program {
+    pub(crate) fn insert(mut self, command: &Command) -> Self {
+        self.0.insert(0, box command.clone());
+        self
+    }
+
     pub(crate) fn append(mut self, program: &Program) -> Self {
         self.0.append(&mut program.0.iter().cloned().collect());
         self

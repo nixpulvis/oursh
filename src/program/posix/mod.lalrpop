@@ -42,35 +42,31 @@ extern {
 }
 
 pub Program: ast::Program = {
-    <p: Program> "\n" <c: Complete> => p.append(&c),
+    <p: Program> "\n" <l: Jobs> => p.append(&l),
     <p: Program> "\n" => p,
-    Complete => <>,
+    <p: Program> ";" <g: Jobs> => p.append(&g),
+    <p: Program> ";" => p,
+    Jobs => <>,
 }
 
-Complete: ast::Program = {
-    <l: List> ";" => ast::Program(vec![box l]),
-    <l: List> "&" => {
-        let bg = ast::Command::Background(box l);
-        ast::Program(vec![box bg])
+Jobs: ast::Program = {
+    <cs: Commands> "&" <j: Jobs> => {
+        j.insert(&ast::Command::Background(box cs))
     },
-    List => ast::Program(vec![box <>]),
+    Job => ast::Program(vec![box <>]),
 }
 
-List: ast::Command = {
-    <l: List> ";" <cs: Commands> => l.push(&cs),
-    <l: List> "&" <cs: Commands> => {
-        let bg = ast::Command::Background(box l);
-        ast::Command::Compound(vec![box bg, box cs])
+Job: ast::Command = {
+    <cs: Commands> "&" => {
+        ast::Command::Background(box cs)
     },
-    Commands => {
-        ast::Command::Compound(vec![box <>])
-    },
+    Commands => <>,
 }
 
 Compound: ast::Command = {
     <cs: Commands> ";" <c: Compound> => {
         match c {
-            c @ ast::Command::Compound(_) => c.insert(&cs),
+            c @ ast::Command::Compound(_) => c.push(&cs),
             c => ast::Command::Compound(vec![box cs, box c]),
         }
     },
@@ -84,7 +80,9 @@ Commands: ast::Command = {
         let b = ast::BridgedProgram(Interpreter::Other(s.into()), t.into());
         ast::Command::Bridgeshell(box b)
     },
-    "(" <c: List> ")" => c,
+    "(" <p: Program> ")" => {
+        ast::Command::Subshell(box p)
+    },
     "{" <c: Compound> "}" => c,
     "if" <cond: Compound> "then" <then: Compound> <els: Else> "fi" => {
         let left = ast::Command::And(box cond, box then);

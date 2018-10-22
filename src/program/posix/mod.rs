@@ -350,7 +350,7 @@ impl super::Command for Command {
     }
 
     fn run_background(&self) -> Result<()> {
-        unimplemented!();
+        Err(Error::Runtime)
     }
 }
 

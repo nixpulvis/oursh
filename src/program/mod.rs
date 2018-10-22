@@ -122,17 +122,7 @@ pub trait Program: Sized {
     }
 
     fn run_background(&self) -> Result<()> {
-        unimplemented!();
-        // for command in self.commands().iter() {
-        //     match command.run_background() {
-        //         Ok(WaitStatus::Exited(p, c)) if c != 0 => {
-        //             return Ok(WaitStatus::Exited(Pid::this(), c));
-        //         },
-        //         Err(e) => return Err(e),
-        //         _ => continue,
-        //     }
-        // }
-        // Ok(())
+        return Err(Error::Runtime)
     }
 }
 
