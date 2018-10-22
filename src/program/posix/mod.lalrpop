@@ -30,8 +30,13 @@ extern {
         "<"    => lex::Token::LCaret,
         "&&"   => lex::Token::And,
         "||"   => lex::Token::Or,
+        "if"   => lex::Token::If,
+        "then" => lex::Token::Then,
+        "else" => lex::Token::Else,
+        "elif" => lex::Token::Elif,
+        "fi"   => lex::Token::Fi,
         "WORD" => lex::Token::Word(<&'input str>),
-        "{#!"   => lex::Token::Shebang,
+        "{#!"  => lex::Token::Shebang,
     }
 }
 
@@ -65,6 +70,7 @@ List: ast::Program = {
     },
 }
 
+// TODO: This should really return a Pair/List Command, not a Program.
 Compound: ast::Program = {
     <cs: Commands> ";" <c: Compound> => {
         c.insert(&cs)
@@ -89,6 +95,12 @@ Commands: ast::Command = {
     "{" <c: Compound> "}" => {
         ast::Command::Compound(box c)
     },
+    "if" <cond: Compound> "then" <then: Compound> <els: Else> "fi" => {
+        ast::Command::Cond(box cond, box then, Some(box els))
+    },
+    "if" <cond: Compound> "then" <then: Compound> "fi" => {
+        ast::Command::Cond(box cond, box then, None)
+    },
     <cs: Commands> "&&" <p: Pipeline> => {
         ast::Command::And(box cs, box p)
     },
@@ -96,6 +108,18 @@ Commands: ast::Command = {
         ast::Command::Or(box cs, box p)
     },
     Pipeline => <>,
+}
+
+Else: ast::Program = {
+    "elif" <elif: Compound> "then" <then: Compound> => {
+        ast::Program(vec![box ast::Command::Cond(box elif, box then, None)])
+    },
+    "elif" <elif: Compound> "then" <then: Compound> <els: Else> => {
+        ast::Program(vec![box ast::Command::Cond(box elif, box then, Some(box els))])
+    },
+    "else" <els: Compound> => {
+        els
+    },
 }
 
 Pipeline: ast::Command = {

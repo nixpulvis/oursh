@@ -32,6 +32,18 @@ pub enum Token<'input> {
     LCaret,
     And,
     Or,
+    If,
+    Then,
+    Else,
+    Elif,
+    Fi,
+    Do,
+    Done,
+    Case,
+    Esac,
+    While,
+    Until,
+    For,
     Word(&'input str),
     Shebang,
 }
@@ -94,21 +106,29 @@ impl<'input> Lexer<'input> {
     }
 
     fn word(&mut self, start: usize) -> Result<(usize, Token<'input>, usize), Error> {
-        let (end, _) = self.take_while(start, is_word_continue);
-        Ok((start, Token::Word(&self.input[start..end]), end))
+        let (end, word) = self.take_while(start, is_word_continue);
+        let tok = match word {
+            "if"    => Token::If,
+            "then"  => Token::Then,
+            "else"  => Token::Else,
+            "elif"  => Token::Elif,
+            "fi"    => Token::Fi,
+            "do"    => Token::Do,
+            "done"  => Token::Done,
+            "case"  => Token::Case,
+            "esac"  => Token::Esac,
+            "while" => Token::While,
+            "until" => Token::Until,
+            "for"   => Token::For,
+            w       => Token::Word(w),
+        };
+
+        Ok((start, tok, end))
     }
 
     fn block(&mut self, start: usize) -> Result<(usize, Token<'input>, usize), Error> {
         if let Some((_, '#')) = self.lookahead {
             self.advance();  // Move past the matched '#'.
-            // // TODO: Matching '}' detection.
-            // let (end, interp) = self.take_until(start, |c| c == '!' || c == '\n');
-            // debug!("{:?}, {:?}", end, interp);
-
-            // debug!("before {:?}", self.lookahead);
-            // self.advance();  // Move past the delim.
-            // debug!("after {:?}", self.lookahead);
-
             // TODO: Distinguish kinds of Shebang.
             if let Some((_, '!')) = self.lookahead {
                 self.advance();  // Move past the matched '!'.

@@ -114,17 +114,25 @@ pub trait Program: Sized {
 
     /// Run the program sequentially.
     fn run(&self) -> Result<WaitStatus> {
+        let mut last = WaitStatus::Exited(Pid::this(), 0);
         for command in self.commands().iter() {
-            command.run()?;
+            last = command.run()?;
         }
-        Ok(WaitStatus::Exited(Pid::this(), 0))
+        Ok(last)
     }
 
     fn run_background(&self) -> Result<()> {
-        for command in self.commands().iter() {
-            command.run_background()?;
-        }
-        Ok(())
+        unimplemented!();
+        // for command in self.commands().iter() {
+        //     match command.run_background() {
+        //         Ok(WaitStatus::Exited(p, c)) if c != 0 => {
+        //             return Ok(WaitStatus::Exited(Pid::this(), c));
+        //         },
+        //         Err(e) => return Err(e),
+        //         _ => continue,
+        //     }
+        // }
+        // Ok(())
     }
 }
 

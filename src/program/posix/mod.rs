@@ -226,6 +226,21 @@ impl super::Command for Command {
                     Err(_) => Err(Error::Runtime),
                 }
             },
+            Command::Cond(ref cond, ref then, ref els) => {
+                match cond.run() {
+                    Ok(WaitStatus::Exited(p, c)) if c == 0 => {
+                        then.run().map_err(|_| Error::Runtime)
+                    },
+                    Ok(_) => {
+                        if let Some(els) = els {
+                            els.run().map_err(|_| Error::Runtime)
+                        } else {
+                            Ok(WaitStatus::Exited(Pid::this(), 0))
+                        }
+                    },
+                    Err(_) => Err(Error::Runtime),
+                }
+            },
             Command::Subshell(ref program) => {
                 // TODO #4: Run in a *subshell* ffs.
                 program.run()
