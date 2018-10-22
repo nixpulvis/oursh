@@ -42,9 +42,7 @@ extern {
 }
 
 pub Program: ast::Program = {
-    <p: Program> "\n" <c: Complete> => {
-        p.append(&c)
-    },
+    <p: Program> "\n" <c: Complete> => p.append(&c),
     <p: Program> "\n" => p,
     Complete => <>,
 }
@@ -59,9 +57,7 @@ Complete: ast::Program = {
 }
 
 List: ast::Command = {
-    <l: List> ";" <cs: Commands> => {
-        l.push(&cs)
-    },
+    <l: List> ";" <cs: Commands> => l.push(&cs),
     <l: List> "&" <cs: Commands> => {
         let bg = ast::Command::Background(box l);
         ast::Command::Compound(vec![box bg, box cs])
@@ -78,9 +74,7 @@ Compound: ast::Command = {
             c => ast::Command::Compound(vec![box cs, box c]),
         }
     },
-    <cs: Commands> ";" => {
-        cs
-    },
+    <cs: Commands> ";" => cs,
 }
 
 Commands: ast::Command = {
@@ -90,12 +84,8 @@ Commands: ast::Command = {
         let b = ast::BridgedProgram(Interpreter::Other(s.into()), t.into());
         ast::Command::Bridgeshell(box b)
     },
-    "(" <c: List> ")" => {
-        c
-    },
-    "{" <c: Compound> "}" => {
-        c
-    },
+    "(" <c: List> ")" => c,
+    "{" <c: Compound> "}" => c,
     "if" <cond: Compound> "then" <then: Compound> <els: Else> "fi" => {
         let left = ast::Command::And(box cond, box then);
         ast::Command::Or(box left, box els)
@@ -120,9 +110,7 @@ Else: ast::Command = {
         let left = ast::Command::And(box elif, box then);
         ast::Command::Or(box left, box els)
     },
-    "else" <els: Compound> => {
-        els
-    },
+    "else" <els: Compound> => els,
 }
 
 Pipeline: ast::Command = {
