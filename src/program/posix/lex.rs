@@ -172,7 +172,7 @@ impl<'input> Iterator for Lexer<'input> {
     type Item = Span<Token<'input>, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        debug!("starting at: {:?}", self.lookahead);
+        debug!("emit<start>: {:?}", self.lookahead);
         while let Some((i, c)) = self.advance() {
             let tok = match c {
                 '\n' => Some(Ok((i, Token::Linefeed, i+1))),
@@ -215,7 +215,7 @@ impl<'input> Iterator for Lexer<'input> {
                 },
                 c => panic!("unexpected char {:?}", c),
             };
-            debug!("emit: {:?}", tok);
+            debug!("emit<end>:   {:?}", tok);
             return tok;
         }
         None

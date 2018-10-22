@@ -101,20 +101,12 @@ extern crate lalrpop_util;
 macro_rules! debug {
     ($e:expr) => {
         if let Ok(_level) = ::std::env::var("LOG") {
-            eprintln!("----- {} -----", stringify!($e));
             eprintln!("{:#?}", $e);
-            eprintln!("-----");
         }
     };
     ($format:expr, $($e:expr),*) => {
         if let Ok(_level) = ::std::env::var("LOG") {
-            eprint!("----- ");
-            $(
-                eprint!("{} ", stringify!($e));
-            )*
-            eprintln!("-----");
             eprintln!($format, $($e),*);
-            eprintln!("-----");
         }
     };
 }
@@ -127,5 +119,11 @@ pub mod repl;
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_has_a_test() {}
+    fn debug_macro() {
+        debug!(1);
+        debug!(1 + 2);
+        debug!("addition: {}", 1 + 2);
+        debug!("{}", vec![1,2,3,4][2]);
+        debug!("{} = {} * {}", 15, 3, 5);
+    }
 }
