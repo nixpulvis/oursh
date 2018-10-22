@@ -76,7 +76,6 @@ fn cond_command() {
 }
 
 #[test]
-#[ignore]
 fn subshell_command() {
     assert_oursh!("( true )");
     assert_oursh!("(echo 1)", "1\n");
