@@ -193,11 +193,12 @@ impl super::Command for Command {
                     Ok(WaitStatus::Exited(Pid::this(), 0))
                 }
             },
-            Command::Compound(ref program) => {
-                for command in program.0.iter() {
-                    command.run()?;
+            Command::Compound(ref commands) => {
+                let mut last = WaitStatus::Exited(Pid::this(), 0);
+                for command in commands.iter() {
+                    last = command.run()?;
                 }
-                Ok(WaitStatus::Exited(Pid::this(), 0))
+                Ok(last)
             },
             Command::Not(ref command) => {
                 match command.run() {

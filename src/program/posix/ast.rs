@@ -29,8 +29,7 @@ pub enum Command {
     /// ```sh
     /// { ls ; }
     /// ```
-    // TODO #10: We are currently overpermissive here.
-    Compound(Box<Program>),
+    Compound(Vec<Box<Command>>),
 
     /// Performs boolean negation to the status code of the inner
     /// command.
@@ -62,7 +61,7 @@ pub enum Command {
     /// ```
     Or(Box<Command>, Box<Command>),
 
-    Cond(Box<Program>, Box<Program>, Option<Box<Program>>),
+    Cond(Box<Command>, Box<Command>, Option<Box<Command>>),
 
     /// Run the inner **program** in a sub-shell environment.
     ///
@@ -91,7 +90,7 @@ pub enum Command {
     ///   sleep 1; echo "ping";
     /// done &
     /// ```
-    Background(Box<Program>),
+    Background(Box<Command>),
 
     /// Run a program through another parser/interpreter.
     ///
@@ -117,17 +116,23 @@ pub enum Command {
 pub struct Word(pub String);
 
 
-impl Program {
+impl Command {
     pub(crate) fn push(mut self, command: &Command) -> Self {
-        self.0.push(box command.clone());
+        if let Command::Compound(ref mut v) = self {
+            v.push(box command.clone());
+        }
         self
     }
 
     pub(crate) fn insert(mut self, command: &Command) -> Self {
-        self.0.insert(0, box command.clone());
+        if let Command::Compound(ref mut v) = self {
+            v.insert(0, box command.clone());
+        }
         self
     }
+}
 
+impl Program {
     pub(crate) fn append(mut self, program: &Program) -> Self {
         self.0.append(&mut program.0.iter().cloned().collect());
         self

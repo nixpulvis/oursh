@@ -49,34 +49,37 @@ pub Program: ast::Program = {
 }
 
 Complete: ast::Program = {
-    <l: List> ";" => l,
+    <l: List> ";" => ast::Program(vec![box l]),
     <l: List> "&" => {
         let bg = ast::Command::Background(box l);
         ast::Program(vec![box bg])
     },
-    List => <>,
+    List => ast::Program(vec![box <>]),
 }
 
-List: ast::Program = {
+List: ast::Command = {
     <l: List> ";" <cs: Commands> => {
         l.push(&cs)
     },
     <l: List> "&" <cs: Commands> => {
         let bg = ast::Command::Background(box l);
-        ast::Program(vec![box bg, box cs])
+        ast::Command::Compound(vec![box bg, box cs])
     },
     Commands => {
-        ast::Program(vec![box <>])
+        ast::Command::Compound(vec![box <>])
     },
 }
 
 // TODO: This should really return a Pair/List Command, not a Program.
-Compound: ast::Program = {
+Compound: ast::Command = {
     <cs: Commands> ";" <c: Compound> => {
-        c.insert(&cs)
+        match c {
+            c @ ast::Command::Compound(_) => c.insert(&cs),
+            c => ast::Command::Compound(vec![box cs, box c]),
+        }
     },
     <cs: Commands> ";" => {
-        ast::Program(vec![box cs])
+        cs
     },
 }
 
@@ -93,7 +96,7 @@ Commands: ast::Command = {
         ast::Command::Subshell(box p)
     },
     "{" <c: Compound> "}" => {
-        ast::Command::Compound(box c)
+        c
     },
     "if" <cond: Compound> "then" <then: Compound> <els: Else> "fi" => {
         ast::Command::Cond(box cond, box then, Some(box els))
@@ -110,12 +113,12 @@ Commands: ast::Command = {
     Pipeline => <>,
 }
 
-Else: ast::Program = {
+Else: ast::Command = {
     "elif" <elif: Compound> "then" <then: Compound> => {
-        ast::Program(vec![box ast::Command::Cond(box elif, box then, None)])
+        ast::Command::Cond(box elif, box then, None)
     },
     "elif" <elif: Compound> "then" <then: Compound> <els: Else> => {
-        ast::Program(vec![box ast::Command::Cond(box elif, box then, Some(box els))])
+        ast::Command::Cond(box elif, box then, Some(box els))
     },
     "else" <els: Compound> => {
         els

@@ -23,6 +23,7 @@ programs, the language this will be written in.
     - [ ] Special variables `echo $?; echo $1`
     - [x] Compound commands `{ ls; date; }`
     - [x] Boolean status syntax `! true && false || true`
+    - [x] Conditionals `if ; then ; elif ; then ; else ; fi`
     - [x] Subshells `(sleep 1; date)`
     - [ ] Background jobs `{ sleep 1; date; }& date`
 - [ ] Shebang block bridged programs
