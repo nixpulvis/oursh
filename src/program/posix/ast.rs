@@ -61,8 +61,6 @@ pub enum Command {
     /// ```
     Or(Box<Command>, Box<Command>),
 
-    Cond(Box<Command>, Box<Command>, Option<Box<Command>>),
-
     /// Run the inner **program** in a sub-shell environment.
     ///
     /// ### Examples

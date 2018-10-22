@@ -99,10 +99,11 @@ Commands: ast::Command = {
         c
     },
     "if" <cond: Compound> "then" <then: Compound> <els: Else> "fi" => {
-        ast::Command::Cond(box cond, box then, Some(box els))
+        let left = ast::Command::And(box cond, box then);
+        ast::Command::Or(box left, box els)
     },
     "if" <cond: Compound> "then" <then: Compound> "fi" => {
-        ast::Command::Cond(box cond, box then, None)
+        ast::Command::And(box cond, box then)
     },
     <cs: Commands> "&&" <p: Pipeline> => {
         ast::Command::And(box cs, box p)
@@ -115,10 +116,11 @@ Commands: ast::Command = {
 
 Else: ast::Command = {
     "elif" <elif: Compound> "then" <then: Compound> => {
-        ast::Command::Cond(box elif, box then, None)
+        ast::Command::And(box elif, box then)
     },
     "elif" <elif: Compound> "then" <then: Compound> <els: Else> => {
-        ast::Command::Cond(box elif, box then, Some(box els))
+        let left = ast::Command::And(box elif, box then);
+        ast::Command::Or(box left, box els)
     },
     "else" <els: Compound> => {
         els
