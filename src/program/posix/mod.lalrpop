@@ -71,7 +71,6 @@ List: ast::Command = {
     },
 }
 
-// TODO: This should really return a Pair/List Command, not a Program.
 Compound: ast::Command = {
     <cs: Commands> ";" <c: Compound> => {
         match c {
