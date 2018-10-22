@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","A lexer error."],["Token","Every token in the langauge, these are the terminals of the grammar."]],"struct":[["Lexer","A lexer to feed the parser gernerated by LALRPOP."]],"type":[["Span","A result type wrapping a token with start and end locations."]]});

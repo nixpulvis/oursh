@@ -221,6 +221,14 @@
 <span id="221">221</span>
 <span id="222">222</span>
 <span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Parsing and handling program syntax(es) of the shell.</span>
 <span class="doccomment">//!</span>
@@ -338,17 +346,25 @@
 
     <span class="doccomment">/// Run the program sequentially.</span>
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last</span> <span class="op">=</span> <span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>);
         <span class="kw">for</span> <span class="ident">command</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">commands</span>().<span class="ident">iter</span>() {
-            <span class="ident">command</span>.<span class="ident">run</span>()<span class="question-mark">?</span>;
+            <span class="ident">last</span> <span class="op">=</span> <span class="ident">command</span>.<span class="ident">run</span>()<span class="question-mark">?</span>;
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
+        <span class="prelude-val">Ok</span>(<span class="ident">last</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">run_background</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">for</span> <span class="ident">command</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">commands</span>().<span class="ident">iter</span>() {
-            <span class="ident">command</span>.<span class="ident">run_background</span>()<span class="question-mark">?</span>;
-        }
-        <span class="prelude-val">Ok</span>(())
+        <span class="macro">unimplemented</span><span class="macro">!</span>();
+        <span class="comment">// for command in self.commands().iter() {</span>
+        <span class="comment">//     match command.run_background() {</span>
+        <span class="comment">//         Ok(WaitStatus::Exited(p, c)) if c != 0 =&gt; {</span>
+        <span class="comment">//             return Ok(WaitStatus::Exited(Pid::this(), c));</span>
+        <span class="comment">//         },</span>
+        <span class="comment">//         Err(e) =&gt; return Err(e),</span>
+        <span class="comment">//         _ =&gt; continue,</span>
+        <span class="comment">//     }</span>
+        <span class="comment">// }</span>
+        <span class="comment">// Ok(())</span>
     }
 }
 
