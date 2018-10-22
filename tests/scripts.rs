@@ -8,7 +8,7 @@ mod common;
 #[test]
 fn hello_world() {
     assert_oursh!(> "./scripts/hello_world.sh",
-                         "hello world\n");
+                    "hello world\n");
 }
 
 #[test]
@@ -21,7 +21,7 @@ fn multiline() {
 fn date() {
     let date = Local::now().format("%Y-%m-%d").to_string();
     assert_oursh!(> "./scripts/date.oursh",
-                         format!("{}\n", date));
+                    format!("{}\n", date));
 }
 
 #[test]

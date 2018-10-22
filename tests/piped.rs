@@ -6,14 +6,23 @@ fn hello_world() {
 }
 
 #[test]
-fn builtins() {
-    assert_oursh!(":");
-    // assert_oursh!("cd /; cd /home; cd -", "/\n");
+fn builtin_cd() {
     assert_oursh!("cd /; pwd", "/\n");
-    // assert_oursh!(! "cd a b");  // TODO: Check output status somehow.
     // assert_oursh!("cd; pwd", "$HOME\n");
+    // assert_oursh!("cd ~; pwd", "$HOME\n");
+    // assert_oursh!("cd /; cd /home; cd -", "/\n");
+    // assert_oursh!(! "cd a b");  // TODO: Check output status somehow.
+}
+
+#[test]
+fn builtin_exit() {
     assert_oursh!("exit");
     assert_oursh!(! "exit 1");
+}
+
+#[test]
+fn builtin_null() {
+    assert_oursh!(":");
 }
 
 #[test]
