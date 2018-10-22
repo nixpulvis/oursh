@@ -148,7 +148,7 @@ impl super::Program for Program {
 
         // TODO #8: Custom lexer here.
         let lexer = lex::Lexer::new(&string);
-        let parser = lalrpop::ProgramParser::new();
+        let parser = parse::ProgramParser::new();
         match parser.parse(&string, lexer) {
             Ok(parsed) => Ok(parsed),
             Err(e) => {
@@ -364,4 +364,4 @@ pub mod lex;
 // enjoy.
 //
 // The code for this module is located in `src/program/posix/mod.lalrpop`.
-lalrpop_mod!(pub lalrpop, "/program/posix/mod.rs");
+lalrpop_mod!(pub parse, "/program/posix/mod.rs");

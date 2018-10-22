@@ -116,8 +116,13 @@ pub mod program;
 pub mod repl;
 
 
+#[macro_use]
+#[cfg(test)]
+extern crate assert_matches;
+
 #[cfg(test)]
 mod tests {
+    // This just tests syntax.
     #[test]
     fn debug_macro() {
         debug!(1);

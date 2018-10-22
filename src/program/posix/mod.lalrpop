@@ -50,30 +50,30 @@ pub Program: ast::Program = {
 }
 
 Jobs: ast::Program = {
-    <cs: Commands> "&" <j: Jobs> => {
+    <cs: Command> "&" <j: Jobs> => {
         j.insert(&ast::Command::Background(box cs))
     },
     Job => ast::Program(vec![box <>]),
 }
 
 Job: ast::Command = {
-    <cs: Commands> "&" => {
+    <cs: Command> "&" => {
         ast::Command::Background(box cs)
     },
-    Commands => <>,
+    Command => <>,
 }
 
 Compound: ast::Command = {
-    <cs: Commands> ";" <c: Compound> => {
+    <cs: Command> ";" <c: Compound> => {
         match c {
             c @ ast::Command::Compound(_) => c.push(&cs),
             c => ast::Command::Compound(vec![box cs, box c]),
         }
     },
-    <cs: Commands> ";" => cs,
+    <cs: Command> ";" => cs,
 }
 
-Commands: ast::Command = {
+pub Command: ast::Command = {
     // TODO #15: Hopefully in fixing #8 and #10 this can play nicely.
     // NOTE: This can be successfully complied, but will break a doc tests.
     <s: "{#!"> <t: "TEXT"> "}" => {
@@ -91,10 +91,10 @@ Commands: ast::Command = {
     "if" <cond: Compound> "then" <then: Compound> "fi" => {
         ast::Command::And(box cond, box then)
     },
-    <cs: Commands> "&&" <p: Pipeline> => {
+    <cs: Command> "&&" <p: Pipeline> => {
         ast::Command::And(box cs, box p)
     },
-    <cs: Commands> "||" <p: Pipeline> => {
+    <cs: Command> "||" <p: Pipeline> => {
         ast::Command::Or(box cs, box p)
     },
     Pipeline => <>,
@@ -119,13 +119,13 @@ Pipeline: ast::Command = {
 }
 
 PipelineSeq: ast::Command = {
-    <ps: PipelineSeq> "|" "\n"* <c: Command> => {
+    <ps: PipelineSeq> "|" "\n"* <c: Simple> => {
         ast::Command::Pipeline(box ps, box c)
     },
-    <c: Command> => c,
+    <c: Simple> => c,
 }
 
-Command: ast::Command = {
+Simple: ast::Command = {
     "WORD"+ => ast::Command::Simple(<>.iter().map(|w| {
         ast::Word(w.to_string())
     }).collect())

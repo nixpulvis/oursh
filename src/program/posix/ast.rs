@@ -140,3 +140,107 @@ impl Program {
         self
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use lalrpop_util::ParseError;
+    use program::posix::parse::{ProgramParser, CommandParser};
+    use program::posix::lex::{Lexer, Token, Error};
+    use super::*;
+
+    fn parse_program<'a>(text: &'a str)
+        -> Result<Program, ParseError<usize, Token<'a>, Error>>
+    {
+        let lexer = Lexer::new(text);
+        let parser = ProgramParser::new();
+        parser.parse(text, lexer)
+    }
+
+    #[test]
+    fn program() {
+        assert!(parse_program("").is_err());
+        // TODO: Should this be Ok? len 0.
+        assert_eq!(1, parse_program("cat README.md").unwrap().0.len());
+        assert_eq!(1, parse_program("ls;").unwrap().0.len());
+        assert_eq!(2, parse_program("ls; date").unwrap().0.len());
+        assert_eq!(3, parse_program("git s; ls -la; true;").unwrap().0.len());
+    }
+
+    fn parse_command<'a>(text: &'a str)
+        -> Result<Command, ParseError<usize, Token<'a>, Error>>
+    {
+        let lexer = Lexer::new(text);
+        let parser = CommandParser::new();
+        parser.parse(text, lexer)
+    }
+
+    #[test]
+    fn simple_command() {
+        // TODO: Just parse a command.
+        assert!(parse_command("ls").is_ok());
+        assert!(parse_command("git s").is_ok());
+        assert!(parse_command("ls -la").is_ok());
+    }
+
+    #[test]
+    fn compound_command() {
+        assert!(parse_command("{ls}").is_err());
+        assert!(parse_command("{ls; date}").is_err());
+
+        // DO NOT DELETE, REAL BUG.
+
+        // let text = "{ls;}";
+        // let command = parse_command(text).unwrap();
+        // assert_matches!(command, Command::Compound(ref c) if c.len() == 1);
+
+        let text = "{ls; date;}";
+        let command = parse_command(text).unwrap();
+        assert_matches!(command, Command::Compound(ref c) if c.len() == 2);
+
+        let text = "{git s; ls -la; true;}";
+        let command = parse_command(text).unwrap();
+        assert_matches!(command, Command::Compound(ref c) if c.len() == 3);
+    }
+
+    #[test]
+    fn not_command() {
+        let command = parse_command("! true").unwrap();
+        assert_matches!(command, Command::Not(_));
+        let command = parse_command("! true || false").unwrap();
+        assert_matches!(command, Command::Or(box Command::Not(_),_));
+    }
+
+    #[test]
+    fn and_command() {
+        let command = parse_command("true && false").unwrap();
+        assert_matches!(command, Command::And(_,_));
+        let command = parse_command("true || false && true").unwrap();
+        assert_matches!(command, Command::And(_,_));
+    }
+
+    #[test]
+    fn or_command() {
+        let command = parse_command("true || false").unwrap();
+        assert_matches!(command, Command::Or(_,_));
+        let command = parse_command("true && false || true").unwrap();
+        assert_matches!(command, Command::Or(_,_));
+    }
+
+    #[test]
+    fn subshell_command() {
+        assert!(parse_command("()").is_err());
+
+        let command = parse_command("(ls)").unwrap();
+        assert_matches!(command, Command::Subshell(_));
+
+        let command = parse_command("(date;)").unwrap();
+        assert_matches!(command, Command::Subshell(_));
+
+        let command = parse_command("(date; ls)").unwrap();
+        assert_matches!(command, Command::Subshell(_));
+
+        let command = parse_command("(date; ls -la;)").unwrap();
+        assert_matches!(command, Command::Subshell(_));
+    }
+}
