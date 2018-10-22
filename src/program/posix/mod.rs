@@ -107,17 +107,19 @@
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
 use std::ffi::CString;
-#[cfg(feature = "bridge")]
-use std::fs::{self, File};
 use std::io::{Write, BufRead};
-#[cfg(feature = "bridge")]
-use std::os::unix::fs::PermissionsExt;
+use std::process::{self, Stdio};
+use lalrpop_util::ParseError;
 use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
-use std::process::{self, Stdio};
 use job::Job;
 use program::{Result, Error, Program as ProgramTrait};
 use program::builtin::{self, Builtin};
+
+#[cfg(feature = "bridge")]
+use std::fs::{self, File};
+#[cfg(feature = "bridge")]
+use std::os::unix::fs::PermissionsExt;
 #[cfg(feature = "bridge")]
 use program::ast::Interpreter;
 
@@ -147,10 +149,32 @@ impl super::Program for Program {
         // TODO #8: Custom lexer here.
         let lexer = lex::Lexer::new(&string);
         let parser = lalrpop::ProgramParser::new();
-        if let Ok(parsed) = parser.parse(&string, lexer) {
-            Ok(parsed)
-        } else {
-            Err(Error::Parse)
+        match parser.parse(&string, lexer) {
+            Ok(parsed) => Ok(parsed),
+            Err(e) => {
+                match e {
+                    ParseError::InvalidToken { location } => {
+                        eprintln!("invalid token found at {}", location);
+                    },
+                    ParseError::UnrecognizedToken { token, expected } => {
+                        if let Some((i, t, _)) = token {
+                            eprintln!("unexpected token {:?} found at {}, expecting {}",
+                                      t, i, expected.join(", "));
+                        } else {
+                            eprintln!("unexpected token found, expecting {:?}",
+                                      expected);
+                        }
+                    },
+                    ParseError::ExtraToken { token: (i, t, _) } => {
+                        eprintln!("extra token {:?} found at {}", t, i);
+                    }
+                    ParseError::User { error } => {
+                        let lex::Error::UnrecognizedChar(i, c) = error;
+                        eprintln!("unexpected character {} found at {}", c, i);
+                    },
+                }
+                Err(Error::Parse)
+            }
         }
     }
 
