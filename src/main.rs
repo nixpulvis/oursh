@@ -84,14 +84,14 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
         let program = match parse_primary(text.as_bytes()) {
             Ok(program) => program,
             Err(e) => {
-                println!("{:?}: {:#?}", e, text);
+                eprintln!("{:?}: {:#?}", e, text);
                 return Err(e);
             }
         };
 
         // Print the program if the flag is given.
         if args.get_bool("-#") {
-            println!("{:#?}", program);
+            eprintln!("{:#?}", program);
         }
 
         // Run it!

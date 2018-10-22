@@ -6,14 +6,23 @@ fn hello_world() {
 }
 
 #[test]
-fn builtins() {
-    assert_oursh!(":");
-    // assert_oursh!("cd /; cd /home; cd -", "/\n");
-    // assert_oursh!("cd /; pwd", "/\n");
-    // assert_oursh!("cd a b");  // TODO: Check output status somehow.
+fn builtin_cd() {
+    assert_oursh!("cd /; pwd", "/\n");
     // assert_oursh!("cd; pwd", "$HOME\n");
+    // assert_oursh!("cd ~; pwd", "$HOME\n");
+    // assert_oursh!("cd /; cd /home; cd -", "/\n");
+    // assert_oursh!(! "cd a b");  // TODO: Check output status somehow.
+}
+
+#[test]
+fn builtin_exit() {
     assert_oursh!("exit");
     assert_oursh!(! "exit 1");
+}
+
+#[test]
+fn builtin_null() {
+    assert_oursh!(":");
 }
 
 #[test]
@@ -68,10 +77,18 @@ fn or_command() {
 }
 
 #[test]
-#[ignore]
+fn cond_command() {
+    assert_oursh!("if true; then echo 1; else echo 2; fi", "1\n");
+    assert_oursh!("if false; then echo 1; else echo 2; fi", "2\n");
+    assert_oursh!("if false; then echo 1; elif false; then echo 2; else echo 3; fi", "3\n");
+    assert_oursh!("if false; then echo 1; elif true; then echo 2; else echo 3; fi", "2\n");
+}
+
+#[test]
 fn subshell_command() {
     assert_oursh!("( true )");
     assert_oursh!("(echo 1)", "1\n");
+    assert_oursh!("(false; echo 1)", "1\n");
 }
 
 #[test]

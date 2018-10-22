@@ -1,0 +1,147 @@
+use program::posix::ast;
+use program::posix::lex;
+use program::ast::Interpreter;
+
+grammar<'input>(text: &'input str);
+
+extern {
+    type Location = usize;
+    type Error = lex::Error;
+
+    enum lex::Token<'input> {
+        " "    => lex::Token::Space,
+        "\t"   => lex::Token::Tab,
+        "\n"   => lex::Token::Linefeed,
+        ";"    => lex::Token::Semi,
+        "&"    => lex::Token::Amper,
+        "{"    => lex::Token::LBrace,
+        "}"    => lex::Token::RBrace,
+        "("    => lex::Token::LParen,
+        ")"    => lex::Token::RParen,
+        "`"    => lex::Token::Backtick,
+        "!"    => lex::Token::Bang,
+        "|"    => lex::Token::Pipe,
+        "$"    => lex::Token::Dollar,
+        "="    => lex::Token::Equals,
+        "\\"   => lex::Token::Backslash,
+        "\""   => lex::Token::DoubleQuote,
+        "'"    => lex::Token::SingleQuote,
+        ">"    => lex::Token::RCaret,
+        "<"    => lex::Token::LCaret,
+        "&&"   => lex::Token::And,
+        "||"   => lex::Token::Or,
+        "if"   => lex::Token::If,
+        "then" => lex::Token::Then,
+        "else" => lex::Token::Else,
+        "elif" => lex::Token::Elif,
+        "fi"   => lex::Token::Fi,
+        "WORD" => lex::Token::Word(<&'input str>),
+        "{#!"  => lex::Token::Shebang(<&'input str>),
+        "TEXT" => lex::Token::Text(<&'input str>),
+    }
+}
+
+pub Program: ast::Program = {
+    <p: Program> "\n" <c: Complete> => {
+        p.append(&c)
+    },
+    <p: Program> "\n" => p,
+    Complete => <>,
+}
+
+Complete: ast::Program = {
+    <l: List> ";" => ast::Program(vec![box l]),
+    <l: List> "&" => {
+        let bg = ast::Command::Background(box l);
+        ast::Program(vec![box bg])
+    },
+    List => ast::Program(vec![box <>]),
+}
+
+List: ast::Command = {
+    <l: List> ";" <cs: Commands> => {
+        l.push(&cs)
+    },
+    <l: List> "&" <cs: Commands> => {
+        let bg = ast::Command::Background(box l);
+        ast::Command::Compound(vec![box bg, box cs])
+    },
+    Commands => {
+        ast::Command::Compound(vec![box <>])
+    },
+}
+
+// TODO: This should really return a Pair/List Command, not a Program.
+Compound: ast::Command = {
+    <cs: Commands> ";" <c: Compound> => {
+        match c {
+            c @ ast::Command::Compound(_) => c.insert(&cs),
+            c => ast::Command::Compound(vec![box cs, box c]),
+        }
+    },
+    <cs: Commands> ";" => {
+        cs
+    },
+}
+
+Commands: ast::Command = {
+    // TODO #15: Hopefully in fixing #8 and #10 this can play nicely.
+    // NOTE: This can be successfully complied, but will break a doc tests.
+    <s: "{#!"> <t: "TEXT"> "}" => {
+        let b = ast::BridgedProgram(Interpreter::Other(s.into()), t.into());
+        ast::Command::Bridgeshell(box b)
+    },
+    "(" <c: List> ")" => {
+        c
+    },
+    "{" <c: Compound> "}" => {
+        c
+    },
+    "if" <cond: Compound> "then" <then: Compound> <els: Else> "fi" => {
+        let left = ast::Command::And(box cond, box then);
+        ast::Command::Or(box left, box els)
+    },
+    "if" <cond: Compound> "then" <then: Compound> "fi" => {
+        ast::Command::And(box cond, box then)
+    },
+    <cs: Commands> "&&" <p: Pipeline> => {
+        ast::Command::And(box cs, box p)
+    },
+    <cs: Commands> "||" <p: Pipeline> => {
+        ast::Command::Or(box cs, box p)
+    },
+    Pipeline => <>,
+}
+
+Else: ast::Command = {
+    "elif" <elif: Compound> "then" <then: Compound> => {
+        ast::Command::And(box elif, box then)
+    },
+    "elif" <elif: Compound> "then" <then: Compound> <els: Else> => {
+        let left = ast::Command::And(box elif, box then);
+        ast::Command::Or(box left, box els)
+    },
+    "else" <els: Compound> => {
+        els
+    },
+}
+
+Pipeline: ast::Command = {
+    "!" <ps: PipelineSeq> => {
+        ast::Command::Not(box ps)
+    },
+    <ps: PipelineSeq> => ps,
+}
+
+PipelineSeq: ast::Command = {
+    <ps: PipelineSeq> "|" "\n"* <c: Command> => {
+        ast::Command::Pipeline(box ps, box c)
+    },
+    <c: Command> => c,
+}
+
+Command: ast::Command = {
+    "WORD"+ => ast::Command::Simple(<>.iter().map(|w| {
+        ast::Word(w.to_string())
+    }).collect())
+}

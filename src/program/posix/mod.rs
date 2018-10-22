@@ -107,17 +107,19 @@
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
 use std::ffi::CString;
-#[cfg(feature = "bridge")]
-use std::fs::{self, File};
 use std::io::{Write, BufRead};
-#[cfg(feature = "bridge")]
-use std::os::unix::fs::PermissionsExt;
+use std::process::{self, Stdio};
+use lalrpop_util::ParseError;
 use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
-use std::process::{self, Stdio};
 use job::Job;
 use program::{Result, Error, Program as ProgramTrait};
 use program::builtin::{self, Builtin};
+
+#[cfg(feature = "bridge")]
+use std::fs::{self, File};
+#[cfg(feature = "bridge")]
+use std::os::unix::fs::PermissionsExt;
 #[cfg(feature = "bridge")]
 use program::ast::Interpreter;
 
@@ -145,10 +147,34 @@ impl super::Program for Program {
         }
 
         // TODO #8: Custom lexer here.
-        if let Ok(parsed) = lalrpop::ProgramParser::new().parse(&string) {
-            Ok(parsed)
-        } else {
-            Err(Error::Parse)
+        let lexer = lex::Lexer::new(&string);
+        let parser = lalrpop::ProgramParser::new();
+        match parser.parse(&string, lexer) {
+            Ok(parsed) => Ok(parsed),
+            Err(e) => {
+                match e {
+                    ParseError::InvalidToken { location } => {
+                        eprintln!("invalid token found at {}", location);
+                    },
+                    ParseError::UnrecognizedToken { token, expected } => {
+                        if let Some((i, t, _)) = token {
+                            eprintln!("unexpected token {:?} found at {}, expecting {}",
+                                      t, i, expected.join(", "));
+                        } else {
+                            eprintln!("unexpected token found, expecting {:?}",
+                                      expected);
+                        }
+                    },
+                    ParseError::ExtraToken { token: (i, t, _) } => {
+                        eprintln!("extra token {:?} found at {}", t, i);
+                    }
+                    ParseError::User { error } => {
+                        let lex::Error::UnrecognizedChar(i, c) = error;
+                        eprintln!("unexpected character {} found at {}", c, i);
+                    },
+                }
+                Err(Error::Parse)
+            }
         }
     }
 
@@ -191,11 +217,12 @@ impl super::Command for Command {
                     Ok(WaitStatus::Exited(Pid::this(), 0))
                 }
             },
-            Command::Compound(ref program) => {
-                for command in program.0.iter() {
-                    command.run()?;
+            Command::Compound(ref commands) => {
+                let mut last = WaitStatus::Exited(Pid::this(), 0);
+                for command in commands.iter() {
+                    last = command.run()?;
                 }
-                Ok(WaitStatus::Exited(Pid::this(), 0))
+                Ok(last)
             },
             Command::Not(ref command) => {
                 match command.run() {
@@ -323,158 +350,12 @@ impl super::Command for Command {
     }
 
     fn run_background(&self) -> Result<()> {
-        match *self {
-            Command::Simple(ref words) => {
-                unimplemented!();
-                // let argv: Vec<CString> = words.iter().map(|w| {
-                //     CString::new(&w.0 as &str)
-                //         .expect("error in word UTF-8")
-                // }).collect();
-
-                // match argv.first() {
-                //     Some(command) => {
-                //         Job::new(argv).run_background()
-                //                       .map_err(|_| Error::Runtime)
-                //     }
-                //     None => Ok(())
-                // }
-            },
-            _ => unimplemented!(),
-        }
+        unimplemented!();
     }
 }
 
-
-/// Abstract Syntax Tree for the POSIX language.
-pub mod ast {
-    use program::ast::Interpreter;
-
-    /// A program is the result of parsing a sequence of commands.
-    #[derive(Debug, Clone)]
-    pub struct Program(pub Vec<Box<Command>>);
-
-    /// A program's text and the interpreter to be used.
-    // TODO #8: Include grammar separate from interpreter?
-    #[derive(Debug, Clone)]
-    pub struct BridgedProgram(pub Interpreter, pub String);
-
-    /// A command is a *highly* mutually-recursive node with the main features
-    /// of the POSIX language.
-    #[derive(Debug, Clone)]
-    pub enum Command {
-        /// Just a single command, with it's arguments.
-        ///
-        /// ### Examples
-        ///
-        /// ```sh
-        /// date --iso-8601
-        /// ```
-        // TODO #8: Simple should not just be a vec of words.
-        Simple(Vec<Word>),
-
-        /// A full program embedded in a compound command.
-        ///
-        /// ```sh
-        /// { ls ; }
-        /// ```
-        // TODO #10: We are currently overpermissive here.
-        Compound(Box<Program>),
-
-        /// Performs boolean negation to the status code of the inner
-        /// command.
-        ///
-        /// ### Examples
-        ///
-        /// ```sh
-        /// ! grep 'password' data.txt
-        /// ```
-        Not(Box<Command>),
-
-        /// Perform the first command, conditionally running the next
-        /// upon success.
-        ///
-        /// ### Examples
-        ///
-        /// ```sh
-        /// mkdir tmp && cd tmp
-        /// ```
-        And(Box<Command>, Box<Command>),
-
-        /// Perform the first command, conditionally running the next
-        /// upon failure.
-        ///
-        /// ### Examples
-        ///
-        /// ```sh
-        /// kill $1 || kill -9 $1
-        /// ```
-        Or(Box<Command>, Box<Command>),
-
-        /// Run the inner **program** in a sub-shell environment.
-        ///
-        /// ### Examples
-        ///
-        /// ```sh
-        /// DATE=(date)
-        /// ```
-        Subshell(Box<Program>),
-
-        /// Run a command's output through to the input of another.
-        ///
-        /// ### Examples
-        ///
-        /// ```sh
-        /// cat $1 | wc -l
-        /// ```
-        Pipeline(Box<Command>, Box<Command>),
-
-        /// Run a command in the background.
-        ///
-        /// ### Examples
-        ///
-        /// ```sh
-        /// while true; do
-        ///   sleep 1; echo "ping";
-        /// done &
-        /// ```
-        Background(Box<Program>),
-
-        /// Run a program through another parser/interpreter.
-        ///
-        /// ### Examples
-        ///
-        /// ```sh
-        /// {#ruby puts (Math.sqrt(32**2/57.2))}
-        /// ```
-        ///
-        /// ### Compatibility
-        ///
-        /// This is **non-POSIX**
-        ///
-        /// TODO: How bad is it?
-        Bridgeshell(Box<BridgedProgram>),
-    }
-
-    /// A parsed word, already having gone through expansion.
-    // TODO #8: How can we expand things like $1 or $? from the lexer?
-    // TODO #8: This needs to handle escapes and all kinds of fun. We first
-    //       need to decide on our custom Tokens and lexer.
-    #[derive(Debug, Clone)]
-    pub struct Word(pub String);
-
-
-    impl Program {
-        pub(crate) fn push(mut self, command: Box<Command>) -> Self {
-            self.0.push(command);
-            self
-        }
-
-        pub(crate) fn insert(mut self, command: Box<Command>) -> Self {
-            self.0.insert(0, command);
-            self
-        }
-    }
-}
+pub mod ast;
+pub mod lex;
 
 // Following with the skiing analogy, the code inside here is black level.
 // Many of the issues in a grammar rule cause conflicts in seemingly unrelated
@@ -482,5 +363,5 @@ pub mod ast {
 // a fantasic job of helping, it's not perfect. Avoid the rocks, trees, and
 // enjoy.
 //
-// The code for this module is located in `src/program/posix.lalrpop`.
-lalrpop_mod!(lalrpop, "/program/posix.rs");
+// The code for this module is located in `src/program/posix/mod.lalrpop`.
+lalrpop_mod!(pub lalrpop, "/program/posix/mod.rs");

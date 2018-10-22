@@ -62,7 +62,6 @@ impl Builtin for Cd {
                           .map_err(|_| Error::Runtime)
             },
             2 => {
-                println!("hit");
                 chdir(&*argv[1].to_string_lossy().as_ref())
                     .map(|_| WaitStatus::Exited(Pid::this(), 1))
                     .map_err(|_| Error::Runtime)
