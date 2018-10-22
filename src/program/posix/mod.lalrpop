@@ -36,7 +36,8 @@ extern {
         "elif" => lex::Token::Elif,
         "fi"   => lex::Token::Fi,
         "WORD" => lex::Token::Word(<&'input str>),
-        "{#!"  => lex::Token::Shebang,
+        "{#!"  => lex::Token::Shebang(<&'input str>),
+        "TEXT" => lex::Token::Text(<&'input str>),
     }
 }
 
@@ -86,10 +87,8 @@ Compound: ast::Command = {
 Commands: ast::Command = {
     // TODO #15: Hopefully in fixing #8 and #10 this can play nicely.
     // NOTE: This can be successfully complied, but will break a doc tests.
-    "{#!" <i: "WORD"+> ";" <t: "WORD"*> "}" => {
-        let i = i.join(" ");
-        let t = t.join(" ");
-        let b = ast::BridgedProgram(Interpreter::Other(i), t);
+    <s: "{#!"> <t: "TEXT"> "}" => {
+        let b = ast::BridgedProgram(Interpreter::Other(s.into()), t.into());
         ast::Command::Bridgeshell(box b)
     },
     "(" <c: List> ")" => {

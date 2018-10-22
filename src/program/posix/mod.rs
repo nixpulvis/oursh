@@ -326,24 +326,7 @@ impl super::Command for Command {
     }
 
     fn run_background(&self) -> Result<()> {
-        match *self {
-            Command::Simple(ref words) => {
-                unimplemented!();
-                // let argv: Vec<CString> = words.iter().map(|w| {
-                //     CString::new(&w.0 as &str)
-                //         .expect("error in word UTF-8")
-                // }).collect();
-
-                // match argv.first() {
-                //     Some(command) => {
-                //         Job::new(argv).run_background()
-                //                       .map_err(|_| Error::Runtime)
-                //     }
-                //     None => Ok(())
-                // }
-            },
-            _ => unimplemented!(),
-        }
+        unimplemented!();
     }
 }
 

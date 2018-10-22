@@ -45,7 +45,8 @@ pub enum Token<'input> {
     Until,
     For,
     Word(&'input str),
-    Shebang,
+    Shebang(&'input str),
+    Text(&'input str),
 }
 
 /// A lexer to feed the parser gernerated by LALRPOP.
@@ -59,6 +60,11 @@ pub struct Lexer<'input> {
     /// Always have the next (or first in the initial case) character
     /// of the input, allows for EOF detection, amongst other things.
     lookahead: Option<(usize, char)>,
+
+    /// A boolean indicating we're currently lexing inside a shebang block,
+    /// and should therefor output TEXT.
+    #[cfg(feature = "bridge")]
+    in_shebang: bool,
 }
 
 impl<'input> Lexer<'input> {
@@ -67,7 +73,13 @@ impl<'input> Lexer<'input> {
     pub fn new(input: &'input str) -> Self {
         let mut chars = input.char_indices();
         let lookahead = chars.next();
-        Lexer { input, chars, lookahead }
+        Lexer {
+            input,
+            chars,
+            lookahead,
+            #[cfg(feature = "bridge")]
+            in_shebang: false,
+        }
     }
 }
 
@@ -131,18 +143,35 @@ impl<'input> Lexer<'input> {
     fn block(&mut self, start: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
-        if let Some((_, '#')) = self.lookahead {
-            self.advance();  // Move past the matched '#'.
-            // TODO: Distinguish kinds of Shebang.
-            if let Some((_, '!')) = self.lookahead {
-                self.advance();  // Move past the matched '!'.
-                Ok((start, Token::Shebang, start+3))
-            } else {
-                Ok((start, Token::Shebang, start+2))
+        #[cfg(feature = "bridge")]
+        {
+            if let Some((_, '#')) = self.lookahead {
+                let (end, _) = self.take_until(start, |c| c == ';');
+                self.advance();  // Consume the ';' delimeter.
+                self.take_while(end, is_whitespace);
+                self.in_shebang = true;
+
+                // TODO: Distinguish kinds of Shebang.
+                if let Some((_, '!')) = self.lookahead {
+                    let tok = Token::Shebang(&self.input[(start+4)..end]);
+                    return Ok((start, tok, end));
+                } else {
+                    let tok = Token::Shebang(&self.input[(start+3)..end]);
+                    return Ok((start, tok, end));
+                }
             }
-        } else {
-            Ok((start, Token::LBrace, start+1))
         }
+        Ok((start, Token::LBrace, start+1))
+    }
+
+    #[cfg(feature = "bridge")]
+    fn text(&mut self, start: usize)
+        -> Result<(usize, Token<'input>, usize), Error>
+    {
+        // TODO: Count matching braces in TEXT.
+        let (end, _) = self.take_until(start, |d| d == '}');
+        self.in_shebang = false;
+        Ok((start, Token::Text(&self.input[start..end]), end))
     }
 }
 
@@ -173,6 +202,21 @@ impl<'input> Iterator for Lexer<'input> {
 
     fn next(&mut self) -> Option<Self::Item> {
         debug!("emit<start>: {:?}", self.lookahead);
+
+        #[cfg(feature = "bridge")]
+        {
+            if self.in_shebang {
+                if let Some((start, _)) = self.lookahead {
+                    let tok = Some(self.text(start));
+                    debug!("emit<end>:   {:?}", tok);
+                    return tok;
+                } else {
+                    return None
+                }
+            }
+        }
+
+        // Consume characters until we've got a token.
         while let Some((i, c)) = self.advance() {
             let tok = match c {
                 '\n' => Some(Ok((i, Token::Linefeed, i+1))),
@@ -185,7 +229,7 @@ impl<'input> Iterator for Lexer<'input> {
                 '='  => Some(Ok((i, Token::Equals, i+1))),
                 '\\' => Some(Ok((i, Token::Backslash, i+1))),
                 '"'  => Some(Ok((i, Token::DoubleQuote, i+1))),
-                '\'' => Some(Ok((i, Token::DoubleQuote, i+1))),
+                '\'' => Some(Ok((i, Token::SingleQuote, i+1))),
                 '>'  => Some(Ok((i, Token::RCaret, i+1))),
                 '<'  => Some(Ok((i, Token::LCaret, i+1))),
                 '&' => {
@@ -218,6 +262,8 @@ impl<'input> Iterator for Lexer<'input> {
             debug!("emit<end>:   {:?}", tok);
             return tok;
         }
+
+        // Otherwise, return the EOF none.
         None
     }
 }
