@@ -82,9 +82,9 @@ impl<'input> Lexer<'input> {
         }
     }
 
-    fn take_until<F>(&mut self, start: usize, mut terminate: F) -> (usize, &'input str)
-    where
-        F: FnMut(char) -> bool,
+    fn take_until<F>(&mut self, start: usize, mut terminate: F)
+        -> (usize, &'input str)
+        where F: FnMut(char) -> bool
     {
         let mut end = start + 1;
         while let Some((e, c)) = self.lookahead {
@@ -98,14 +98,16 @@ impl<'input> Lexer<'input> {
         (end, &self.input[start..end])
     }
 
-    fn take_while<F>(&mut self, start: usize, mut keep_going: F) -> (usize, &'input str)
-    where
-        F: FnMut(char) -> bool,
+    fn take_while<F>(&mut self, start: usize, mut keep_going: F)
+        -> (usize, &'input str)
+        where F: FnMut(char) -> bool,
     {
         self.take_until(start, |c| !keep_going(c))
     }
 
-    fn word(&mut self, start: usize) -> Result<(usize, Token<'input>, usize), Error> {
+    fn word(&mut self, start: usize)
+        -> Result<(usize, Token<'input>, usize), Error>
+    {
         let (end, word) = self.take_while(start, is_word_continue);
         let tok = match word {
             "if"    => Token::If,
@@ -126,7 +128,9 @@ impl<'input> Lexer<'input> {
         Ok((start, tok, end))
     }
 
-    fn block(&mut self, start: usize) -> Result<(usize, Token<'input>, usize), Error> {
+    fn block(&mut self, start: usize)
+        -> Result<(usize, Token<'input>, usize), Error>
+    {
         if let Some((_, '#')) = self.lookahead {
             self.advance();  // Move past the matched '#'.
             // TODO: Distinguish kinds of Shebang.

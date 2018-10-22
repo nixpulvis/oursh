@@ -92,8 +92,8 @@ Commands: ast::Command = {
         let b = ast::BridgedProgram(Interpreter::Other(i), t);
         ast::Command::Bridgeshell(box b)
     },
-    "(" <p: Program> ")" => {
-        ast::Command::Subshell(box p)
+    "(" <c: List> ")" => {
+        c
     },
     "{" <c: Compound> "}" => {
         c
