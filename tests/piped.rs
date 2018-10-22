@@ -9,8 +9,8 @@ fn hello_world() {
 fn builtins() {
     assert_oursh!(":");
     // assert_oursh!("cd /; cd /home; cd -", "/\n");
-    // assert_oursh!("cd /; pwd", "/\n");
-    // assert_oursh!("cd a b");  // TODO: Check output status somehow.
+    assert_oursh!("cd /; pwd", "/\n");
+    // assert_oursh!(! "cd a b");  // TODO: Check output status somehow.
     // assert_oursh!("cd; pwd", "$HOME\n");
     assert_oursh!("exit");
     assert_oursh!(! "exit 1");
@@ -68,10 +68,19 @@ fn or_command() {
 }
 
 #[test]
+fn cond_command() {
+    assert_oursh!("if true; then echo 1; else echo 2; fi", "1\n");
+    assert_oursh!("if false; then echo 1; else echo 2; fi", "2\n");
+    assert_oursh!("if false; then echo 1; elif false; then echo 2; else echo 3; fi", "3\n");
+    assert_oursh!("if false; then echo 1; elif true; then echo 2; else echo 3; fi", "2\n");
+}
+
+#[test]
 #[ignore]
 fn subshell_command() {
     assert_oursh!("( true )");
     assert_oursh!("(echo 1)", "1\n");
+    assert_oursh!("(false; echo 1)", "1\n");
 }
 
 #[test]
