@@ -81,6 +81,7 @@ use std::io::BufRead;
 use std::result;
 use nix::unistd::Pid;
 use nix::sys::wait::WaitStatus;
+use self::job::Job;
 
 pub type Result<T> = result::Result<T, Error>;
 
@@ -116,7 +117,7 @@ pub trait Program: Sized {
     fn run(&self) -> Result<WaitStatus> {
         let mut last = WaitStatus::Exited(Pid::this(), 0);
         for command in self.commands().iter() {
-            last = command.run()?;
+            last = Job::new(&**command).run()?;
         }
         Ok(last)
     }
@@ -131,9 +132,9 @@ pub trait Program: Sized {
 ///
 // TODO #4: We can reasonably reproduce the redirects, pwd... but is it
 //          sane to try this with ENV too?
-pub trait Command: Debug {
-    /// Run the command, returning a result of it's work.
-    fn run(&self) -> Result<WaitStatus>;
+pub trait Command: Sync + Send + Debug {
+    /// evaluate the command, returning a result of it's work.
+    fn eval(&self) -> Result<WaitStatus>;
 
     /// Return the name of this command.
     ///
@@ -188,6 +189,7 @@ pub fn parse<P: Program, R: BufRead>(reader: R) -> Result<P> {
 // If reading this code were like sking, you'd now be hitting blues. ASTs and
 // language semantics are somewhat tricky subjects.
 
+pub mod job;
 pub mod basic;
 pub use self::basic::Program as BasicProgram;
 pub mod posix;

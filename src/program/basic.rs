@@ -2,7 +2,7 @@
 use std::io::BufRead;
 use std::ffi::CString;
 use nix::sys::wait::WaitStatus;
-use job::Job;
+use exec::Exec;
 use program::{Result, Error};
 
 
@@ -41,8 +41,8 @@ pub struct Command(String);
 
 impl super::Command for Command {
     /// Treat each space blindly as an argument delimiter.
-    fn run(&self) -> Result<WaitStatus> {
-        let mut job = Job::new(self.0.split_whitespace().map(|a| {
+    fn eval(&self) -> Result<WaitStatus> {
+        let mut job = Exec::new(self.0.split_whitespace().map(|a| {
             CString::new(a).expect("error reading argument")
         }).collect());
 

@@ -1,4 +1,3 @@
-//!
 //! This shell language (often called `sh`) is at the heart of the most popular
 //! shells, namely `bash` and `zsh`. While shells typically implement many
 //! extensions to the POSIX standard we'll be implementing only the most basic
@@ -112,8 +111,9 @@ use std::thread;
 use lalrpop_util::ParseError;
 use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
-use job::Job;
+use exec::Exec;
 use program::{Result, Error, Program as ProgramTrait};
+use program::job::Job;
 
 #[cfg(feature = "shebang-block")]
 use std::fs::{self, File};
@@ -187,7 +187,7 @@ impl super::Program for Program {
 
 // The semantics of a single POSIX command.
 impl super::Command for Command {
-    fn run(&self) -> Result<WaitStatus> {
+    fn eval(&self) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref words) => {
@@ -208,7 +208,7 @@ impl super::Command for Command {
                             return builtin::Cd::run(argv)
                         },
                         _ => {
-                            return Job::new(argv).run()
+                            return Exec::new(argv).run()
                                           .map_err(|_| Error::Runtime)
                         },
                     }
@@ -219,12 +219,12 @@ impl super::Command for Command {
             Command::Compound(ref commands) => {
                 let mut last = WaitStatus::Exited(Pid::this(), 0);
                 for command in commands.iter() {
-                    last = command.run()?;
+                    last = command.eval()?;
                 }
                 Ok(last)
             },
             Command::Not(ref command) => {
-                match command.run() {
+                match command.eval() {
                     Ok(WaitStatus::Exited(p, c)) => {
                         Ok(WaitStatus::Exited(p, (c == 0) as i32))
                     }
@@ -233,18 +233,18 @@ impl super::Command for Command {
                 }
             },
             Command::And(ref left, ref right) => {
-                match left.run() {
+                match left.eval() {
                     Ok(WaitStatus::Exited(_, c)) if c == 0 => {
-                        right.run().map_err(|_| Error::Runtime)
+                        right.eval().map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
                     Err(_) => Err(Error::Runtime),
                 }
             },
             Command::Or(ref left, ref right) => {
-                match left.run() {
+                match left.eval() {
                     Ok(WaitStatus::Exited(_, c)) if c != 0 => {
-                        right.run().map_err(|_| Error::Runtime)
+                        right.eval().map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
                     Err(_) => Err(Error::Runtime),
@@ -288,10 +288,7 @@ impl super::Command for Command {
             },
             Command::Background(ref command) => {
                 println!("[?] ???");
-                let command = command.clone();
-                thread::spawn(move || {
-                    command.run().unwrap();
-                });
+                Job::new(&**command).background(true).run().unwrap();
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             #[cfg(feature = "shebang-block")]

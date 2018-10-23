@@ -160,7 +160,7 @@ macro_rules! debug {
     };
 }
 
-pub mod job;
+pub mod exec;
 pub mod program;
 pub mod repl;
 
