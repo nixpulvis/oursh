@@ -364,7 +364,6 @@
 <span id="364">364</span>
 <span id="365">365</span>
 <span id="366">366</span>
-<span id="367">367</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! The ubiquitous POSIX shell command language.</span>
 <span class="doccomment">//!</span>
@@ -529,8 +528,7 @@
                             <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;unexpected token {:?} found at {}, expecting {}&quot;</span>,
                                       <span class="ident">t</span>, <span class="ident">i</span>, <span class="ident">expected</span>.<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>));
                         } <span class="kw">else</span> {
-                            <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;unexpected token found, expecting {:?}&quot;</span>,
-                                      <span class="ident">expected</span>);
+                            <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;expecting {:?}&quot;</span>, <span class="ident">expected</span>);
                         }
                     },
                     <span class="ident">ParseError</span>::<span class="ident">ExtraToken</span> { <span class="ident">token</span>: (<span class="ident">i</span>, <span class="ident">t</span>, <span class="kw">_</span>) } <span class="op">=&gt;</span> {
