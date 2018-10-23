@@ -103,6 +103,11 @@
 <span id="103">103</span>
 <span id="104">104</span>
 <span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Subprocess execution management.</span>
 <span class="doccomment">//!</span>
@@ -111,7 +116,7 @@
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>::<span class="ident">exit</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
-<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::{<span class="ident">execvp</span>, <span class="ident">fork</span>, <span class="ident">Pid</span>, <span class="ident">ForkResult</span>};
+<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::{<span class="self">self</span>, <span class="ident">execvp</span>, <span class="ident">Pid</span>, <span class="ident">ForkResult</span>};
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::{<span class="ident">waitpid</span>, <span class="ident">WaitStatus</span>};
 
 <span class="doccomment">/// A job to be executed by various means.</span>
@@ -154,7 +159,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">fork</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">nix</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">fork</span>() {
+        <span class="kw">match</span> <span class="ident">unistd</span>::<span class="ident">fork</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">ForkResult</span>::<span class="ident">Parent</span> { <span class="ident">child</span>, .. }) <span class="op">=&gt;</span> {
                 <span class="self">self</span>.<span class="ident">child</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">child</span>);
                 <span class="prelude-val">Ok</span>(())
@@ -173,7 +178,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">fork_and_wait</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">nix</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">fork</span>() {
+        <span class="kw">match</span> <span class="ident">unistd</span>::<span class="ident">fork</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">ForkResult</span>::<span class="ident">Parent</span> { <span class="ident">child</span>, .. }) <span class="op">=&gt;</span> {
                 <span class="self">self</span>.<span class="ident">child</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">child</span>);
                 <span class="self">self</span>.<span class="ident">wait</span>()
@@ -201,6 +206,11 @@
                     <span class="kw">match</span> <span class="ident">waitpid</span>(<span class="ident">child</span>, <span class="prelude-val">None</span>) {
                         <span class="comment">// TODO #4: Cover other cases?</span>
                         <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">StillAlive</span>) <span class="op">=&gt;</span> {},
+                        <span class="ident">s</span> @ <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="kw">_</span>, <span class="number">127</span>)) <span class="op">=&gt;</span> {
+                            <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">argv</span>[<span class="number">0</span>].<span class="ident">to_string_lossy</span>();
+                            <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;oursh: {}: command not found&quot;</span>, <span class="ident">name</span>);
+                            <span class="kw">return</span> <span class="ident">s</span>;
+                        },
                         <span class="ident">s</span> <span class="op">=&gt;</span> <span class="kw">return</span> <span class="ident">s</span>,
                     };
                 }
