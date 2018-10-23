@@ -480,6 +480,7 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::{<span class="ident">Write</span>, <span class="ident">BufRead</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>::{<span class="self">self</span>, <span class="ident">Stdio</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">thread</span>;
 <span class="kw">use</span> <span class="ident">lalrpop_util</span>::<span class="ident">ParseError</span>;
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::<span class="ident">WaitStatus</span>;
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::<span class="ident">Pid</span>;
@@ -657,9 +658,12 @@
                 }
                 <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
             },
-            <span class="ident">Command</span>::<span class="ident">Background</span>(<span class="kw-2">ref</span> <span class="ident">program</span>) <span class="op">=&gt;</span> {
-                <span class="ident">program</span>.<span class="ident">run_background</span>()<span class="question-mark">?</span>;
+            <span class="ident">Command</span>::<span class="ident">Background</span>(<span class="kw-2">ref</span> <span class="ident">command</span>) <span class="op">=&gt;</span> {
                 <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;[?] ???&quot;</span>);
+                <span class="kw">let</span> <span class="ident">command</span> <span class="op">=</span> <span class="ident">command</span>.<span class="ident">clone</span>();
+                <span class="ident">thread</span>::<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">||</span> {
+                    <span class="ident">command</span>.<span class="ident">run</span>().<span class="ident">unwrap</span>();
+                });
                 <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
             },
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>)]</span>
@@ -717,10 +721,6 @@
                 <span class="macro">unimplemented</span><span class="macro">!</span>();
             },
         }
-    }
-
-    <span class="kw">fn</span> <span class="ident">run_background</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">Runtime</span>)
     }
 }
 
