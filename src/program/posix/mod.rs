@@ -1,4 +1,3 @@
-//! The ubiquitous POSIX shell command language.
 //!
 //! This shell language (often called `sh`) is at the heart of the most popular
 //! shells, namely `bash` and `zsh`. While shells typically implement many
@@ -114,7 +113,6 @@ use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
 use job::Job;
 use program::{Result, Error, Program as ProgramTrait};
-use program::builtin::{self, Builtin};
 
 #[cfg(feature = "bridge")]
 use std::fs::{self, File};
@@ -124,9 +122,10 @@ use std::os::unix::fs::PermissionsExt;
 use program::ast::Interpreter;
 
 
-// Re-export the two trait implementing types.
+// Re-exports.
 pub use self::ast::Program;
 pub use self::ast::Command;
+pub use self::builtin::Builtin;
 
 /// The syntax and semantics of a single POSIX command.
 ///
@@ -353,7 +352,13 @@ impl super::Command for Command {
     }
 }
 
+// Builtin functions for the POSIX language, like `exit` and `cd`.
+pub mod builtin;
+
+// The POSIX AST data structures and helper functions.
 pub mod ast;
+
+// The custom LALRPOP lexer.
 pub mod lex;
 
 // Following with the skiing analogy, the code inside here is black level.

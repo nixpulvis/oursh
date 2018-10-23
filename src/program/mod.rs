@@ -196,7 +196,6 @@ pub fn parse<P: Program, R: BufRead>(reader: R) -> Result<P> {
 
 pub mod basic;
 pub use self::basic::Program as BasicProgram;
-pub mod builtin;
 pub mod posix;
 pub use self::posix::Program as PosixProgram;
 
