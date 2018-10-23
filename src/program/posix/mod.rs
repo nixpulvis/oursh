@@ -108,6 +108,7 @@
 use std::ffi::CString;
 use std::io::{Write, BufRead};
 use std::process::{self, Stdio};
+use std::thread;
 use lalrpop_util::ParseError;
 use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
@@ -285,9 +286,12 @@ impl super::Command for Command {
                 }
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
-            Command::Background(ref program) => {
-                program.run_background()?;
+            Command::Background(ref command) => {
                 println!("[?] ???");
+                let command = command.clone();
+                thread::spawn(move || {
+                    command.run().unwrap();
+                });
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             #[cfg(feature = "bridge")]
@@ -345,10 +349,6 @@ impl super::Command for Command {
                 unimplemented!();
             },
         }
-    }
-
-    fn run_background(&self) -> Result<()> {
-        Err(Error::Runtime)
     }
 }
 

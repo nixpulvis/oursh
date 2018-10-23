@@ -53,8 +53,4 @@ impl super::Command for Command {
             _ => Err(Error::Runtime),
         }
     }
-
-    fn run_background(&self) -> Result<()> {
-        unimplemented!();
-    }
 }
