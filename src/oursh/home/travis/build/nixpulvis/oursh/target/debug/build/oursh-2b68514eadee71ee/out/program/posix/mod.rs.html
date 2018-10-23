@@ -3641,10 +3641,9 @@
 <span id="3641">3641</span>
 <span id="3642">3642</span>
 <span id="3643">3643</span>
-<span id="3644">3644</span>
 </pre><pre class="rust ">
 <span class="comment">// auto-generated: &quot;lalrpop 0.16.0&quot;</span>
-<span class="comment">// sha256: 6cd90bfe731f4898a54f9cba49dabcf67bc277171f839f8f4d5b6f76e10</span>
+<span class="comment">// sha256: 6d415ae556d7b2bb2be86a33af1e28b201478cf796187d0178903fdf46b747</span>
 <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">posix</span>::<span class="ident">ast</span>;
 <span class="kw">use</span> <span class="ident">program</span>::<span class="ident">posix</span>::<span class="ident">lex</span>;
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_extern_crates</span>)]</span>
@@ -6926,8 +6925,7 @@
 {
     {
         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">ast</span>::<span class="ident">Interpreter</span>::<span class="ident">Other</span>(<span class="ident">s</span>.<span class="ident">into</span>());
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">ast</span>::<span class="ident">BridgedProgram</span>(<span class="ident">i</span>, <span class="ident">t</span>.<span class="ident">into</span>());
-        <span class="ident">ast</span>::<span class="ident">Command</span>::<span class="ident">Bridgeshell</span>(<span class="kw">box</span> <span class="ident">b</span>)
+        <span class="ident">ast</span>::<span class="ident">Command</span>::<span class="ident">Shebang</span>(<span class="ident">i</span>, <span class="ident">t</span>.<span class="ident">into</span>())
     }
 }
 

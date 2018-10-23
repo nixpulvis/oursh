@@ -487,11 +487,11 @@
 <span class="kw">use</span> <span class="ident">job</span>::<span class="ident">Job</span>;
 <span class="kw">use</span> <span class="ident">program</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Error</span>, <span class="ident">Program</span> <span class="kw">as</span> <span class="ident">ProgramTrait</span>};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;shebang-block&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::{<span class="self">self</span>, <span class="ident">File</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;shebang-block&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">unix</span>::<span class="ident">fs</span>::<span class="ident">PermissionsExt</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;shebang-block&quot;</span>)]</span>
 <span class="kw">use</span> <span class="self">self</span>::<span class="ident">ast</span>::<span class="ident">Interpreter</span>;
 
 
@@ -666,14 +666,14 @@
                 });
                 <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
             },
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>)]</span>
-            <span class="ident">Command</span>::<span class="ident">Bridgeshell</span>(<span class="kw-2">ref</span> <span class="ident">program</span>) <span class="op">=&gt;</span> {
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;shebang-block&quot;</span>)]</span>
+            <span class="ident">Command</span>::<span class="ident">Shebang</span>(<span class="kw-2">ref</span> <span class="ident">interpreter</span>, <span class="kw-2">ref</span> <span class="ident">text</span>) <span class="op">=&gt;</span> {
                 <span class="comment">// TODO: Pass text off to another parser.</span>
-                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Interpreter</span>::<span class="ident">Other</span>(<span class="kw-2">ref</span> <span class="ident">interpreter</span>) <span class="op">=</span> <span class="ident">program</span>.<span class="number">0</span> {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Interpreter</span>::<span class="ident">Other</span>(<span class="kw-2">ref</span> <span class="ident">interpreter</span>) <span class="op">=</span> <span class="ident">interpreter</span> {
                     <span class="comment">// TODO: Even for the Shebang interpretor, we shouldn&#39;t</span>
                     <span class="comment">// create files like this.</span>
                     <span class="comment">// XXX: Length is the worlds worst hash function.</span>
-                    <span class="kw">let</span> <span class="ident">bridgefile</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;/tmp/.oursh_bridge-{}&quot;</span>, <span class="ident">program</span>.<span class="number">1</span>.<span class="ident">len</span>());
+                    <span class="kw">let</span> <span class="ident">bridgefile</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;/tmp/.oursh_bridge-{}&quot;</span>, <span class="ident">text</span>.<span class="ident">len</span>());
                     {
                         <span class="comment">// TODO: Use our job interface without creating any</span>
                         <span class="comment">// fucking files... The shebang isn&#39;t even a real</span>
@@ -694,10 +694,10 @@
                         }.<span class="ident">as_bytes</span>().<span class="ident">to_owned</span>();
                         <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">interpreter</span>).<span class="ident">unwrap</span>();
                         <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="string">b&quot;\n&quot;</span>).<span class="ident">unwrap</span>();
-                        <span class="kw">let</span> <span class="ident">program</span> <span class="op">=</span> <span class="ident">program</span>.<span class="number">1</span>.<span class="ident">chars</span>()
-                                               .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span> <span class="kw">as</span> <span class="ident">u8</span>)
-                                               .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span>();
-                        <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">program</span>).<span class="ident">unwrap</span>();
+                        <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">text</span>.<span class="ident">chars</span>()
+                                       .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span> <span class="kw">as</span> <span class="ident">u8</span>)
+                                       .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span>();
+                        <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">text</span>).<span class="ident">unwrap</span>();
 
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">perms</span> <span class="op">=</span> <span class="ident">fs</span>::<span class="ident">metadata</span>(<span class="kw-2">&amp;</span><span class="ident">bridgefile</span>).<span class="ident">unwrap</span>()
                                                                .<span class="ident">permissions</span>();
@@ -707,17 +707,17 @@
                     <span class="comment">// TODO #4: Suspend and restore raw mode.</span>
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">process</span>::<span class="ident">Command</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">bridgefile</span>))
                         .<span class="ident">spawn</span>()
-                        .<span class="ident">expect</span>(<span class="string">&quot;error swawning bridge process&quot;</span>);
+                        .<span class="ident">expect</span>(<span class="string">&quot;error swawning shebang block process&quot;</span>);
                     <span class="ident">child</span>.<span class="ident">wait</span>()
-                        .<span class="ident">expect</span>(<span class="string">&quot;error waiting for bridge process&quot;</span>);
+                        .<span class="ident">expect</span>(<span class="string">&quot;error waiting for shebang block process&quot;</span>);
 
                     <span class="prelude-val">Ok</span>(<span class="ident">WaitStatus</span>::<span class="ident">Exited</span>(<span class="ident">Pid</span>::<span class="ident">this</span>(), <span class="number">0</span>))
                 } <span class="kw">else</span> {
                     <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">Runtime</span>)
                 }
             },
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bridge&quot;</span>))]</span>
-            <span class="ident">Command</span>::<span class="ident">Bridgeshell</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> {
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;shebang-block&quot;</span>))]</span>
+            <span class="ident">Command</span>::<span class="ident">Shebang</span>(<span class="kw">_</span>,<span class="kw">_</span>) <span class="op">=&gt;</span> {
                 <span class="macro">unimplemented</span><span class="macro">!</span>();
             },
         }
