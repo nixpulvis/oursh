@@ -88,8 +88,6 @@ impl<'input> Iterator for Lexer<'input> {
     type Item = Span<Token<'input>, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        debug!("emit<start>: {:?}", self.lookahead);
-
         #[cfg(feature = "bridge")]
         {
             // If we're inside a shebang, parse a full TEXT block.
@@ -116,8 +114,8 @@ impl<'input> Iterator for Lexer<'input> {
                 '$'  => Some(Ok((i, Token::Dollar, i+1))),
                 '='  => Some(Ok((i, Token::Equals, i+1))),
                 '\\' => Some(Ok((i, Token::Backslash, i+1))),
-                '"'  => Some(Ok((i, Token::DoubleQuote, i+1))),
-                '\'' => Some(Ok((i, Token::SingleQuote, i+1))),
+                '\'' => Some(self.single_quote(i)),
+                '"'  => Some(self.double_quote(i)),
                 '>'  => Some(Ok((i, Token::RCaret, i+1))),
                 '<'  => Some(Ok((i, Token::LCaret, i+1))),
                 '&' => {
@@ -142,21 +140,24 @@ impl<'input> Iterator for Lexer<'input> {
                 c if is_whitespace(c) => continue,
                 c => return Some(Err(Error::UnrecognizedChar(i, c))),
             };
-            debug!("emit<end>:   {:?}", tok);
+            debug!("emit<end>: {:?}", tok);
             return tok;
         }
 
         // Otherwise, return the EOF none.
-        None
+        let tok = None;
+        debug!("emit<end>: {:?}", tok);
+        tok
     }
 }
 
 impl<'input> Lexer<'input> {
     fn advance(&mut self) -> Option<(usize, char)> {
         match self.lookahead {
-            Some((i, t)) => {
+            Some((i, c)) => {
+                debug!("emit<advance>: {}: {}", i, c);
                 self.lookahead = self.chars.next();
-                Some((i, t))
+                Some((i, c))
             },
             None => None,
         }
@@ -183,6 +184,25 @@ impl<'input> Lexer<'input> {
         where F: FnMut(char) -> bool,
     {
         self.take_until(start, |c| !keep_going(c))
+    }
+
+    // TODO: Escapes
+    fn single_quote(&mut self, start: usize)
+        -> Result<(usize, Token<'input>, usize), Error>
+    {
+        let (end, string) = self.take_while(start, |c| c != '\'');
+        self.advance();  // Consume the ending single quote.
+        Ok((start, Token::Word(&self.input[start+1..end]), end))
+    }
+
+    // TODO: Escapes
+    // TODO: Should we expand $ variables here?
+    fn double_quote(&mut self, start: usize)
+        -> Result<(usize, Token<'input>, usize), Error>
+    {
+        let (end, string) = self.take_while(start, |c| c != '"');
+        self.advance();  // Consume the ending double quote.
+        Ok((start, Token::Word(&self.input[start+1..end]), end))
     }
 
     fn word(&mut self, start: usize)

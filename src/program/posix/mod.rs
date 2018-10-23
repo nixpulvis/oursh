@@ -161,8 +161,7 @@ impl super::Program for Program {
                             eprintln!("unexpected token {:?} found at {}, expecting {}",
                                       t, i, expected.join(", "));
                         } else {
-                            eprintln!("unexpected token found, expecting {:?}",
-                                      expected);
+                            eprintln!("expecting {:?}", expected);
                         }
                     },
                     ParseError::ExtraToken { token: (i, t, _) } => {
