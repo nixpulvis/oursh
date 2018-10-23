@@ -24,17 +24,19 @@ programs, the language this will be written in.
     - [x] Compound commands `{ ls; date; }`
     - [x] Boolean status syntax `! true && false || true`
     - [x] Conditionals `if ; then ; elif ; then ; else ; fi`
-    - [x] Subshells `(sleep 1; date)`
+    - [ ] Subshells `(sleep 1; date)`
     - [ ] Background jobs `{ sleep 1; date; }& date`
 - [ ] Shebang block programs
     - [ ] Alternate syntax `{# ...}`
     - [ ] Hashlang syntax `{#lang; ...}`, i.e. `{#posix ls}`
-    - [x] Shebang syntax `{#!interpreter; ...}`,
-          i.e. `{#!/usr/bin/env ruby; puts :sym}`
+    - [x] Shebang syntax `{#!/usr/bin/env ruby; puts :sym}`
 - [ ] bash/zsh autocomplete compatibility
-    - [x] Executable completion
-    - [ ] POSIX `sh` completion
-- [ ] `man` / `-h` / `--help` parsing
+    - [x] Command completion
+    - [ ] Path completion
+    - [ ] Variable completion
+    - [ ] Job completion
+    - [ ] Syntax completion
+    - [ ] `man` / `-h` / `--help` parsing
 - [ ] Multi-line input
 - [ ] Modern scripting language
     - [ ] Macros
@@ -46,7 +48,7 @@ programs, the language this will be written in.
 - [ ] Smart history, sync'd across devices
 - [ ] Pipe old commands without rerunning
 - [ ] Package manager
--  Sane defaults
+- Sane defaults
 - Fast
 
 
@@ -89,9 +91,10 @@ for Racket!
 
 I've built and wrote a few things about shells before:
 
-- [`rush`][rush] A glorified homework assignment for computer architecture.
-- [`shell.py`][shell.py] My submission for computer organization a8.
-- [Building a Shell - Part 1][basp1] Start of this project.
+- [`rush`][rush] A glorified homework assignment for computer architecture
+- [`shell.py`][shell.py] My submission for computer organization a8
+- [Building a Shell - Part 1][basp1] Start of this project
+- [Building a Shell - Part 2][basp2] `program` module intro
 
 
 ## [POSIX Reference][posix]
@@ -164,3 +167,4 @@ oursh : crate
 [rush]: https://github.com/nixpulvis/rush
 [shell.py]: /doc/shell.py
 [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
+[basp2]: https://nixpulvis.com/ramblings/2018-10-15-building-a-shell-part-2
