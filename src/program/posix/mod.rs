@@ -288,6 +288,8 @@ impl super::Command for Command {
             },
             Command::Background(ref command) => {
                 println!("[?] ???");
+
+                // TODO: Track background jobs.
                 let command = command.clone();
                 thread::spawn(move || {
                     command.run().unwrap();
