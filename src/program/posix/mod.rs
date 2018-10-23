@@ -120,7 +120,7 @@ use std::fs::{self, File};
 #[cfg(feature = "bridge")]
 use std::os::unix::fs::PermissionsExt;
 #[cfg(feature = "bridge")]
-use program::ast::Interpreter;
+use self::ast::Interpreter;
 
 
 // Re-exports.

@@ -192,23 +192,3 @@ pub mod basic;
 pub use self::basic::Program as BasicProgram;
 pub mod posix;
 pub use self::posix::Program as PosixProgram;
-
-
-/// Abstract Syntax Tree for programs between multiple languages.
-pub mod ast {
-    /// Either explicit or implicit declaration of the interperator for
-    /// a bridged program.
-    ///
-    /// ### Examples
-    ///
-    /// ```sh
-    /// {# ...}
-    /// {#ruby ...}
-    /// ```
-    #[derive(Debug, Clone)]
-    pub enum Interpreter {
-        Primary,
-        Alternate,
-        Other(String),
-    }
-}

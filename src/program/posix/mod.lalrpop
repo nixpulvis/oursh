@@ -1,6 +1,5 @@
 use program::posix::ast;
 use program::posix::lex;
-use program::ast::Interpreter;
 
 grammar<'input>(text: &'input str);
 
@@ -77,7 +76,8 @@ pub Command: ast::Command = {
     // TODO #15: Hopefully in fixing #8 and #10 this can play nicely.
     // NOTE: This can be successfully complied, but will break a doc tests.
     <s: "{#!"> <t: "TEXT"> "}" => {
-        let b = ast::BridgedProgram(Interpreter::Other(s.into()), t.into());
+        let i = ast::Interpreter::Other(s.into());
+        let b = ast::BridgedProgram(i, t.into());
         ast::Command::Bridgeshell(box b)
     },
     "(" <p: Program> ")" => {

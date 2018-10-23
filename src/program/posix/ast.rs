@@ -1,14 +1,8 @@
 //! Abstract Syntax Tree for the POSIX language.
-use program::ast::Interpreter;
 
 /// A program is the result of parsing a sequence of commands.
 #[derive(Debug, Clone)]
 pub struct Program(pub Vec<Box<Command>>);
-
-/// A program's text and the interpreter to be used.
-// TODO #8: Include grammar separate from interpreter?
-#[derive(Debug, Clone)]
-pub struct BridgedProgram(pub Interpreter, pub String);
 
 /// A command is a *highly* mutually-recursive node with the main features
 /// of the POSIX language.
@@ -128,6 +122,27 @@ impl Command {
         self
     }
 }
+
+/// Either explicit or implicit declaration of the interperator for
+/// a bridged program.
+///
+/// ### Examples
+///
+/// ```sh
+/// {# ...}
+/// {#ruby ...}
+/// ```
+#[derive(Debug, Clone)]
+pub enum Interpreter {
+    Primary,
+    Alternate,
+    Other(String),
+}
+
+/// A program's text and the interpreter to be used.
+// TODO #8: Include grammar separate from interpreter?
+#[derive(Debug, Clone)]
+pub struct BridgedProgram(pub Interpreter, pub String);
 
 impl Program {
     pub(crate) fn insert(mut self, command: &Command) -> Self {
