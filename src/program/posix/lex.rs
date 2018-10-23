@@ -92,13 +92,14 @@ impl<'input> Iterator for Lexer<'input> {
         {
             // If we're inside a shebang, parse a full TEXT block.
             if self.in_shebang {
-                if let Some((start, _)) = self.lookahead {
-                    let tok = Some(self.text(start));
-                    debug!("emit<end>:   {:?}", tok);
-                    return tok;
+                let tok = if let Some((start, _)) = self.lookahead {
+                    Some(self.text(start))
                 } else {
-                    return None
-                }
+                    None
+                };
+
+                debug!("emit<end>: {:?}", tok);
+                return tok;
             }
         }
 
@@ -186,11 +187,11 @@ impl<'input> Lexer<'input> {
         self.take_until(start, |c| !keep_going(c))
     }
 
-    // TODO: Escapes
     fn single_quote(&mut self, start: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
-        let (end, string) = self.take_while(start, |c| c != '\'');
+        // TODO: This quitely stops at EOF.
+        let (end, _) = self.take_while(start, |c| c != '\'');
         self.advance();  // Consume the ending single quote.
         Ok((start, Token::Word(&self.input[start+1..end]), end))
     }
@@ -200,7 +201,8 @@ impl<'input> Lexer<'input> {
     fn double_quote(&mut self, start: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
-        let (end, string) = self.take_while(start, |c| c != '"');
+        // TODO: This quitely stops at EOF.
+        let (end, _) = self.take_while(start, |c| c != '"');
         self.advance();  // Consume the ending double quote.
         Ok((start, Token::Word(&self.input[start+1..end]), end))
     }
