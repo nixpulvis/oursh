@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["ast","Abstract Syntax Tree for the POSIX language."],["lex",""],["parse",""]]});
+initSidebarItems({"mod":[["ast","Abstract Syntax Tree for the POSIX language."],["builtin","Commands that are run from the shell directly, without forking another process."],["lex",""],["parse",""]]});
