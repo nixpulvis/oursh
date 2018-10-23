@@ -9,9 +9,10 @@ use std::{env, process};
 use std::io::{self, Read};
 use std::fs::File;
 use docopt::{Docopt, ArgvMap, Value};
+use nix::sys::wait::WaitStatus;
+use termion::is_tty;
 use oursh::program::{Result, Error, Program, parse_primary};
 use oursh::repl;
-use termion::is_tty;
 
 // Write the Docopt usage string.
 const USAGE: &'static str = "

@@ -5,7 +5,7 @@
 
 use std::process::exit;
 use std::ffi::CString;
-use nix::unistd::{execvp, fork, Pid, ForkResult};
+use nix::unistd::{self, execvp, Pid, ForkResult};
 use nix::sys::wait::{waitpid, WaitStatus};
 
 /// A job to be executed by various means.
@@ -48,7 +48,7 @@ impl Job {
     }
 
     fn fork(&mut self) -> Result<(), nix::Error> {
-        match fork() {
+        match unistd::fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
                 Ok(())
@@ -67,7 +67,7 @@ impl Job {
     }
 
     fn fork_and_wait(&mut self) -> nix::Result<WaitStatus> {
-        match fork() {
+        match unistd::fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
                 self.wait()
@@ -95,6 +95,11 @@ impl Job {
                     match waitpid(child, None) {
                         // TODO #4: Cover other cases?
                         Ok(WaitStatus::StillAlive) => {},
+                        s @ Ok(WaitStatus::Exited(_, 127)) => {
+                            let name = self.argv[0].to_string_lossy();
+                            eprintln!("oursh: {}: command not found", name);
+                            return s;
+                        },
                         s => return s,
                     };
                 }
