@@ -127,6 +127,11 @@
 <span id="127">127</span>
 <span id="128">128</span>
 <span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! This shell should be both POSIX compatible and yet modern and exciting.</span>
 <span class="doccomment">//! Fancy features should not be prevented by POSIX compatibility. This will</span>
@@ -246,8 +251,13 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">repl</span>;
 
 
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">assert_matches</span>;
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
+    <span class="comment">// This just tests syntax.</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">debug_macro</span>() {
         <span class="macro">debug</span><span class="macro">!</span>(<span class="number">1</span>);

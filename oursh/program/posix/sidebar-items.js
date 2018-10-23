@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["ast","Abstract Syntax Tree for the POSIX language."],["lalrpop",""],["lex",""]]});
+initSidebarItems({"mod":[["ast","Abstract Syntax Tree for the POSIX language."],["lex",""],["parse",""]]});
