@@ -18,10 +18,10 @@ travis-ci = { repository = "https://github.com/nixpulvis/oursh" }
 [features]
 default = ["raw", "history", "completion"]
 
-bridge     = []
-completion = []
-history    = []
-raw        = []
+shebang-block = []
+completion    = []
+history       = []
+raw           = []
 
 [dependencies]
 docopt = "1.0"

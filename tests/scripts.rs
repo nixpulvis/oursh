@@ -1,6 +1,6 @@
 extern crate chrono;
 
-#[cfg(feature = "bridge")]
+#[cfg(feature = "shebang-block")]
 use chrono::Local;
 
 mod common;
@@ -17,7 +17,7 @@ fn multiline() {
 }
 
 #[test]
-#[cfg(feature = "bridge")]
+#[cfg(feature = "shebang-block")]
 fn date() {
     let date = Local::now().format("%Y-%m-%d").to_string();
     assert_oursh!(> "./scripts/date.oursh",
@@ -25,7 +25,7 @@ fn date() {
 }
 
 #[test]
-#[cfg(feature = "bridge")]
+#[cfg(feature = "shebang-block")]
 #[ignore]
 fn fib() {
     assert_oursh!(> "./scripts/fib.oursh", "21\n");

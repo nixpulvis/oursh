@@ -115,11 +115,11 @@ use nix::unistd::Pid;
 use job::Job;
 use program::{Result, Error, Program as ProgramTrait};
 
-#[cfg(feature = "bridge")]
+#[cfg(feature = "shebang-block")]
 use std::fs::{self, File};
-#[cfg(feature = "bridge")]
+#[cfg(feature = "shebang-block")]
 use std::os::unix::fs::PermissionsExt;
-#[cfg(feature = "bridge")]
+#[cfg(feature = "shebang-block")]
 use self::ast::Interpreter;
 
 
@@ -294,14 +294,14 @@ impl super::Command for Command {
                 });
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
-            #[cfg(feature = "bridge")]
-            Command::Bridgeshell(ref program) => {
+            #[cfg(feature = "shebang-block")]
+            Command::Shebang(ref interpreter, ref text) => {
                 // TODO: Pass text off to another parser.
-                if let Interpreter::Other(ref interpreter) = program.0 {
+                if let Interpreter::Other(ref interpreter) = interpreter {
                     // TODO: Even for the Shebang interpretor, we shouldn't
                     // create files like this.
                     // XXX: Length is the worlds worst hash function.
-                    let bridgefile = format!("/tmp/.oursh_bridge-{}", program.1.len());
+                    let bridgefile = format!("/tmp/.oursh_bridge-{}", text.len());
                     {
                         // TODO: Use our job interface without creating any
                         // fucking files... The shebang isn't even a real
@@ -322,10 +322,10 @@ impl super::Command for Command {
                         }.as_bytes().to_owned();
                         file.write_all(&interpreter).unwrap();
                         file.write_all(b"\n").unwrap();
-                        let program = program.1.chars()
-                                               .map(|c| c as u8)
-                                               .collect::<Vec<u8>>();
-                        file.write_all(&program).unwrap();
+                        let text = text.chars()
+                                       .map(|c| c as u8)
+                                       .collect::<Vec<u8>>();
+                        file.write_all(&text).unwrap();
 
                         let mut perms = fs::metadata(&bridgefile).unwrap()
                                                                .permissions();
@@ -335,17 +335,17 @@ impl super::Command for Command {
                     // TODO #4: Suspend and restore raw mode.
                     let mut child = process::Command::new(&format!("{}", bridgefile))
                         .spawn()
-                        .expect("error swawning bridge process");
+                        .expect("error swawning shebang block process");
                     child.wait()
-                        .expect("error waiting for bridge process");
+                        .expect("error waiting for shebang block process");
 
                     Ok(WaitStatus::Exited(Pid::this(), 0))
                 } else {
                     Err(Error::Runtime)
                 }
             },
-            #[cfg(not(feature = "bridge"))]
-            Command::Bridgeshell(_) => {
+            #[cfg(not(feature = "shebang-block"))]
+            Command::Shebang(_,_) => {
                 unimplemented!();
             },
         }

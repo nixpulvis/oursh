@@ -110,8 +110,8 @@ fn background_command() {
 }
 
 #[test]
-#[cfg(feature = "bridge")]
-fn bridged_sh_command() {
+#[cfg(feature = "shebang-block")]
+fn shebang_block_sh_command() {
     assert_oursh!("{#!/bin/sh; echo '1'}", "1\n");
     assert_oursh!(r#"
 {#!/bin/sh;
@@ -123,14 +123,14 @@ fn bridged_sh_command() {
 }
 
 #[test]
-#[cfg(feature = "bridge")]
-fn bridged_ruby_command() {
+#[cfg(feature = "shebang-block")]
+fn shebang_block_ruby_command() {
     assert_oursh!("{#!/usr/bin/env ruby; puts 1}", "1\n");
 }
 
 #[test]
-#[cfg(feature = "bridge")]
-fn bridged_python_command() {
+#[cfg(feature = "shebang-block")]
+fn shebang_block_python_command() {
     assert_oursh!("{#!/usr/bin/env python; print(1)}", "1\n");
     assert_oursh!("{#!/usr/bin/env python  ;    print(1)}", "1\n");
     assert_oursh!(r#"
@@ -140,8 +140,8 @@ print("hello world")
 }
 
 #[test]
-#[cfg(feature = "bridge")]
-fn bridged_racket_command() {
+#[cfg(feature = "shebang-block")]
+fn shebang_block_racket_command() {
     assert_oursh!(r#"
 {#!/usr/bin/env racket;
     #lang racket/base
@@ -151,8 +151,8 @@ fn bridged_racket_command() {
 
 #[test]
 #[ignore]
-#[cfg(feature = "bridge")]
-fn bridged_rust_command() {
+#[cfg(feature = "shebang-block")]
+fn shebang_block_rust_command() {
     assert_oursh!(r#"
 {#!/usr/bin/env cargo-script-run;
     fn main() {

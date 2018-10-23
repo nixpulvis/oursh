@@ -26,7 +26,7 @@ programs, the language this will be written in.
     - [x] Conditionals `if ; then ; elif ; then ; else ; fi`
     - [x] Subshells `(sleep 1; date)`
     - [ ] Background jobs `{ sleep 1; date; }& date`
-- [ ] Shebang block bridged programs
+- [ ] Shebang block programs
     - [ ] Alternate syntax `{# ...}`
     - [ ] Hashlang syntax `{#lang; ...}`, i.e. `{#posix ls}`
     - [x] Shebang syntax `{#!interpreter; ...}`,

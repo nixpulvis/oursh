@@ -62,7 +62,7 @@ pub struct Lexer<'input> {
     /// of the input, allows for EOF detection, amongst other things.
     lookahead: Option<(usize, char)>,
 
-    #[cfg(feature = "bridge")]
+    #[cfg(feature = "shebang-block")]
     /// A boolean indicating we're currently lexing inside a shebang block,
     /// and should therefor output TEXT.
     in_shebang: bool,
@@ -78,7 +78,7 @@ impl<'input> Lexer<'input> {
             input,
             chars,
             lookahead,
-            #[cfg(feature = "bridge")]
+            #[cfg(feature = "shebang-block")]
             in_shebang: false,
         }
     }
@@ -88,7 +88,7 @@ impl<'input> Iterator for Lexer<'input> {
     type Item = Span<Token<'input>, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        #[cfg(feature = "bridge")]
+        #[cfg(feature = "shebang-block")]
         {
             // If we're inside a shebang, parse a full TEXT block.
             if self.in_shebang {
@@ -233,7 +233,7 @@ impl<'input> Lexer<'input> {
     fn block(&mut self, start: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
-        #[cfg(feature = "bridge")]
+        #[cfg(feature = "shebang-block")]
         {
             if let Some((_, '#')) = self.lookahead {
                 let (end, _) = self.take_until(start, |c| c == ';');
@@ -255,7 +255,7 @@ impl<'input> Lexer<'input> {
         Ok((start, Token::LBrace, start+1))
     }
 
-    #[cfg(feature = "bridge")]
+    #[cfg(feature = "shebang-block")]
     fn text(&mut self, start: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {

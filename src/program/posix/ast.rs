@@ -97,7 +97,7 @@ pub enum Command {
     /// This is **non-POSIX**
     ///
     /// TODO: How bad is it?
-    Bridgeshell(Box<BridgedProgram>),
+    Shebang(Interpreter, String),
 }
 
 /// A parsed word, already having gone through expansion.
@@ -138,11 +138,6 @@ pub enum Interpreter {
     Alternate,
     Other(String),
 }
-
-/// A program's text and the interpreter to be used.
-// TODO #8: Include grammar separate from interpreter?
-#[derive(Debug, Clone)]
-pub struct BridgedProgram(pub Interpreter, pub String);
 
 impl Program {
     pub(crate) fn insert(mut self, command: &Command) -> Self {

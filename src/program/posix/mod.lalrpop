@@ -77,8 +77,7 @@ pub Command: ast::Command = {
     // NOTE: This can be successfully complied, but will break a doc tests.
     <s: "{#!"> <t: "TEXT"> "}" => {
         let i = ast::Interpreter::Other(s.into());
-        let b = ast::BridgedProgram(i, t.into());
-        ast::Command::Bridgeshell(box b)
+        ast::Command::Shebang(i, t.into())
     },
     "(" <p: Program> ")" => {
         ast::Command::Subshell(box p)
