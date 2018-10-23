@@ -14,6 +14,9 @@ script:
   - cargo test
   - cargo doc --no-deps
 
+before_install:
+  - rm rust-toolchain
+
 after_success:
   # TODO: PR/branch docs.
   - test $TRAVIS_PULL_REQUEST == "false" &&
