@@ -32,8 +32,8 @@ fn forkbomb() {
 }
 
 #[test]
-#[ignore]
 fn hello_world_quoted() {
+    assert_oursh!("echo 'hello world'", "hello world\n");
     assert_oursh!("echo \"hello world\"", "hello world\n");
 }
 
