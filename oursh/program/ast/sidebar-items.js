@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Interpreter","Either explicit or implicit declaration of the interperator for a bridged program."]]});
