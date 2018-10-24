@@ -1,9 +1,9 @@
+//! The shell language (often called `sh`) at the heart of the most popular
+//! shells.
 //!
-//! This shell language (often called `sh`) is at the heart of the most popular
-//! shells, namely `bash` and `zsh`. While shells typically implement many
-//! extensions to the POSIX standard we'll be implementing only the most basic
-//! set of functionality and offloading all extensions to the `modern`
-//! language.
+//! While shells typically implement many extensions to the POSIX standard
+//! we'll be implementing only the most basic set of functionality and
+//! offloading all extensions to the `modern` language.
 //!
 //! # Compatibility
 //!
@@ -47,6 +47,15 @@
 //!
 //! echo $NAME
 //! echo $i
+//! ```
+//!
+//! Variables are loaded from the environment (often simply called `ENV`) as
+//! well. For more information on the enviroment read
+//! [section 8.1](http://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html).
+//!
+//! ```sh
+//! echo $PATH
+//! echo $TERM
 //! ```
 //!
 //! In addition to variables beginning with a `$` being expanded to the value

@@ -11,16 +11,7 @@
 //! [`posix`](program::posix) module docs.
 //!
 //! ```sh
-//! a=0
-//! b=1
-//! for ((i=0; i<10; i++))
-//! do
-//!     echo -n "$a "
-//!     fn=$((a + b))
-//!     a=$b
-//!     b=$fn
-//! done
-//! echo
+//! for ((i=0; i<10; i++)); do echo $i; done
 //! ```
 //!
 //! ### Modern Shell Language
@@ -30,15 +21,7 @@
 //!
 //! ```sh
 //! # WIP
-//! var a = 0
-//! var b = 1
-//! for i in 0..10 {
-//!     echo -n "$a "
-//!     let fn = $((a + b))
-//!     a = $b
-//!     b = $fn
-//! }
-//! echo
+//! for i in (0..10) { echo $i }
 //! ```
 //!
 //! ### Default Syntax
@@ -82,12 +65,21 @@ use std::result;
 use nix::unistd::Pid;
 use nix::sys::wait::WaitStatus;
 
+/// Convenience type for results with program errors.
 pub type Result<T> = result::Result<T, Error>;
 
+/// A comprehensive error type for the operation of programs.
 #[derive(Debug)]
 pub enum Error {
+    /// A general issue reading the program.
+    // TODO: Wrap an io error?
     Read,
+    /// An error within the lexer or parser.
+    // TODO: Wrap both our lex::Error and ParseError.
     Parse,
+    /// An error encountered during the evaluation of a program.
+    // TODO: Propagate status.
+    // TODO: Just wrap an Wait/ExitStatus?
     Runtime,
 }
 

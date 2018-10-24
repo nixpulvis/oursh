@@ -1,3 +1,14 @@
+//! Custom LALRPOP lexer for tokenizing the input stream.
+//!
+//! ```
+//! use oursh::program::posix::lex::Lexer;
+//!
+//! for span in Lexer::new("ls -la | wc") {
+//!     let (start, token, end) = span.unwrap();
+//!     println!("{:?}", token);
+//! }
+//! ```
+
 use std::str::{self, CharIndices};
 
 /// A result type wrapping a token with start and end locations.
@@ -10,7 +21,7 @@ pub enum Error {
 }
 
 /// Every token in the langauge, these are the terminals of the grammar.
-#[derive(Debug)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum Token<'input> {
     Space,
     Tab,
@@ -286,4 +297,50 @@ fn is_word_continue(ch: char) -> bool {
 
 fn is_whitespace(ch: char) -> bool {
     ch == ' ' || ch == '\t'
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        let mut lexer = Lexer::new("");
+        assert!(lexer.next().is_none());
+    }
+
+    #[test]
+    fn error() {
+        let mut lexer = Lexer::new("*");
+        assert_matches!(lexer.next(),
+                        Some(Err(Error::UnrecognizedChar(_, '*'))));
+    }
+
+    #[test]
+    fn linefeed() {
+        let mut lexer = Lexer::new("\n");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Linefeed, _))));
+    }
+
+    #[test]
+    fn words() {
+        let mut lexer = Lexer::new("ls -la");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("ls"), _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("-la"), _))));
+    }
+
+    #[test]
+    fn keywords() {
+        let mut lexer = Lexer::new("if ls done");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::If, _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("ls"), _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Done, _))));
+    }
 }
