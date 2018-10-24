@@ -327,6 +327,9 @@
 <span id="327">327</span>
 <span id="328">328</span>
 <span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Quick and effective raw mode repl library for ANSI terminals.</span>
 <span class="doccomment">//!</span>
@@ -540,6 +543,9 @@
                     <span class="comment">// Save history to file in $HOME.</span>
                     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;history&quot;</span>)]</span>
                     <span class="ident">history</span>.<span class="ident">save</span>();
+
+                    <span class="comment">// Manually drop the raw terminal.</span>
+                    <span class="ident">drop</span>(<span class="ident">stdout</span>);
 
                     <span class="comment">// Exit this wonderful world.</span>
                     <span class="ident">exit</span>(<span class="number">0</span>)
