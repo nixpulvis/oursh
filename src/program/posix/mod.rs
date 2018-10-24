@@ -384,4 +384,6 @@ pub mod lex;
 // enjoy.
 //
 // The code for this module is located in `src/program/posix/mod.lalrpop`.
-lalrpop_mod!(pub parse, "/program/posix/mod.rs");
+lalrpop_mod!(
+    /// LALRPOP generated parser module.
+    pub parse, "/program/posix/mod.rs");
