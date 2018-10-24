@@ -8,6 +8,9 @@ documentation = "https://docs.rs/oursh"
 homepage = "https://nixpulvis/oursh/oursh"
 repository = "https://github.com/nixpulvis/oursh"
 
+# Get with the times.
+edition = "2018"
+
 # Compile our parser grammars.
 build = "build.rs"
 
