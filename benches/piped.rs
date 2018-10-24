@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate criterion;
 
-// use std::process::Command;
 use criterion::Criterion;
 
 #[path="../tests/common/mod.rs"]

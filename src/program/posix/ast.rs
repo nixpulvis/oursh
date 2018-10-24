@@ -155,8 +155,10 @@ impl Program {
 #[cfg(test)]
 mod tests {
     use lalrpop_util::ParseError;
-    use program::posix::parse::{ProgramParser, CommandParser};
-    use program::posix::lex::{Lexer, Token, Error};
+    use crate::program::posix::{
+        parse::{ProgramParser, CommandParser},
+        lex::{Lexer, Token, Error},
+    };
     use super::*;
 
     fn parse_program<'a>(text: &'a str)

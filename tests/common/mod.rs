@@ -26,7 +26,7 @@ macro_rules! shell {
     (> $executable:expr, $filename:expr) => {{
         use std::process::{Command, Stdio};
 
-        let mut child = Command::new($executable)
+        let child = Command::new($executable)
             .arg($filename)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
