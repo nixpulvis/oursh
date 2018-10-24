@@ -184,6 +184,10 @@
 <span id="184">184</span>
 <span id="185">185</span>
 <span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Parsing and handling program syntax(es) of the shell.</span>
 <span class="doccomment">//!</span>
@@ -245,12 +249,16 @@
 <span class="doccomment">//! - TODO #5: Parse sequence of programs from stream.</span>
 <span class="doccomment">//! - TODO #5: Partial parses for readline-ish / syntax highlighting.</span>
 
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufRead</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">result</span>;
-<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::<span class="ident">Pid</span>;
-<span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::<span class="ident">WaitStatus</span>;
+<span class="kw">use</span> <span class="ident">std</span>::{
+    <span class="ident">result</span>,
+    <span class="ident">ffi</span>::<span class="ident">CString</span>,
+    <span class="ident">fmt</span>::<span class="ident">Debug</span>,
+    <span class="ident">io</span>::<span class="ident">BufRead</span>,
+};
+<span class="kw">use</span> <span class="ident">nix</span>::{
+    <span class="ident">unistd</span>::<span class="ident">Pid</span>,
+    <span class="ident">sys</span>::<span class="ident">wait</span>::<span class="ident">WaitStatus</span>,
+};
 
 <span class="doccomment">/// Convenience type for results with program errors.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;

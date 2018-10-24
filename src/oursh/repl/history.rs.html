@@ -113,12 +113,16 @@
 <span id="113">113</span>
 <span id="114">114</span>
 <span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Keeps a record of previous commands, used for completion and archeology.</span>
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">env</span>;
+<span class="kw">use</span> <span class="ident">std</span>::{
+    <span class="ident">env</span>,
+    <span class="ident">io</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>,
+    <span class="ident">fs</span>::<span class="ident">File</span>,
+    <span class="ident">path</span>::<span class="ident">Path</span>,
+};
 
 <span class="doccomment">/// The history of a user&#39;s provided commands.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>

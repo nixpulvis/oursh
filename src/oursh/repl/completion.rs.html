@@ -181,6 +181,9 @@
 <span id="181">181</span>
 <span id="182">182</span>
 <span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! User text completion for REPL interations.</span>
 <span class="doccomment">//!</span>
@@ -200,9 +203,12 @@
 <span class="doccomment">//! assert_eq!(&quot;cargo&quot;, &amp;text);</span>
 <span class="doccomment">//! ```</span>
 
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">cmp</span>::<span class="ident">Ordering</span>::<span class="ident">Equal</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">unix</span>::<span class="ident">fs</span>::<span class="ident">PermissionsExt</span>;
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">env</span>, <span class="ident">fs</span>};
+<span class="kw">use</span> <span class="ident">std</span>::{
+    <span class="ident">env</span>,
+    <span class="ident">fs</span>,
+    <span class="ident">cmp</span>::<span class="ident">Ordering</span>::<span class="ident">Equal</span>,
+    <span class="ident">os</span>::<span class="ident">unix</span>::<span class="ident">fs</span>::<span class="ident">PermissionsExt</span>,
+};
 
 <span class="doccomment">/// The result of a query for text completion.</span>
 <span class="doccomment">///</span>

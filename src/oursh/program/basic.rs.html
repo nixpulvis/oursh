@@ -54,13 +54,21 @@
 <span id="54">54</span>
 <span id="55">55</span>
 <span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Single command programs with no features.</span>
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufRead</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">CString</span>;
+<span class="kw">use</span> <span class="ident">std</span>::{
+    <span class="ident">io</span>::<span class="ident">BufRead</span>,
+    <span class="ident">ffi</span>::<span class="ident">CString</span>,
+};
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::<span class="ident">WaitStatus</span>;
-<span class="kw">use</span> <span class="ident">job</span>::<span class="ident">Job</span>;
-<span class="kw">use</span> <span class="ident">program</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Error</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">job</span>::<span class="ident">Job</span>,
+    <span class="ident">program</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Error</span>},
+};
 
 
 <span class="doccomment">/// A basic program with only a single command.</span>

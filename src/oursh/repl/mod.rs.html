@@ -330,6 +330,8 @@
 <span id="330">330</span>
 <span id="331">331</span>
 <span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Quick and effective raw mode repl library for ANSI terminals.</span>
 <span class="doccomment">//!</span>
@@ -340,23 +342,25 @@
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>;
 <span class="kw">use</span> <span class="ident">pwd</span>::<span class="ident">Passwd</span>;
 <span class="kw">use</span> <span class="ident">termion</span>::{<span class="ident">style</span>, <span class="ident">color</span>};
-<span class="kw">use</span> <span class="ident">program</span>::<span class="prelude-ty">Result</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">program</span>::<span class="prelude-ty">Result</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;raw&quot;</span>)]</span>
+<span class="kw">use</span> {
+    <span class="ident">std</span>::<span class="ident">process</span>::<span class="ident">exit</span>,
+    <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">DetectCursorPos</span>,
+    <span class="ident">termion</span>::<span class="ident">event</span>::<span class="ident">Key</span>,
+    <span class="ident">termion</span>::<span class="ident">input</span>::<span class="ident">TermRead</span>,
+    <span class="ident">termion</span>::<span class="ident">raw</span>::<span class="ident">IntoRawMode</span>,
+};
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;raw&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufRead</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;raw&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>::<span class="ident">exit</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;raw&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">cursor</span>::<span class="ident">DetectCursorPos</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;raw&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">event</span>::<span class="ident">Key</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;raw&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">input</span>::<span class="ident">TermRead</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;raw&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">termion</span>::<span class="ident">raw</span>::<span class="ident">IntoRawMode</span>;
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;completion&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">repl</span>::<span class="ident">completion</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="self">self</span>::<span class="ident">completion</span>::<span class="kw-2">*</span>;
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;history&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">repl</span>::<span class="ident">history</span>::<span class="ident">History</span>;
+<span class="kw">use</span> <span class="self">self</span>::<span class="ident">history</span>::<span class="ident">History</span>;
 
 <span class="doccomment">/// Start a REPL over the strings the user provides.</span>
 <span class="comment">// TODO: Partial syntax, completion.</span>
