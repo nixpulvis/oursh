@@ -3,45 +3,23 @@
 //! [![Dependencies](https://deps.rs/repo/github/nixpulvis/oursh/status.svg)](https://deps.rs/repo/github/nixpulvis/oursh)
 //! [![Gitter Chat](https://badges.gitter.im/oursh.png)](https://gitter.im/oursh/Lobby)
 //!
-//! This shell should be both POSIX compatible and yet modern and exciting. Fancy
-//! features should not be prevented by POSIX compatibility. This will effect the
-//! design of the shell.
+//! This shell should be both POSIX compatible and yet modern and exciting.
+//! Fancy features should not be prevented by POSIX compatibility. This will
+//! effect the design of the shell.
 //!
-//! The name of the shell is `oursh` which is both somewhat unique, and memorable.
-//! It's also a nice name to play with pseudo-satirical themes... right comrade?
-//! It's short (ish) and sneakily fits `rs` in it, which is the extension of Rust
-//! programs, the language this will be written in.
+//! The name of the shell is `oursh` which is both somewhat unique, and
+//! memorable.  It's also a nice name to play with pseudo-satirical themes...
+//! right comrade?  It's short (ish) and sneakily fits `rs` in it, which is the
+//! extension of Rust programs, the language this will be written in.
 //!
 //! ## Features
 //!
 //! - POSIX compatibility
-//!   - Simple commands `ls`
-//!   - Quotes `echo "foo"; echo 'bar'`
-//!   - Variables `echo $foo`
-//!   - Environment `echo $TERM`
-//!   - Special variables `echo $?; echo $1`
-//!   - Compound commands `{ ls; date; }`
-//!   - Boolean status syntax `! true && false || true`
-//!   - Conditionals `if ; then ; elif ; then ; else ; fi`
-//!   - Subshells `(sleep 1; date)`
-//!   - Background jobs `{ sleep 1; date; }& date`
 //! - Shebang block programs
-//!   - Alternate syntax `{# ...}`
-//!   - Shelang syntax `{#lang; ...}`
-//!   - Shebang syntax `{#!/usr/bin/env ruby; puts :sym}`
 //! - bash/zsh autocomplete compatibility
-//!   - Command completion
-//!   - Path completion
-//!   - Variable completion
-//!   - Job completion
-//!   - Syntax completion
-//!   - `man` / `-h` / `--help` parsing
+//! - `man` / `-h` / `--help` parsing
 //! - Multi-line input
 //! - Modern scripting language
-//!   - Macros
-//!   - Types
-//!   - Higher-order functions
-//!   - Threading?
 //! - Obfuscated strings (`!'password'!`)
 //! - mosh like remote session support
 //! - Smart history, sync'd across devices
@@ -50,42 +28,20 @@
 //! -  Sane defaults
 //! - Fast
 //!
-//! ## Usage
-//!
-//! While this project is in early stages, there are no OS packages to use.
-//! However, you can compile and run directly from source easily. Just ensure you
-//! have [`rustup`][rustup] installed.
-//!
-//! ```sh
-//! cargo build
-//! cargo run
-//! ```
-//!
-//!
-//! ## Testing
-//!
-//! We have four kinds of tests in this program. Crate unit tests, Executable unit
-//! tests, subprocess based integration tests, and documentation tests.
-//!
-//! ```sh
-//! # Run all tests.
-//! cargo test
-//! ```
-//!
-//!
 //! ## Previous Work
 //!
 //! I've been using [`fish`][fish] as my main shell for a few years now. Fish
 //! inspires a lot of the modern syntax.
 //!
-//! POSIX compatibility comes from my desire to use this shell as my `chsh -s ...`
-//! shell on [Arch Linux][arch]. See the full POSIX reference for more information.
+//! POSIX compatibility comes from my desire to use this shell as my `chsh -s
+//! ...` shell on [Arch Linux][arch]. See the full POSIX reference for more
+//! information.
 //!
-//! Some of the shebang language interoperation was inspired by my time with the
-//! Northeastern University PL group, and generally from writing [Racket][racket].
-//! The beauty of of merging the UNIX style `#!...` with Racket's `#lang ...` here
-//! is very exciting to me. I might just _have_ to make a `{#lang ...}` shortcut
-//! for Racket!
+//! Some of the shebang language interoperation was inspired by my time with
+//! the Northeastern University PL group, and generally from writing
+//! [Racket][racket].  The beauty of of merging the UNIX style `#!...` with
+//! Racket's `#lang ...` here is very exciting to me. I might just _have_ to
+//! make a `{#lang ...}` shortcut for Racket!
 //!
 //! I've built and wrote a few things about shells before:
 //!
