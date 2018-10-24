@@ -1,5 +1,4 @@
-use program::posix::ast;
-use program::posix::lex;
+use crate::program::posix::{ast, lex};
 
 grammar<'input>(text: &'input str);
 

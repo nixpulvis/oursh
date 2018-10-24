@@ -3,11 +3,16 @@
 //!
 //! These commands take precedence over any executables with the same name
 //! in the `$PATH`.
-use std::ffi::CString;
-use std::{env, process};
-use nix::unistd::{chdir, Pid};
-use nix::sys::wait::WaitStatus;
-use program::{Result, Error};
+use std::{
+    env,
+    process,
+    ffi::CString,
+};
+use nix::{
+    unistd::{chdir, Pid},
+    sys::wait::WaitStatus,
+};
+use crate::program::{Result, Error};
 
 /// A builtin is a custom shell command, often changing the state of the
 /// shell in some way.

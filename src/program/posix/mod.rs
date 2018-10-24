@@ -114,23 +114,28 @@
 //!
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
-use std::ffi::CString;
-use std::io::{Write, BufRead};
-use std::process::{self, Stdio};
-use std::thread;
+use std::{
+    thread,
+    ffi::CString,
+    io::{Write, BufRead},
+    process::{self, Stdio},
+};
 use lalrpop_util::ParseError;
-use nix::sys::wait::WaitStatus;
-use nix::unistd::Pid;
-use job::Job;
-use program::{Result, Error, Program as ProgramTrait};
+use nix::{
+    sys::wait::WaitStatus,
+    unistd::Pid,
+};
+use crate::{
+    job::Job,
+    program::{Result, Error, Program as ProgramTrait},
+};
 
 #[cfg(feature = "shebang-block")]
-use std::fs::{self, File};
-#[cfg(feature = "shebang-block")]
-use std::os::unix::fs::PermissionsExt;
-#[cfg(feature = "shebang-block")]
-use self::ast::Interpreter;
-
+use {
+    std::fs::{self, File},
+    std::os::unix::fs::PermissionsExt,
+    self::ast::Interpreter,
+};
 
 // Re-exports.
 pub use self::ast::Program;
