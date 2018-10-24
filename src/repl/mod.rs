@@ -88,15 +88,20 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
             Key::Char('\t') => {
                 match complete(&text) {
                     Completion::None => continue,
-                    Completion::Partial(possibilities) => {
-                        if possibilities.len() > 25 {
-                            print!("\n\r");
-                            for possibility in possibilities {
-                                print!("{}\n\r", possibility);
+                    Completion::Partial(prefix, possibilities) => {
+                        if text == prefix {
+                            if possibilities.len() > 25 {
+                                print!("\n\r");
+                                for possibility in possibilities {
+                                    print!("{}\n\r", possibility);
+                                }
+                                print!("\n\r");
+                            } else {
+                                print!("\n\r{}\n\r", possibilities.join("\t"));
                             }
-                            print!("\n\r");
                         } else {
-                            print!("\n\r{}\n\r", possibilities.join("\t"));
+                            text = prefix;
+                            print!("\r");
                         }
                         prompt.display(&mut stdout);
                         print!("{}", text);

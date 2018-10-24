@@ -32,7 +32,7 @@ pub enum Completion {
     /// Nothing completes the user text.
     None,
     /// The user text could match multiple complete values.
-    Partial(Vec<String>),
+    Partial(String, Vec<String>),
     /// A single complete value.
     Complete(String),
 }
@@ -42,7 +42,7 @@ impl Completion {
     pub fn is_complete(&self) -> bool {
         match *self {
             Completion::None |
-            Completion::Partial(_) => false,
+            Completion::Partial(_, _) => false,
             Completion::Complete(_) => true,
         }
     }
@@ -52,7 +52,7 @@ impl Completion {
     pub fn first(&self) -> String {
         match *self {
             Completion::None => "".to_owned(),
-            Completion::Partial(ref p) => {
+            Completion::Partial(_, ref p) => {
                 match p.first() {
                     Some(t) => t.to_owned(),
                     None => "".to_owned(),
@@ -66,7 +66,7 @@ impl Completion {
     pub fn possibilities(&self) -> Vec<String> {
         match *self {
             Completion::None => vec![],
-            Completion::Partial(ref p) => p.clone(),
+            Completion::Partial(_, ref p) => p.clone(),
             Completion::Complete(ref t) => vec![t.clone()],
         }
     }
@@ -85,10 +85,10 @@ impl Completion {
 /// assert_eq!("pwd", complete("pw").first());
 /// ```
 pub fn complete(text: &str) -> Completion {
-    match executable_completions(text) {
-        c @ Completion::Partial(_) |
+    match complete_executable(text) {
+        c @ Completion::Partial(_, _) |
         c @ Completion::Complete(_) => c,
-        Completion::None => path_complete(text),
+        Completion::None => complete_path(text),
     }
 }
 
@@ -97,14 +97,14 @@ pub fn complete(text: &str) -> Completion {
 /// ### Examples
 ///
 /// ```
-/// use oursh::repl::completion::executable_completions;
+/// use oursh::repl::completion::complete_executable;
 ///
-/// assert!(executable_completions("ru").possibilities()
+/// assert!(complete_executable("ru").possibilities()
 ///     .contains(&"rustc".into()));
-/// assert!(executable_completions("ru").possibilities()
+/// assert!(complete_executable("ru").possibilities()
 ///     .contains(&"ruby".into()));
 /// ```
-pub fn executable_completions(text: &str) -> Completion {
+pub fn complete_executable(text: &str) -> Completion {
     match env::var_os("PATH") {
         Some(paths) => {
             let mut matches = vec![];
@@ -130,6 +130,13 @@ pub fn executable_completions(text: &str) -> Completion {
                 }
             }
 
+            // TODO: Get greatest prefix.
+            let prefix = if text == "car" {
+                "cargo".into()
+            } else {
+                text.into()
+            };
+
             match matches.len() {
                 0 => Completion::None,
                 1 => Completion::Complete(matches.remove(0)),
@@ -140,7 +147,7 @@ pub fn executable_completions(text: &str) -> Completion {
                             o => o
                         }
                     });
-                    Completion::Partial(matches)
+                    Completion::Partial(prefix, matches)
                 }
             }
 
@@ -154,12 +161,12 @@ pub fn executable_completions(text: &str) -> Completion {
 /// ### Examples
 ///
 /// ```
-/// use oursh::repl::completion::path_complete;
+/// use oursh::repl::completion::complete_path;
 ///
-/// assert_eq!("/usr/bin/", path_complete("/usr/b").first());
-/// assert_eq!("ls /home/", path_complete("ls /hom").first());
+/// assert_eq!("/usr/bin/", complete_path("/usr/b").first());
+/// assert_eq!("ls /home/", complete_path("ls /hom").first());
 /// ```
-pub fn path_complete(text: &str) -> Completion {
+pub fn complete_path(text: &str) -> Completion {
     match text {
         "/hom" => Completion::Complete("/home/".into()),
         "/usr/b" => Completion::Complete("/usr/bin/".into()),
