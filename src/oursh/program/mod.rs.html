@@ -184,14 +184,6 @@
 <span id="184">184</span>
 <span id="185">185</span>
 <span id="186">186</span>
-<span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
-<span id="191">191</span>
-<span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Parsing and handling program syntax(es) of the shell.</span>
 <span class="doccomment">//!</span>
@@ -206,16 +198,7 @@
 <span class="doccomment">//! [`posix`](program::posix) module docs.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```sh</span>
-<span class="doccomment">//! a=0</span>
-<span class="doccomment">//! b=1</span>
-<span class="doccomment">//! for ((i=0; i&lt;10; i++))</span>
-<span class="doccomment">//! do</span>
-<span class="doccomment">//!     echo -n &quot;$a &quot;</span>
-<span class="doccomment">//!     fn=$((a + b))</span>
-<span class="doccomment">//!     a=$b</span>
-<span class="doccomment">//!     b=$fn</span>
-<span class="doccomment">//! done</span>
-<span class="doccomment">//! echo</span>
+<span class="doccomment">//! for ((i=0; i&lt;10; i++)); do echo $i; done</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### Modern Shell Language</span>
@@ -225,15 +208,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```sh</span>
 <span class="doccomment">//! # WIP</span>
-<span class="doccomment">//! var a = 0</span>
-<span class="doccomment">//! var b = 1</span>
-<span class="doccomment">//! for i in 0..10 {</span>
-<span class="doccomment">//!     echo -n &quot;$a &quot;</span>
-<span class="doccomment">//!     let fn = $((a + b))</span>
-<span class="doccomment">//!     a = $b</span>
-<span class="doccomment">//!     b = $fn</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! echo</span>
+<span class="doccomment">//! for i in (0..10) { echo $i }</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### Default Syntax</span>
@@ -277,12 +252,21 @@
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">unistd</span>::<span class="ident">Pid</span>;
 <span class="kw">use</span> <span class="ident">nix</span>::<span class="ident">sys</span>::<span class="ident">wait</span>::<span class="ident">WaitStatus</span>;
 
+<span class="doccomment">/// Convenience type for results with program errors.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
+<span class="doccomment">/// A comprehensive error type for the operation of programs.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
+    <span class="doccomment">/// A general issue reading the program.</span>
+    <span class="comment">// TODO: Wrap an io error?</span>
     <span class="ident">Read</span>,
+    <span class="doccomment">/// An error within the lexer or parser.</span>
+    <span class="comment">// TODO: Wrap both our lex::Error and ParseError.</span>
     <span class="ident">Parse</span>,
+    <span class="doccomment">/// An error encountered during the evaluation of a program.</span>
+    <span class="comment">// TODO: Propagate status.</span>
+    <span class="comment">// TODO: Just wrap an Wait/ExitStatus?</span>
     <span class="ident">Runtime</span>,
 }
 
