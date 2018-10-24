@@ -211,6 +211,9 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
                     #[cfg(feature = "history")]
                     history.save();
 
+                    // Manually drop the raw terminal.
+                    drop(stdout);
+
                     // Exit this wonderful world.
                     exit(0)
                 }
