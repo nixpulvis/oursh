@@ -341,9 +341,6 @@
 <span id="341">341</span>
 <span id="342">342</span>
 <span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
 </pre><pre class="rust ">
 <span class="doccomment">//! Custom LALRPOP lexer for tokenizing the input stream.</span>
 <span class="doccomment">//!</span>
@@ -428,7 +425,6 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;input</span><span class="op">&gt;</span> <span class="ident">Lexer</span><span class="op">&lt;</span><span class="lifetime">&#39;input</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a new lexer from an input &amp;str.</span>
-    <span class="comment">// TODO: Try taking/using `utf8::BufReadDecoder`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chars</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">char_indices</span>();
         <span class="kw">let</span> <span class="ident">lookahead</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">next</span>();
@@ -624,7 +620,6 @@
     }
 }
 
-<span class="comment">// TODO: Unicode?</span>
 <span class="kw">fn</span> <span class="ident">is_word_start</span>(<span class="ident">ch</span>: <span class="ident">char</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
     <span class="kw">match</span> <span class="ident">ch</span> {
         <span class="string">&#39;-&#39;</span> <span class="op">|</span> <span class="string">&#39;_&#39;</span> <span class="op">|</span> <span class="string">&#39;.&#39;</span> <span class="op">|</span> <span class="string">&#39;:&#39;</span> <span class="op">|</span> <span class="string">&#39;/&#39;</span> <span class="op">|</span>
@@ -634,7 +629,6 @@
     }
 }
 
-<span class="comment">// TODO: Unicode?</span>
 <span class="kw">fn</span> <span class="ident">is_word_continue</span>(<span class="ident">ch</span>: <span class="ident">char</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
     <span class="kw">match</span> <span class="ident">ch</span> {
         <span class="string">&#39;\&#39;&#39;</span> <span class="op">=&gt;</span> <span class="bool-val">true</span>,
