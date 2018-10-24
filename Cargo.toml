@@ -52,6 +52,7 @@ harness = false
 
 [[bench]]
 name = "compare"
+harness = false
 
 [[bench]]
 name = "piped"
