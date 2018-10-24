@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["ast","Abstract Syntax Tree for the POSIX language."],["builtin","Commands that are run from the shell directly, without forking another process."],["lex","Custom LALRPOP lexer for tokenizing the input stream."],["parse",""]]});
+initSidebarItems({"mod":[["ast","Abstract Syntax Tree for the POSIX language."],["builtin","Commands that are run from the shell directly, without forking another process."],["lex","Custom LALRPOP lexer for tokenizing the input stream."],["parse","LALRPOP generated parser module."]]});
