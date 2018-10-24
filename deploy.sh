@@ -6,9 +6,6 @@ rev=$(git rev-parse --short HEAD)
 # Assume the docs are already built...
 cd target/doc
 
-# TODO: https://github.com/rust-lang/rust/issues/16103#issuecomment-424054063
-cp -f oursh/index.html index.html
-
 # Create a new clone of the git repository here.
 git init
 # TODO: Deploy as a deployer, or others?
