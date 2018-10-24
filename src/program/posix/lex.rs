@@ -81,7 +81,6 @@ pub struct Lexer<'input> {
 
 impl<'input> Lexer<'input> {
     /// Create a new lexer from an input &str.
-    // TODO: Try taking/using `utf8::BufReadDecoder`.
     pub fn new(input: &'input str) -> Self {
         let mut chars = input.char_indices();
         let lookahead = chars.next();
@@ -277,7 +276,6 @@ impl<'input> Lexer<'input> {
     }
 }
 
-// TODO: Unicode?
 fn is_word_start(ch: char) -> bool {
     match ch {
         '-' | '_' | '.' | ':' | '/' |
@@ -287,7 +285,6 @@ fn is_word_start(ch: char) -> bool {
     }
 }
 
-// TODO: Unicode?
 fn is_word_continue(ch: char) -> bool {
     match ch {
         '\'' => true,
