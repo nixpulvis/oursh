@@ -1,9 +1,13 @@
 //! Single command programs with no features.
-use std::io::BufRead;
-use std::ffi::CString;
+use std::{
+    io::BufRead,
+    ffi::CString,
+};
 use nix::sys::wait::WaitStatus;
-use job::Job;
-use program::{Result, Error};
+use crate::{
+    job::Job,
+    program::{Result, Error},
+};
 
 
 /// A basic program with only a single command.

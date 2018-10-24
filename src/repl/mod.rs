@@ -7,23 +7,25 @@ use std::io::{Write, Stdin, Stdout};
 use nix::unistd;
 use pwd::Passwd;
 use termion::{style, color};
-use program::Result;
+use crate::program::Result;
+
+#[cfg(feature = "raw")]
+use {
+    std::process::exit,
+    termion::cursor::DetectCursorPos,
+    termion::event::Key,
+    termion::input::TermRead,
+    termion::raw::IntoRawMode,
+};
+
 #[cfg(not(feature = "raw"))]
 use std::io::BufRead;
-#[cfg(feature = "raw")]
-use std::process::exit;
-#[cfg(feature = "raw")]
-use termion::cursor::DetectCursorPos;
-#[cfg(feature = "raw")]
-use termion::event::Key;
-#[cfg(feature = "raw")]
-use termion::input::TermRead;
-#[cfg(feature = "raw")]
-use termion::raw::IntoRawMode;
+
 #[cfg(feature = "completion")]
-use repl::completion::*;
+use self::completion::*;
+
 #[cfg(feature = "history")]
-use repl::history::History;
+use self::history::History;
 
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.

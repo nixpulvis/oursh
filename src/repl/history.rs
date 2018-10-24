@@ -1,8 +1,10 @@
 //! Keeps a record of previous commands, used for completion and archeology.
-use std::fs::File;
-use std::path::Path;
-use std::io::prelude::*;
-use std::env;
+use std::{
+    env,
+    io::prelude::*,
+    fs::File,
+    path::Path,
+};
 
 /// The history of a user's provided commands.
 #[derive(Debug)]

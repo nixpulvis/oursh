@@ -3,10 +3,14 @@
 //! All commands (both foreground and background) are created and executed as
 //! a *job*. This helps manage the commands the shell runs.
 
-use std::process::exit;
-use std::ffi::CString;
-use nix::unistd::{self, execvp, Pid, ForkResult};
-use nix::sys::wait::{waitpid, WaitStatus};
+use std::{
+    process::exit,
+    ffi::CString,
+};
+use nix::{
+    unistd::{self, execvp, Pid, ForkResult},
+    sys::wait::{waitpid, WaitStatus},
+};
 
 /// A job to be executed by various means.
 ///

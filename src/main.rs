@@ -5,14 +5,18 @@ extern crate nix;
 extern crate oursh;
 extern crate termion;
 
-use std::{env, process};
-use std::io::{self, Read};
-use std::fs::File;
+use std::{
+    env,
+    process,
+    fs::File,
+    io::{self, Read},
+};
 use docopt::{Docopt, ArgvMap, Value};
-use nix::sys::wait::WaitStatus;
 use termion::is_tty;
-use oursh::program::{Result, Error, Program, parse_primary};
-use oursh::repl;
+use oursh::{
+    repl,
+    program::{Result, Error, Program, parse_primary},
+};
 
 // Write the Docopt usage string.
 const USAGE: &'static str = "

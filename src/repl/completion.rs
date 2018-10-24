@@ -16,9 +16,12 @@
 //! assert_eq!("cargo", &text);
 //! ```
 
-use std::cmp::Ordering::Equal;
-use std::os::unix::fs::PermissionsExt;
-use std::{env, fs};
+use std::{
+    env,
+    fs,
+    cmp::Ordering::Equal,
+    os::unix::fs::PermissionsExt,
+};
 
 /// The result of a query for text completion.
 ///

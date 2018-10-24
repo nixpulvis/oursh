@@ -58,12 +58,16 @@
 //! - TODO #5: Parse sequence of programs from stream.
 //! - TODO #5: Partial parses for readline-ish / syntax highlighting.
 
-use std::ffi::CString;
-use std::fmt::Debug;
-use std::io::BufRead;
-use std::result;
-use nix::unistd::Pid;
-use nix::sys::wait::WaitStatus;
+use std::{
+    result,
+    ffi::CString,
+    fmt::Debug,
+    io::BufRead,
+};
+use nix::{
+    unistd::Pid,
+    sys::wait::WaitStatus,
+};
 
 /// Convenience type for results with program errors.
 pub type Result<T> = result::Result<T, Error>;
