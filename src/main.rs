@@ -12,7 +12,6 @@ use std::{
     io::{self, Read},
 };
 use docopt::{Docopt, ArgvMap, Value};
-use nix::sys::wait::WaitStatus;
 use termion::is_tty;
 use oursh::{
     repl,

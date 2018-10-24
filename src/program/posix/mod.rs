@@ -271,7 +271,7 @@ impl super::Command for Command {
             Command::Pipeline(ref left, ref right) => {
                 // TODO: This is obviously a temporary hack.
                 if let box Command::Simple(left_words) = left {
-                    let mut child = process::Command::new(&left_words[0].0)
+                    let child = process::Command::new(&left_words[0].0)
                         .args(left_words.iter().skip(1).map(|w| &w.0))
                         .stdout(Stdio::piped())
                         .spawn()
