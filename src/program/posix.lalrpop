@@ -1,3 +1,4 @@
+//* vim: set ft=rust: */
 use crate::program::posix::{ast, lex};
 
 grammar<'input>(text: &'input str);
