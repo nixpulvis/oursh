@@ -1,5 +1,3 @@
-#![feature(alloc_system)]
-
 extern crate docopt;
 extern crate nix;
 extern crate oursh;
@@ -15,7 +13,11 @@ use docopt::{Docopt, ArgvMap, Value};
 use termion::is_tty;
 use oursh::{
     repl,
-    program::{Result, Error, Program, parse_primary},
+    program::{
+        parse_primary, parse_alternate,
+        Result, Error,
+        Program,
+    },
 };
 
 // Write the Docopt usage string.
@@ -24,8 +26,9 @@ Usage: oursh [options] [<file>]
 
 Options:
     -h --help     Show this screen.
-    -# --ast      Print an AST of each program.
     -v --verbose  Print extra information.
+    -# --ast      Print an AST of each program.
+    --alternate   Use alternate program syntax.
 ";
 
 // Our shell, for the greater good. Ready and waiting.
@@ -86,21 +89,39 @@ fn main() -> Result<()> {
 fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
     move |text: &String| {
         // Parse with the primary grammar and run each command in order.
-        let program = match parse_primary(text.as_bytes()) {
-            Ok(program) => program,
-            Err(e) => {
-                eprintln!("{:?}: {:#?}", e, text);
-                return Err(e);
+        if args.get_bool("--alternate") {
+            let program = match parse_alternate(text.as_bytes()) {
+                Ok(program) => program,
+                Err(e) => {
+                    eprintln!("{:?}: {:#?}", e, text);
+                    return Err(e);
+                }
+            };
+
+            // Print the program if the flag is given.
+            if args.get_bool("-#") {
+                eprintln!("{:#?}", program);
             }
-        };
 
-        // Print the program if the flag is given.
-        if args.get_bool("-#") {
-            eprintln!("{:#?}", program);
+            // Run it!
+            program.run().map(|_| ())
+        } else {
+            let program = match parse_primary(text.as_bytes()) {
+                Ok(program) => program,
+                Err(e) => {
+                    eprintln!("{:?}: {:#?}", e, text);
+                    return Err(e);
+                }
+            };
+
+            // Print the program if the flag is given.
+            if args.get_bool("-#") {
+                eprintln!("{:#?}", program);
+            }
+
+            // Run it!
+            program.run().map(|_| ())
         }
-
-        // Run it!
-        program.run().map(|_| ())
     }
 }
 

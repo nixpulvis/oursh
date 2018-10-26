@@ -98,7 +98,7 @@ pub enum Error {
 /// - Is simply iterating a collection of `commands` really the correct
 ///   semantics for all the types of programs we want?
 /// - What language information do we still need to store?
-pub trait Program: Sized {
+pub trait Program: Sized + Debug {
     /// The type of each of this program's commands.
     type Command: Command;
 
@@ -127,7 +127,7 @@ pub trait Program: Sized {
 ///
 // TODO #4: We can reasonably reproduce the redirects, pwd... but is it
 //          sane to try this with ENV too?
-pub trait Command: Debug {
+pub trait Command: Sized + Debug {
     /// Run the command, returning a result of it's work.
     fn run(&self) -> Result<WaitStatus>;
 
@@ -158,10 +158,23 @@ pub type AlternateProgram = BasicProgram;
 /// ```
 /// use oursh::program::parse_primary;
 ///
-/// parse_primary(b"ls" as &[u8]);
+/// parse_primary(b"ls | wc" as &[u8]);
 /// ```
 pub fn parse_primary<R: BufRead>(reader: R) -> Result<PrimaryProgram> {
     PrimaryProgram::parse(reader)
+}
+
+/// Parse a program of the alternate type.
+///
+/// # Examples
+///
+/// ```
+/// use oursh::program::parse_alternate;
+///
+/// parse_alternate(b"ls" as &[u8]);
+/// ```
+pub fn parse_alternate<R: BufRead>(reader: R) -> Result<AlternateProgram> {
+    AlternateProgram::parse(reader)
 }
 
 /// Parse a program of the given type.
