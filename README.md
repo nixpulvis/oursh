@@ -142,16 +142,20 @@ We will want to create a few internal modules for the shell.
 _Current modules as of: 2018-10-14_
 
 ```
-oursh : crate
+ oursh : crate
  ├── job : public
  ├── program : public
- │   ├── ast : public
  │   ├── basic : public
  │   └── posix : public
- │       └── ast : public
+ │       ├── ast : public
+ │       │   └── tests : private @ #[cfg(test)]
+ │       ├── builtin : public
+ │       └── lex : public
+ │           └── tests : private @ #[cfg(test)]
  ├── repl : public
+ │   ├── completion : public @ #[cfg(feature = "completion")]
  │   └── history : public @ #[cfg(feature = "history")]
- └── tests : private @ #[cfg(test)]
+ └── tests : private @ #[cfg(test)]└── tests : private @ #[cfg(test)]
 ```
 
 
