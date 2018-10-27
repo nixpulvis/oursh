@@ -114,7 +114,7 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
             };
 
             // Print the program if the flag is given.
-            if args.get_bool("-#") {
+            if args.get_bool("-v") {
                 eprintln!("{:#?}", program);
             }
 
