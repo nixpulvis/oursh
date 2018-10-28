@@ -86,7 +86,10 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
             },
             #[cfg(feature = "completion")]
             Key::Char('\t') => {
-                match complete(&text) {
+                stdout.suspend_raw_mode().unwrap();
+                let completion = complete(&text);
+                stdout.activate_raw_mode().unwrap();
+                match completion {
                     Completion::None => continue,
                     Completion::Partial(prefix, possibilities) => {
                         if text == prefix {

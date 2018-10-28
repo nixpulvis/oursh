@@ -5,7 +5,7 @@ use itertools::{
 };
 
 #[derive(Eq, PartialEq, Debug)]
-struct Trie {
+pub struct Trie {
     is_member: bool,
     value: String,
     children: Vec<Trie>,
@@ -213,5 +213,15 @@ mod tests {
         assert_eq!(trie.len(), 3);
         assert_eq!(trie.depth(), 2);
         // TODO: Assert matches closer.
+    }
+
+    #[test]
+    fn prefix() {
+        let mut trie = Trie::default();
+        trie.insert("freedom");
+        trie.insert("flip");
+        trie.insert("freak");
+        assert_eq!(trie.prefix("").count(), 3);
+        assert_eq!(trie.prefix("fr").count(), 2);
     }
 }

@@ -22,6 +22,7 @@ use std::{
     cmp::Ordering::Equal,
     os::unix::fs::PermissionsExt,
 };
+use trie_hugger::Trie;
 
 /// The result of a query for text completion.
 ///
@@ -107,7 +108,7 @@ pub fn complete(text: &str) -> Completion {
 pub fn complete_executable(text: &str) -> Completion {
     match env::var_os("PATH") {
         Some(paths) => {
-            let mut matches = vec![];
+            let mut matches = Trie::default();
             for dir in env::split_paths(&paths) {
                 if let Ok(executables) = fs::read_dir(dir) {
                     let paths = executables.filter_map(|e| {
@@ -120,9 +121,9 @@ pub fn complete_executable(text: &str) -> Completion {
                             if let Ok(metadata) = fs::metadata(&path) {
                                 if (metadata.permissions()
                                             .mode() & 0o111 != 0)
-                                    && filename.starts_with(text)
+                                    // && filename.starts_with(text)
                                 {
-                                    matches.push(filename.into());
+                                    matches.insert(&filename);
                                 }
                             }
                         }
@@ -130,27 +131,24 @@ pub fn complete_executable(text: &str) -> Completion {
                 }
             }
 
-            // TODO: Get greatest prefix.
-            let prefix = if text == "car" {
-                "cargo".into()
-            } else {
-                text.into()
-            };
-
-            match matches.len() {
+            println!("{:#?}", matches);
+            println!("len: {}", matches.len());
+            println!("depth: {}", matches.depth());
+            println!("count: {}", matches.count());
+            match matches.count() {
                 0 => Completion::None,
-                1 => Completion::Complete(matches.remove(0)),
-                _ => {
-                    matches.sort_by(|a, b| {
-                        match a.len().cmp(&b.len()) {
-                            Equal => b.cmp(&a),
-                            o => o
-                        }
-                    });
-                    Completion::Partial(prefix, matches)
-                }
+                _ => Completion::None,
+                // 1 => Completion::Complete(matches.remove(0)),
+                // _ => {
+                //     matches.sort_by(|a, b| {
+                //         match a.len().cmp(&b.len()) {
+                //             Equal => b.cmp(&a),
+                //             o => o
+                //         }
+                //     });
+                //     Completion::Partial(prefix, matches)
+                // }
             }
-
         }
         None => panic!("PATH is undefined"),
     }
