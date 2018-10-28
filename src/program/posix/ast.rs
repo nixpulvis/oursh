@@ -109,13 +109,26 @@ pub struct Word(pub String);
 
 
 impl Command {
-    pub(crate) fn push(mut self, command: &Command) -> Self {
+    pub fn push(mut self, command: &Command) -> Self {
         match self {
             Command::Compound(ref mut c) => {
                 c.push(box command.clone());
             },
             c @ _ => {
                 return Command::Compound(vec![box c, box command.clone()]);
+            },
+        }
+
+        self
+    }
+
+    pub fn insert(mut self, command: &Command) -> Self {
+        match self {
+            Command::Compound(ref mut c) => {
+                c.insert(0, box command.clone());
+            },
+            c @ _ => {
+                return Command::Compound(vec![box command.clone(), box c]);
             },
         }
 
@@ -200,19 +213,17 @@ mod tests {
         assert!(parse_command("{ls}").is_err());
         assert!(parse_command("{ls; date}").is_err());
 
-        // DO NOT DELETE, REAL BUG.
-
-        // let text = "{ls;}";
-        // let command = parse_command(text).unwrap();
-        // assert_matches!(command, Command::Compound(ref c) if c.len() == 1);
+        let text = "{ls;}";
+        let command = parse_command(text).unwrap();
+        assert_matches!(&command, Command::Compound(c) if c.len() == 1);
 
         let text = "{ls; date;}";
         let command = parse_command(text).unwrap();
-        assert_matches!(command, Command::Compound(ref c) if c.len() == 2);
+        assert_matches!(&command, Command::Compound(c) if c.len() == 2);
 
         let text = "{git s; ls -la; true;}";
         let command = parse_command(text).unwrap();
-        assert_matches!(command, Command::Compound(ref c) if c.len() == 3);
+        assert_matches!(&command, Command::Compound(c) if c.len() == 3);
     }
 
     #[test]
