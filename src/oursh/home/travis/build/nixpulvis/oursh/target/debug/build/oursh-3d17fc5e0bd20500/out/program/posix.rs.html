@@ -3638,9 +3638,11 @@
 <span id="3638">3638</span>
 <span id="3639">3639</span>
 <span id="3640">3640</span>
+<span id="3641">3641</span>
+<span id="3642">3642</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// auto-generated: &quot;lalrpop 0.16.0&quot;</span>
-<span class="comment">// sha256: 759feb63802c80693a9029da5f674289a34302ff160495046a0575fbc957227</span>
+<span class="comment">// sha256: 7c985f2745e725f76ee01a56368984c457d9d3c7ec5cd6aa6bd1842f7e15c</span>
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">program</span>::<span class="ident">posix</span>::{<span class="ident">ast</span>, <span class="ident">lex</span>};
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_extern_crates</span>)]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">lalrpop_util</span> <span class="kw">as</span> <span class="ident">__lalrpop_util</span>;
@@ -6889,7 +6891,7 @@
 {
     {
         <span class="kw">match</span> <span class="ident">c</span> {
-            <span class="ident">c</span> @ <span class="ident">ast</span>::<span class="ident">Command</span>::<span class="ident">Compound</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="ident">c</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="ident">cs</span>),
+            <span class="ident">c</span> @ <span class="ident">ast</span>::<span class="ident">Command</span>::<span class="ident">Compound</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="ident">c</span>.<span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="ident">cs</span>),
             <span class="ident">c</span> <span class="op">=&gt;</span> <span class="ident">ast</span>::<span class="ident">Command</span>::<span class="ident">Compound</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">cs</span>, <span class="kw">box</span> <span class="ident">c</span>]),
         }
     }
@@ -6904,7 +6906,9 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (<span class="ident">usize</span>, <span class="ident">lex</span>::<span class="ident">Token</span><span class="op">&lt;</span><span class="lifetime">&#39;input</span><span class="op">&gt;</span>, <span class="ident">usize</span>),
 ) <span class="op">-&gt;</span> <span class="ident">ast</span>::<span class="ident">Command</span>
 {
-    <span class="ident">cs</span>
+    {
+        <span class="ident">ast</span>::<span class="ident">Command</span>::<span class="ident">Compound</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="kw">box</span> <span class="ident">cs</span>])
+    }
 }
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
