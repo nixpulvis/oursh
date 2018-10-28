@@ -35,23 +35,16 @@ impl Trie {
     }
 
     pub fn depth(&self) -> usize {
-        if self.is_empty() {
-            0
-        } else {
-            self.children.iter().fold(1, |m, c| max(m, c.depth() + 1))
-        }
+        self.children.iter().fold(0, |m, c| max(m, c.depth() + 1))
     }
 
     pub fn count(&self) -> usize {
-        let mut count = self.children.iter().fold(0, |a, c| a + c.len());
-        if self.is_member { count += 1 };
-        count
+        let base = if self.is_member { 1 } else { 0 };
+        self.children.iter().fold(base, |a, c| a + c.count())
     }
 
-    pub fn insert(&mut self, value: String) {
-        print!("adding {} to {:?}: ", value, self);
-
-        for child in self.children.iter_mut() {
+    pub fn insert(&mut self, value: &str) {
+        for (n, child) in self.children.iter_mut().enumerate() {
             let mut iter = value.chars()
                                 .zip_longest(child.value().chars())
                                 .enumerate();
@@ -64,37 +57,57 @@ impl Trie {
                         // If we're still at index 0 we don't match at all.
                         if i == 0 { break; }
 
-                        println!("split child")
-                        // TODO: Like a lumberjack, split the trie.
+                        self.split(value, n, i);
+                        return;
                     }
                     // Our value is longer than the child, insert into it.
                     Left(_) => {
-                        println!("into child");
-                        child.children.push(Trie {
-                            is_member: true,
-                            value: value[value.len()-i..].into(),
-                            children: vec![],
-                        });
+                        child.insert(&value[i..]);
                         return;
                     }
                     // Our value is shorter than the child, insert this child
                     // onto a new node for the value.
                     Right(_) => {
-                        println!("onto child");
-                        // TODO: Insert a node for our value, and put this
-                        // child in it.
+                        self.onto(value, n, i);
+                        return;
                     }
                 }
             }
         }
 
         // No match in children.
-        println!("push");
         self.children.push(Trie {
             is_member: true,
-            value: value,
+            value: value.into(),
             children: vec![],
         });
+    }
+
+    fn split(&mut self, value: &str, n: usize, i: usize) {
+        let new = Trie {
+            is_member: true,
+            value: value[i..].into(),
+            children: vec![],
+        };
+        let mut old = self.children.remove(n);
+        old.value = old.value[i..].into();
+        let node = Trie {
+            is_member: false,
+            value: value[..i].into(),
+            children: vec![old, new],
+        };
+        self.children.push(node);
+    }
+
+    fn onto(&mut self, value: &str, n: usize, i: usize) {
+        let mut old = self.children.remove(n);
+        old.value = old.value[i..].into();
+        let node = Trie {
+            is_member: true,
+            value: value[..i].into(),
+            children: vec![old],
+        };
+        self.children.push(node);
     }
 }
 
@@ -136,13 +149,14 @@ mod tests {
         trie.insert("baz".into());
         assert_eq!(2, trie.depth());
         trie.insert("foo".into());
-        assert_eq!(3, trie.len());
+        assert_eq!(2, trie.depth());
     }
 
     #[test]
     fn insert_one() {
         let mut trie = Trie::default();
         trie.insert("foo".into());
+        assert_eq!(trie.count(), 1);
         assert!(! trie.is_empty());
         assert_eq!(trie.depth(), 1);
     }
@@ -152,6 +166,7 @@ mod tests {
         let mut trie = Trie::default();
         trie.insert("foo".into());
         trie.insert("bar".into());
+        assert_eq!(trie.count(), 2);
         assert_eq!(trie.len(), 2);
         assert_eq!(trie.depth(), 1);
     }
@@ -161,6 +176,7 @@ mod tests {
         let mut trie = Trie::default();
         trie.insert("foo".into());
         trie.insert("foobar".into());
+        assert_eq!(trie.count(), 2);
         assert_eq!(trie.len(), 2);
         assert_eq!(trie.depth(), 2);
         // TODO: Assert matches closer.
@@ -171,6 +187,7 @@ mod tests {
         let mut trie = Trie::default();
         trie.insert("foobar".into());
         trie.insert("foo".into());
+        assert_eq!(trie.count(), 2);
         assert_eq!(trie.len(), 2);
         assert_eq!(trie.depth(), 2);
         // TODO: Assert matches closer.
@@ -192,8 +209,9 @@ mod tests {
         let mut trie = Trie::default();
         trie.insert("foobar".into());
         trie.insert("food".into());
-        assert_eq!(trie.len(), 2);
-        assert_eq!(trie.depth(), 3);
+        assert_eq!(trie.count(), 2);
+        assert_eq!(trie.len(), 3);
+        assert_eq!(trie.depth(), 2);
         // TODO: Assert matches closer.
     }
 }
