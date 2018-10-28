@@ -36,6 +36,7 @@ regex = "1.0"
 #termios = "*"
 # Option 2: http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/
 termion = { git = "https://github.com/redox-os/termion" }
+trie-hugger = { path = "./trie_hugger" }
 utf8 = "^0.0.2"
 
 [build-dependencies]
