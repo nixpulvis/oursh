@@ -5,3 +5,4 @@ authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
 edition = "2018"
 
 [dependencies]
+itertools = "*"

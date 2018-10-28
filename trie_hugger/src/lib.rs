@@ -1,4 +1,8 @@
 use std::cmp::max;
+use itertools::{
+    Itertools,
+    EitherOrBoth::{Both, Left, Right},
+};
 
 #[derive(Eq, PartialEq, Debug)]
 struct Trie {
@@ -22,39 +26,70 @@ impl Trie {
         &self.value
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.children.is_empty()
+    }
+
     pub fn len(&self) -> usize {
+        self.children.iter().fold(self.children.len(), |a, c| a + c.len())
+    }
+
+    pub fn depth(&self) -> usize {
+        if self.is_empty() {
+            0
+        } else {
+            self.children.iter().fold(1, |m, c| max(m, c.depth() + 1))
+        }
+    }
+
+    pub fn count(&self) -> usize {
         let mut count = self.children.iter().fold(0, |a, c| a + c.len());
         if self.is_member { count += 1 };
         count
     }
 
-    pub fn depth(&self) -> usize {
-        let base = if self.is_empty() { 0 } else { 1 };
-        self.children.iter().fold(base, |m, c| max(m, c.depth()))
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
-
     pub fn insert(&mut self, value: String) {
-        // println!("adding {} to {:?}", value, self);
+        print!("adding {} to {:?}: ", value, self);
 
-        for child in self.children.iter() {
-            // if the value starts with the child node's value then
-            // insert the whole thing into that child with the child's
-            // value removed.
-            //
-            // TODO: if the child node's value starts with the value
-            // we're inserting, we need to insert our node above the
-            // child node and insert the child node into us. All the
-            // children below shouldn't need to be updated.
-            if value.starts_with(child.value()) {
-                // TODO: Insert into child and return.
+        for child in self.children.iter_mut() {
+            let mut iter = value.chars()
+                                .zip_longest(child.value().chars())
+                                .enumerate();
+            for (i, either) in iter {
+                match either {
+                    // We're still in the matching part of the two values.
+                    Both(v, c) if v == c => continue,
+                    // Both values are different.
+                    Both(v, c) => {
+                        // If we're still at index 0 we don't match at all.
+                        if i == 0 { break; }
+
+                        println!("split child")
+                        // TODO: Like a lumberjack, split the trie.
+                    }
+                    // Our value is longer than the child, insert into it.
+                    Left(_) => {
+                        println!("into child");
+                        child.children.push(Trie {
+                            is_member: true,
+                            value: value[value.len()-i..].into(),
+                            children: vec![],
+                        });
+                        return;
+                    }
+                    // Our value is shorter than the child, insert this child
+                    // onto a new node for the value.
+                    Right(_) => {
+                        println!("onto child");
+                        // TODO: Insert a node for our value, and put this
+                        // child in it.
+                    }
+                }
             }
         }
 
         // No match in children.
+        println!("push");
         self.children.push(Trie {
             is_member: true,
             value: value,
@@ -72,6 +107,36 @@ mod tests {
         let trie = Trie::default();
         assert!(trie.is_empty());
         assert_eq!(trie.depth(), 0);
+    }
+
+    #[test]
+    fn len() {
+        let mut trie = Trie::default();
+        assert_eq!(0, trie.len());
+        trie.insert("ba".into());
+        assert_eq!(1, trie.len());
+        trie.insert("foo".into());
+        assert_eq!(2, trie.len());
+        trie.insert("bar".into());
+        assert_eq!(3, trie.len());
+        trie.insert("baz".into());
+        assert_eq!(4, trie.len());
+        trie.insert("bat".into());
+        assert_eq!(5, trie.len());
+    }
+
+    #[test]
+    fn depth() {
+        let mut trie = Trie::default();
+        assert_eq!(0, trie.depth());
+        trie.insert("ba".into());
+        assert_eq!(1, trie.depth());
+        trie.insert("bar".into());
+        assert_eq!(2, trie.depth());
+        trie.insert("baz".into());
+        assert_eq!(2, trie.depth());
+        trie.insert("foo".into());
+        assert_eq!(3, trie.len());
     }
 
     #[test]
@@ -120,5 +185,15 @@ mod tests {
         onto.insert("foobar".into());
         onto.insert("foo".into());
         assert_eq!(into, onto);
+    }
+
+    #[test]
+    fn insert_split_child() {
+        let mut trie = Trie::default();
+        trie.insert("foobar".into());
+        trie.insert("food".into());
+        assert_eq!(trie.len(), 2);
+        assert_eq!(trie.depth(), 3);
+        // TODO: Assert matches closer.
     }
 }
