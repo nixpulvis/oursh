@@ -63,7 +63,7 @@ impl Trie {
     /// This function upholds the invariants of this data structure by
     /// potentially shuffling around children when creating new nodes.
     pub fn insert(&mut self, value: &str) {
-        for (n, child) in self.children.iter_mut().enumerate() {
+        'c: for (n, child) in self.children.iter_mut().enumerate() {
             let mut iter = value.chars()
                                 .zip_longest(child.value().chars())
                                 .enumerate();
@@ -74,9 +74,9 @@ impl Trie {
                     // Both values are different.
                     Both(v, c) => {
                         // If we're still at index 0 we don't match at all.
-                        if i == 0 { break; }
+                        if i == 0 { continue 'c; }
 
-                        self.split(value, n, i);
+                        self.split_node(value, n, i);
                         return;
                     }
                     // Our value is longer than the child, insert into it.
@@ -87,14 +87,24 @@ impl Trie {
                     // Our value is shorter than the child, insert this child
                     // onto a new node for the value.
                     Right(_) => {
-                        self.onto(value, n, i);
+                        self.inject_node(value, n, i);
                         return;
                     }
                 }
             }
+
+            // If we've made it here we have inserted a duplicate, we should
+            // ensure it's a member, and return early to prevent inserting
+            // another new node.
+            child.is_member = true;
+            return;
         }
 
         // No match in children.
+        self.new_node(value);
+    }
+
+    fn new_node(&mut self, value: &str) {
         self.children.push(Trie {
             is_member: true,
             value: value.into(),
@@ -102,7 +112,7 @@ impl Trie {
         });
     }
 
-    fn split(&mut self, value: &str, n: usize, i: usize) {
+    fn split_node(&mut self, value: &str, n: usize, i: usize) {
         let new = Trie {
             is_member: true,
             value: value[i..].into(),
@@ -118,7 +128,7 @@ impl Trie {
         self.children.push(node);
     }
 
-    fn onto(&mut self, value: &str, n: usize, i: usize) {
+    fn inject_node(&mut self, value: &str, n: usize, i: usize) {
         let mut old = self.children.remove(n);
         old.value = old.value[i..].into();
         let node = Trie {
@@ -233,6 +243,18 @@ mod tests {
         trie.insert("foobar".into());
         trie.insert("food".into());
         assert_eq!(trie.count(), 2);
+        assert_eq!(trie.len(), 3);
+        assert_eq!(trie.depth(), 2);
+        // TODO: Assert matches closer.
+    }
+
+    #[test]
+    fn insert_duplicate() {
+        let mut trie = Trie::default();
+        trie.insert("food".into());
+        trie.insert("foobar".into());
+        trie.insert("foo".into());
+        assert_eq!(trie.count(), 3);
         assert_eq!(trie.len(), 3);
         assert_eq!(trie.depth(), 2);
         // TODO: Assert matches closer.
