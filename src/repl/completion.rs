@@ -132,9 +132,8 @@ pub fn complete_executable(text: &str) -> Completion {
             }
 
             println!("{:#?}", matches);
-            println!("len: {}", matches.len());
-            println!("depth: {}", matches.depth());
             println!("count: {}", matches.count());
+            println!("depth: {}", matches.depth());
             match matches.count() {
                 0 => Completion::None,
                 _ => Completion::None,
