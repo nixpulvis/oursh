@@ -121,7 +121,7 @@ pub fn complete_executable(text: &str) -> Completion {
                             if let Ok(metadata) = fs::metadata(&path) {
                                 if (metadata.permissions()
                                             .mode() & 0o111 != 0)
-                                    // && filename.starts_with(text)
+                                    && filename.starts_with(text)
                                 {
                                     matches.insert(&filename);
                                 }
@@ -131,7 +131,7 @@ pub fn complete_executable(text: &str) -> Completion {
                 }
             }
 
-            println!("{:#?}", matches);
+            println!("\n\r{:#?}", matches);
             println!("count: {}", matches.count());
             println!("depth: {}", matches.depth());
             match matches.count() {
