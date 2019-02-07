@@ -21,7 +21,7 @@ pub enum Error {
 }
 
 /// Every token in the langauge, these are the terminals of the grammar.
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Token<'input> {
     Space,
     Tab,
