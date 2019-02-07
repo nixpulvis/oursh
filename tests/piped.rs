@@ -150,7 +150,6 @@ fn shebang_block_racket_command() {
 }
 
 #[test]
-#[ignore]
 #[cfg(feature = "shebang-block")]
 fn shebang_block_rust_command() {
     assert_oursh!(r#"
