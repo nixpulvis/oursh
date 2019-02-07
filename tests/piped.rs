@@ -97,13 +97,11 @@ fn single_pipeline_command() {
 }
 
 #[test]
-#[ignore]
 fn chained_pipeline_command() {
     assert_oursh!("cat README.md | head | wc -l", "10\n");
 }
 
 #[test]
-#[ignore]
 fn background_command() {
     assert_oursh!("sleep 1 & echo 1", "1\n");
     // TODO: I'm thinking the Job status should go to STDERR.
