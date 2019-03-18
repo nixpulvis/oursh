@@ -22,7 +22,10 @@ use oursh::{
 
 // Write the Docopt usage string.
 const USAGE: &'static str = "
-Usage: oursh [options] [<file>]
+Usage:
+    oursh    [options] [<file> [<arguments>...]]
+    oursh -c [options] <command_string>
+    oursh -s [options] [<arguments>...]
 
 Options:
     -h --help       Show this screen.
@@ -37,12 +40,14 @@ fn main() -> Result<()> {
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
                       .unwrap_or_else(|e| e.exit());
 
-    if let Some(Value::Plain(Some(ref filename))) = args.find("<file>") {
+    if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
+        parse_and_run(&args)(c)
+    } else if let Some(Value::Plain(Some(ref filename))) = args.find("<file>") {
         let mut file = File::open(filename)
             .expect(&format!("error opening file: {}", filename));
 
-        // Fill a string buffer from STDIN.
-        let mut text= String::new();
+        // Fill a string buffer from the file.
+        let mut text = String::new();
         file.read_to_string(&mut text)
             .expect("error reading file");
 
@@ -52,6 +57,11 @@ fn main() -> Result<()> {
         // Standard input file descriptor (0), used for user input from the
         // user of the shell.
         let stdin = io::stdin();
+
+        // TODO: Verify we don't actually need to do anything with this flag
+        // since we process STDIN from the repl regardless.
+        //
+        // args.get_bool("-s")
 
         // Process text in raw mode style if we're attached to a tty.
         if is_tty(&stdin) {
