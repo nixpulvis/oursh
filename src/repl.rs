@@ -5,7 +5,7 @@
 
 use std::io::{Stdin, Stdout};
 use crate::program::Result;
-use self::actions::{Action, ActionContext};
+use self::action::{Action, ActionContext};
 use self::prompt::Prompt;
 
 #[cfg(feature = "raw")]
@@ -106,7 +106,7 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
 }
 
 
-pub mod actions;
+pub mod action;
 pub mod display;
 pub mod prompt;
 #[cfg(feature = "completion")]
