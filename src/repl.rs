@@ -5,7 +5,7 @@
 
 use std::io::{Stdin, Stdout};
 use crate::program::Result;
-use self::actions::Action;
+use self::actions::{Action, ActionContext};
 use self::prompt::Prompt;
 
 #[cfg(feature = "raw")]
@@ -14,7 +14,6 @@ use {
     termion::event::Key,
     termion::input::TermRead,
     termion::raw::IntoRawMode,
-    termion::raw::RawTerminal,
 };
 
 #[cfg(not(feature = "raw"))]
@@ -22,16 +21,6 @@ use std::io::BufRead;
 
 #[cfg(feature = "history")]
 use self::history::History;
-
-pub struct ActionContext<'a> {
-    pub stdout: &'a mut RawTerminal<Stdout>,
-    pub runner: &'a Fn(&String) -> Result<()>,
-    pub prompt: &'a mut Prompt,
-    // TODO: Remove this field.
-    pub prompt_length: u16,
-    pub text: &'a mut String,
-    pub history: &'a mut History,
-}
 
 /// Start a REPL over the strings the user provides.
 // TODO: Partial syntax, completion.
@@ -118,6 +107,7 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
 
 
 pub mod actions;
+pub mod display;
 pub mod prompt;
 #[cfg(feature = "completion")]
 pub mod completion;

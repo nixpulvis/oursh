@@ -11,14 +11,19 @@
 //!
 //! - `Complete`
 //! - `History`, args: `next`, `prev`
-use std::io::Write;
-use super::ActionContext;
+use std::io::{Write, Stdout};
+use crate::program::Result;
+use super::prompt::Prompt;
 
 #[cfg(feature = "raw")]
 use {
     std::process::exit,
     termion::cursor::DetectCursorPos,
+    termion::raw::RawTerminal,
 };
+
+#[cfg(feature = "history")]
+use super::history::History;
 
 #[cfg(feature = "completion")]
 use super::completion::*;
@@ -45,6 +50,16 @@ pub enum Movement {
 pub enum Direction {
     Left,
     Right,
+}
+
+pub struct ActionContext<'a> {
+    pub stdout: &'a mut RawTerminal<Stdout>,
+    pub runner: &'a Fn(&String) -> Result<()>,
+    pub prompt: &'a mut Prompt,
+    // TODO: Remove this field.
+    pub prompt_length: u16,
+    pub text: &'a mut String,
+    pub history: &'a mut History,
 }
 
 impl Action {
