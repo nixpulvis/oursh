@@ -50,6 +50,7 @@ fn python() {
 
 #[test]
 #[cfg(feature = "shebang-block")]
+// XXX: https://github.com/nixpulvis/oursh/issues/43
 #[ignore]
 fn fib() {
     assert_oursh!(> "./scripts/fib.oursh", "21\n");
