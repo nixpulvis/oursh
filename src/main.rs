@@ -24,12 +24,13 @@ use oursh::{
 const USAGE: &'static str = "
 Usage:
     oursh    [options] [<file> [<arguments>...]]
-    oursh -c [options] <command_string>
+    oursh -c [options] <command_string> [<command_name> [<arguments>...]]
     oursh -s [options] [<arguments>...]
 
 Options:
     -h --help       Show this screen.
     -v --verbose    Print extra information.
+    -a --ast        Print program ASTs.
     -# --alternate  Use alternate program syntax.
 ";
 
@@ -108,7 +109,7 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
             };
 
             // Print the program if the flag is given.
-            if args.get_bool("-v") {
+            if args.get_bool("--ast") {
                 eprintln!("{:#?}", program);
             }
 
@@ -124,7 +125,7 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
             };
 
             // Print the program if the flag is given.
-            if args.get_bool("-v") {
+            if args.get_bool("--ast") {
                 eprintln!("{:#?}", program);
             }
 
