@@ -23,6 +23,21 @@ use std::io::BufRead;
 use self::history::History;
 
 /// Start a REPL over the strings the user provides.
+///
+/// ## Examples
+///
+/// ```
+/// use std::io;
+/// use oursh::program::Result;
+/// use oursh::repl;
+///
+/// fn echo(text: &String) -> Result<()> {
+///     eprintln!("{}", text);
+///     Ok(())
+/// }
+///
+/// repl::start(io::stdin(), io::stdout(), echo);
+/// ```
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
 pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
