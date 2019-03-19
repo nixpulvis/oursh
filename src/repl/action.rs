@@ -1,21 +1,8 @@
 //! Actions to be bound to input methods.
-//!
-//! - `Insert`
-//! - `Backspace`
-//! - `Delete`
-//! - `Submit` (or `Enter`, `Execute`)
-//! - `Move`, args: `home`, `end`, `word:left`, `right`, ...
-//! - `Interrupt`
-//! - `Exit`
-//! - `Clear` (TODO: needed?)
-//!
-//! - `Complete`
-//! - `History`, args: `next`, `prev`
 use std::io::{Write, Stdout};
 use crate::program::Result;
 use super::prompt::Prompt;
 
-#[cfg(feature = "raw")]
 use {
     std::process::exit,
     termion::cursor::DetectCursorPos,
@@ -29,48 +16,23 @@ use super::history::History;
 use super::completion::*;
 
 
-pub enum Action {
-    /// Insert a single character into the REPL.
-    Insert(char),
-    Backspace,
-    Delete,
-    Enter,
-    Move(Movement),
-    Interrupt,
-    Exit,
-}
-
-pub enum Movement {
-    Home,
-    End,
-    Word(Direction),
-    Char(Direction),
-}
-
-pub enum Direction {
-    Left,
-    Right,
-}
+pub struct Action;
 
 pub struct ActionContext<'a> {
     pub stdout: &'a mut RawTerminal<Stdout>,
     pub runner: &'a Fn(&String) -> Result<()>,
     pub prompt: &'a mut Prompt,
     // TODO: Remove this field.
+    #[cfg(feature = "raw")]
     pub prompt_length: u16,
+    #[cfg(feature = "raw")]
     pub text: &'a mut String,
+    #[cfg(feature = "history")]
     pub history: &'a mut History,
 }
 
+#[cfg(feature = "raw")]
 impl Action {
-    // pub fn execute(self, context: &mut ActionContext) {
-    //     match self {
-    //         Action::Insert(c) => Action::insert(context, c),
-    //         Action::Enter => Action::enter(context),
-    //         _ => {}
-    //     }
-    // }
-
     pub fn insert(context: &mut ActionContext, c: char) {
         if let Ok((x, y)) = context.stdout.cursor_pos() {
             let i = (x - context.prompt_length) as usize;

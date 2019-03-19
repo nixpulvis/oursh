@@ -5,7 +5,6 @@
 
 use std::io::{Stdin, Stdout};
 use crate::program::Result;
-use self::action::{Action, ActionContext};
 use self::prompt::Prompt;
 
 #[cfg(feature = "raw")]
@@ -15,6 +14,8 @@ use {
     termion::input::TermRead,
     termion::raw::IntoRawMode,
 };
+#[cfg(feature = "raw")]
+use self::action::{Action, ActionContext};
 
 #[cfg(not(feature = "raw"))]
 use std::io::BufRead;
@@ -66,38 +67,43 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
     #[cfg(feature = "raw")]
     let mut text = String::new();
 
-    // Create an context to pass to the actions.
-    let mut context = ActionContext {
-        stdout: &mut stdout,
-        runner: &runner,
-        prompt: &mut prompt,
-        prompt_length: prompt_length,
-        text: &mut text,
-        history: &mut history,
-    };
-
-    // Iterate the keys as a user presses them.
-    // TODO #5: Mouse?
     #[cfg(feature = "raw")]
-    for c in stdin.keys() {
-        match c.unwrap() {
-            Key::Char('\n') => Action::enter(&mut context),
-            #[cfg(feature = "completion")]
-            Key::Char('\t') => Action::complete(&mut context),
-            Key::Char(c) => Action::insert(&mut context, c),
-            Key::Left => Action::left(&mut context),
-            Key::Right => Action::right(&mut context),
-            Key::Backspace => Action::backspace(&mut context),
-            Key::Ctrl('a') => Action::home(&mut context),
-            Key::Ctrl('e') => Action::end(&mut context),
-            Key::Ctrl('c') => Action::interrupt(&mut context),
-            Key::Ctrl('d') => Action::eof(&mut context),
-            Key::Ctrl('l') => Action::clear(&mut context),
+    {
+        // Create an context to pass to the actions.
+        let mut context = ActionContext {
+            stdout: &mut stdout,
+            runner: &runner,
+            prompt: &mut prompt,
+            #[cfg(feature = "raw")]
+            prompt_length: prompt_length,
+            #[cfg(feature = "raw")]
+            text: &mut text,
             #[cfg(feature = "history")]
-            Key::Up => Action::history_up(&mut context),
-            #[cfg(feature = "history")]
-            Key::Down => Action::history_down(&mut context),
-            _ => {}
+            history: &mut history,
+        };
+
+        // Iterate the keys as a user presses them.
+        // TODO #5: Mouse?
+        for c in stdin.keys() {
+            match c.unwrap() {
+                Key::Char('\n') => Action::enter(&mut context),
+                #[cfg(feature = "completion")]
+                Key::Char('\t') => Action::complete(&mut context),
+                Key::Char(c) => Action::insert(&mut context, c),
+                Key::Left => Action::left(&mut context),
+                Key::Right => Action::right(&mut context),
+                Key::Backspace => Action::backspace(&mut context),
+                Key::Ctrl('a') => Action::home(&mut context),
+                Key::Ctrl('e') => Action::end(&mut context),
+                Key::Ctrl('c') => Action::interrupt(&mut context),
+                Key::Ctrl('d') => Action::eof(&mut context),
+                Key::Ctrl('l') => Action::clear(&mut context),
+                #[cfg(feature = "history")]
+                Key::Up => Action::history_up(&mut context),
+                #[cfg(feature = "history")]
+                Key::Down => Action::history_down(&mut context),
+                _ => {}
+            }
         }
     }
 
@@ -121,9 +127,10 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
 }
 
 
-pub mod action;
 pub mod display;
 pub mod prompt;
+#[cfg(feature = "raw")]
+pub mod action;
 #[cfg(feature = "completion")]
 pub mod completion;
 #[cfg(feature = "history")]
