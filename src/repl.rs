@@ -127,7 +127,7 @@ pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
 }
 
 
-pub mod display;
+// pub mod display;
 pub mod prompt;
 #[cfg(feature = "raw")]
 pub mod action;
