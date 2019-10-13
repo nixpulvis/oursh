@@ -5,7 +5,7 @@
 
 use std::io::{Stdin, Stdout};
 use crate::program::Result;
-use self::prompt::Prompt;
+pub use self::prompt::Prompt;
 
 #[cfg(feature = "raw")]
 use {
@@ -41,15 +41,12 @@ use self::history::History;
 /// ```
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
-pub fn start<F>(mut stdin: Stdin, mut stdout: Stdout, runner: F)
+pub fn start<F>(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, runner: F)
     where F: Fn(&String) -> Result<()>
 {
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
     let mut history = History::load();
-
-    // A styled static (for now) prompt.
-    let mut prompt = Prompt::new().sh_style();
 
     // Convert the tty's stdout into raw mode.
     #[cfg(feature = "raw")]

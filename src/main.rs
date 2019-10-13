@@ -12,7 +12,10 @@ use std::{
 use docopt::{Docopt, ArgvMap, Value};
 use termion::is_tty;
 use oursh::{
-    repl,
+    repl::{
+        self,
+        Prompt,
+    },
     program::{
         parse_primary, parse_alternate,
         Result, Error,
@@ -71,7 +74,9 @@ fn main() -> Result<()> {
             let stdout = io::stdout();
 
             // Start a program running repl.
-            repl::start(stdin, stdout, parse_and_run(&args));
+            // A styled static (for now) prompt.
+            let prompt = Prompt::new().sh_style();
+            repl::start(prompt, stdin, stdout, parse_and_run(&args));
             Ok(())
         } else {
             // Fill a string buffer from STDIN.
