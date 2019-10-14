@@ -20,7 +20,7 @@ pub struct Action;
 
 pub struct ActionContext<'a> {
     pub stdout: &'a mut RawTerminal<Stdout>,
-    pub runner: &'a Fn(&String) -> Result<()>,
+    pub runner: &'a dyn Fn(&String) -> Result<()>,
     pub prompt: &'a mut Prompt,
     // TODO: Remove this field.
     #[cfg(feature = "raw")]
