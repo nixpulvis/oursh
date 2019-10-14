@@ -24,9 +24,6 @@ pub struct Job {
     argv: Vec<CString>,
     // TODO: Call this pid?
     child: Option<Pid>,
-    // TODO: Status should be part of `child`.
-    // TODO: Use our own type, so downstream use doesn't need `nix`.
-    pub status: Option<WaitStatus>,
 }
 
 impl Job {
@@ -36,8 +33,6 @@ impl Job {
         Job {
             argv: argv,
             child: None,
-            status: None,
-
         }
     }
 
@@ -96,22 +91,12 @@ impl Job {
         execvp(&self.argv[0], &self.argv).map(|_| ())
     }
 
-    pub fn status(&mut self) -> nix::Result<WaitStatus> {
+    pub fn status(&self) -> nix::Result<WaitStatus> {
         match self.child {
             Some(child) => {
-                let status = waitpid(child, Some(WaitPidFlag::WNOHANG));
-                self.status = status.ok();
-                status
+                waitpid(child, Some(WaitPidFlag::WNOHANG))
             },
             _ => unimplemented!(),
-        }
-    }
-
-    pub fn is_done(&self) -> bool {
-        match self.status {
-            Some(WaitStatus::Exited(_,_)) => true,
-            Some(WaitStatus::Signaled(_,_,_)) => true,
-            _ => false,
         }
     }
 
@@ -119,9 +104,7 @@ impl Job {
         match self.child {
             Some(child) => {
                 loop {
-                    let status = waitpid(child, None);
-                    self.status = status.ok();
-                    match status {
+                    match waitpid(child, None) {
                         // TODO #4: Cover other cases?
                         Ok(WaitStatus::StillAlive) => {},
                         s @ Ok(WaitStatus::Exited(_, 127)) => {
