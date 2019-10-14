@@ -9,7 +9,7 @@ use std::{
 };
 use nix::{
     unistd::{self, execvp, Pid, ForkResult},
-    sys::wait::{waitpid, WaitStatus},
+    sys::wait::{waitpid, WaitStatus, WaitPidFlag},
 };
 
 /// A job to be executed by various means.
@@ -26,7 +26,7 @@ pub struct Job {
     child: Option<Pid>,
     // TODO: Status should be part of `child`.
     // TODO: Use our own type, so downstream use doesn't need `nix`.
-    status: Option<WaitStatus>,
+    pub status: Option<WaitStatus>,
 }
 
 impl Job {
@@ -39,6 +39,10 @@ impl Job {
             status: None,
 
         }
+    }
+
+    pub fn pid(&self) -> Option<Pid> {
+        self.child
     }
 
     /// Run a shell job, waiting for the command to finish.
@@ -92,11 +96,32 @@ impl Job {
         execvp(&self.argv[0], &self.argv).map(|_| ())
     }
 
-    fn wait(&self) -> nix::Result<WaitStatus> {
+    pub fn status(&mut self) -> nix::Result<WaitStatus> {
+        match self.child {
+            Some(child) => {
+                let status = waitpid(child, Some(WaitPidFlag::WNOHANG));
+                self.status = status.ok();
+                status
+            },
+            _ => unimplemented!(),
+        }
+    }
+
+    pub fn is_done(&self) -> bool {
+        match self.status {
+            Some(WaitStatus::Exited(_,_)) => true,
+            Some(WaitStatus::Signaled(_,_,_)) => true,
+            _ => false,
+        }
+    }
+
+    fn wait(&mut self) -> nix::Result<WaitStatus> {
         match self.child {
             Some(child) => {
                 loop {
-                    match waitpid(child, None) {
+                    let status = waitpid(child, None);
+                    self.status = status.ok();
+                    match status {
                         // TODO #4: Cover other cases?
                         Ok(WaitStatus::StillAlive) => {},
                         s @ Ok(WaitStatus::Exited(_, 127)) => {

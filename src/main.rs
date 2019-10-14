@@ -73,9 +73,14 @@ fn main() -> Result<()> {
             // to the user of the shell.
             let stdout = io::stdout();
 
+            // Trap SIGINT.
+            ctrlc::set_handler(move || {
+                // noop for now.
+            }).unwrap();
+
             // Start a program running repl.
             // A styled static (for now) prompt.
-            let prompt = Prompt::new().sh_style();
+            let prompt = Prompt::sh_style();
             repl::start(prompt, stdin, stdout, parse_and_run(&args));
             Ok(())
         } else {

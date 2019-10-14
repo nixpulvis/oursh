@@ -7,15 +7,18 @@ use termion::{style, color};
 /// program.
 pub struct Prompt(String);
 
-impl Prompt {
-    /// The most basic possible prompt.
-    pub const DEFAULT_FORMAT: &'static str = "$ ";
+impl Default for Prompt {
+    fn default() -> Self {
+        Prompt("$ ".into())
+    }
+}
 
-    pub fn new() -> Self {
-        Prompt(format!("{}", Self::DEFAULT_FORMAT))
+impl Prompt {
+    pub fn new(prompt: &str) -> Self {
+        Prompt(format!("{}", prompt))
     }
 
-    pub fn sh_style(self) -> Self {
+    pub fn sh_style() -> Self {
         const NAME: &'static str = "oursh";
         const VERSION: &'static str = env!("CARGO_PKG_VERSION");
         let version = &VERSION[0..(VERSION.len() - 2)];
@@ -25,7 +28,7 @@ impl Prompt {
         Prompt(format!("{}-{}$ ", NAME, version))
     }
 
-    pub fn nixpulvis_style(self) -> Self {
+    pub fn nixpulvis_style() -> Self {
         let mut buf = [0u8; 64];
         let hostname_cstr = unistd::gethostname(&mut buf)
             .expect("error getting hostname");
@@ -49,7 +52,7 @@ impl Prompt {
             " "))
     }
 
-    pub fn long_style(self) -> Self {
+    pub fn long_style() -> Self {
         let mut buf = [0u8; 64];
         let hostname_cstr = unistd::gethostname(&mut buf)
             .expect("error getting hostname");
@@ -67,7 +70,7 @@ impl Prompt {
             style::Reset))
     }
 
-    pub fn short_style(self) -> Self {
+    pub fn short_style() -> Self {
         Prompt(format!("{}{}our$h{}{} ",
             color::Fg(color::Red),
             style::Invert,
