@@ -38,12 +38,12 @@ ctrlc = "*"
 termion = { git = "https://github.com/redox-os/termion" }
 
 [build-dependencies]
-lalrpop = "0.16.0"
+lalrpop = "*"
 
 [dev-dependencies]
 chrono = "0.4"
 assert_matches = "1.3"
-criterion = "0.2"
+criterion = "*"
 
 [[bench]]
 name = "shebang_block"

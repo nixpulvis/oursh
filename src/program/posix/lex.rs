@@ -247,18 +247,22 @@ impl<'input> Lexer<'input> {
     {
         #[cfg(feature = "shebang-block")]
         {
-            if let Some((_, '#', _)) = self.lookahead {
-                let (_, end) = self.take_until(start, end, |c| c == ';');
-                self.advance();  // Consume the ';' delimeter.
-                self.take_while(end, end, |c| c.is_whitespace());
-                self.in_shebang = true;
-
+            if let Some((_, '#', s)) = self.lookahead {
+                self.advance();  // Consume the '#'.
                 // TODO: Distinguish kinds of Shebang.
-                if let Some((_, '!', _)) = self.lookahead {
-                    let tok = Token::Shebang(&self.input[(start+4)..end]);
+                if let Some((_, '!', s)) = self.lookahead {
+                    let (_, end) = self.take_until(s, end, |c| c == ';');
+                    self.advance();  // Consume the ';' delimeter.
+                    self.take_while(end, end, |c| c.is_whitespace());
+                    self.in_shebang = true;
+
+                    let tok = Token::Shebang(&self.input[s..end]);
                     return Ok((start, tok, end));
                 } else {
-                    let tok = Token::Shebang(&self.input[(start+3)..end]);
+                    let (_, end) = self.take_until(s, end, char::is_whitespace);
+                    self.in_shebang = true;
+
+                    let tok = Token::Shebang(&self.input[s..end]);
                     return Ok((start, tok, end));
                 }
             }
