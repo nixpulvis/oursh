@@ -88,7 +88,9 @@ impl Job {
     }
 
     fn exec(&self) -> Result<(), nix::Error> {
-        execvp(&self.argv[0], &self.argv).map(|_| ())
+        execvp(&self.argv[0], &self.argv.iter()
+                                        .map(|a| a.as_c_str())
+                                        .collect::<Vec<_>>()[..]).map(|_| ())
     }
 
     pub fn status(&self) -> nix::Result<WaitStatus> {

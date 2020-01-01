@@ -160,7 +160,6 @@ impl super::Program for Program {
             return Err(Error::Read);
         }
 
-        // TODO #8: Custom lexer here.
         let lexer = lex::Lexer::new(&string);
         let parser = parse::ProgramParser::new();
         match parser.parse(&string, lexer) {
@@ -171,13 +170,14 @@ impl super::Program for Program {
                         eprintln!("invalid token found at {}", location);
                     },
                     ParseError::UnrecognizedToken { token, expected } => {
-                        if let Some((i, t, _)) = token {
-                            eprintln!("unexpected token {:?} found at {}, expecting {}",
-                                      t, i, expected.join(", "));
-                        } else {
-                            eprintln!("expecting {:?}", expected);
-                        }
+                        let (s, t, e) = token;
+                        eprintln!("unexpected token {:?} found at {}-{}, expecting one of: {}",
+                                  t, s, e, expected.join(", "));
                     },
+                    ParseError::UnrecognizedEOF { location, expected }=> {
+                        eprintln!("unexpected EOF found at {}, expecting one of: {}",
+                                  location, expected.join(", "));
+                    }
                     ParseError::ExtraToken { token: (i, t, _) } => {
                         eprintln!("extra token {:?} found at {}", t, i);
                     }
