@@ -182,8 +182,8 @@ impl super::Program for Program {
                         eprintln!("extra token {:?} found at {}", t, i);
                     }
                     ParseError::User { error } => {
-                        let lex::Error::UnrecognizedChar(i, c) = error;
-                        eprintln!("unexpected character {} found at {}", c, i);
+                        let lex::Error::UnrecognizedChar(s, c, e) = error;
+                        eprintln!("unexpected character {} found at {}-{}", c, s, e);
                     },
                 }
                 Err(Error::Parse)

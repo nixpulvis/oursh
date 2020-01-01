@@ -17,7 +17,7 @@ pub type Span<T, E> = Result<(usize, T, usize), E>;
 /// A lexer error.
 #[derive(Debug)]
 pub enum Error {
-    UnrecognizedChar(usize, char),
+    UnrecognizedChar(usize, char, usize),
 }
 
 /// Every token in the langauge, these are the terminals of the grammar.
@@ -71,7 +71,7 @@ pub struct Lexer<'input> {
 
     /// Always have the next (or first in the initial case) character
     /// of the input, allows for EOF detection, amongst other things.
-    lookahead: Option<(usize, char)>,
+    lookahead: Option<(usize, char, usize)>,
 
     #[cfg(feature = "shebang-block")]
     /// A boolean indicating we're currently lexing inside a shebang block,
@@ -83,7 +83,8 @@ impl<'input> Lexer<'input> {
     /// Create a new lexer from an input &str.
     pub fn new(input: &'input str) -> Self {
         let mut chars = input.char_indices();
-        let lookahead = chars.next();
+        let next = chars.next();
+        let lookahead = next.map(|n| (n.0, n.1, n.0 + n.1.len_utf8()));
         Lexer {
             input,
             chars,
@@ -102,8 +103,8 @@ impl<'input> Iterator for Lexer<'input> {
         {
             // If we're inside a shebang, parse a full TEXT block.
             if self.in_shebang {
-                let tok = if let Some((start, _)) = self.lookahead {
-                    Some(self.text(start))
+                let tok = if let Some((start, _, end)) = self.lookahead {
+                    Some(self.text(start, end))
                 } else {
                     None
                 };
@@ -114,42 +115,42 @@ impl<'input> Iterator for Lexer<'input> {
         }
 
         // Consume characters until we've got a token.
-        while let Some((i, c)) = self.advance() {
+        while let Some((s, c, e)) = self.advance() {
             let tok = match c {
-                '\n' => Some(Ok((i, Token::Linefeed, i+1))),
-                ';'  => Some(Ok((i, Token::Semi, i+1))),
-                ')'  => Some(Ok((i, Token::RParen, i+1))),
-                '('  => Some(Ok((i, Token::LParen, i+1))),
-                '`'  => Some(Ok((i, Token::Backtick, i+1))),
-                '!'  => Some(Ok((i, Token::Bang, i+1))),
-                '$'  => Some(Ok((i, Token::Dollar, i+1))),
-                '='  => Some(Ok((i, Token::Equals, i+1))),
-                '\\' => Some(Ok((i, Token::Backslash, i+1))),
-                '\'' => Some(self.single_quote(i)),
-                '"'  => Some(self.double_quote(i)),
-                '>'  => Some(Ok((i, Token::RCaret, i+1))),
-                '<'  => Some(Ok((i, Token::LCaret, i+1))),
+                '\n' => Some(Ok((s, Token::Linefeed, e))),
+                ';'  => Some(Ok((s, Token::Semi, e))),
+                ')'  => Some(Ok((s, Token::RParen, e))),
+                '('  => Some(Ok((s, Token::LParen, e))),
+                '`'  => Some(Ok((s, Token::Backtick, e))),
+                '!'  => Some(Ok((s, Token::Bang, e))),
+                '$'  => Some(Ok((s, Token::Dollar, e))),
+                '='  => Some(Ok((s, Token::Equals, e))),
+                '\\' => Some(Ok((s, Token::Backslash, e))),
+                '\'' => Some(self.single_quote(s, e)),
+                '"'  => Some(self.double_quote(s, e)),
+                '>'  => Some(Ok((s, Token::RCaret, e))),
+                '<'  => Some(Ok((s, Token::LCaret, e))),
                 '&' => {
-                    if let Some((_, '&')) = self.lookahead {
+                    if let Some((_, '&', e)) = self.lookahead {
                         self.advance();
-                        Some(Ok((i, Token::And, i+2)))
+                        Some(Ok((s, Token::And, e)))
                     } else {
-                        Some(Ok((i, Token::Amper, i+1)))
+                        Some(Ok((s, Token::Amper, e)))
                     }
                 },
                 '|' => {
-                    if let Some((_, '|')) = self.lookahead {
+                    if let Some((_, '|', e)) = self.lookahead {
                         self.advance();
-                        Some(Ok((i, Token::Or, i+2)))
+                        Some(Ok((s, Token::Or, e)))
                     } else {
-                        Some(Ok((i, Token::Pipe, i+1)))
+                        Some(Ok((s, Token::Pipe, e)))
                     }
                 },
-                '{' => Some(self.block(i)),
-                '}' => Some(Ok((i, Token::RBrace, i+1))),
-                c if is_word_start(c) => Some(self.word(i)),
-                c if is_whitespace(c) => continue,
-                c => return Some(Err(Error::UnrecognizedChar(i, c))),
+                '{' => Some(self.block(s, e)),
+                '}' => Some(Ok((s, Token::RBrace, e))),
+                c if is_word_start(c) => Some(self.word(s, e)),
+                c if c.is_whitespace() => continue,
+                c => return Some(Err(Error::UnrecognizedChar(s, c, e))),
             };
             debug!("emit<end>: {:?}", tok);
             return tok;
@@ -163,64 +164,65 @@ impl<'input> Iterator for Lexer<'input> {
 }
 
 impl<'input> Lexer<'input> {
-    fn advance(&mut self) -> Option<(usize, char)> {
+    fn advance(&mut self) -> Option<(usize, char, usize)> {
         match self.lookahead {
-            Some((i, c)) => {
-                debug!("emit<advance>: {}: {}", i, c);
-                self.lookahead = self.chars.next();
-                Some((i, c))
+            Some((s, c, e)) => {
+                debug!("emit<advance>: c: {} at {}-{}", c, s, e);
+                let next = self.chars.next();
+                self.lookahead = next.map(|n| (n.0, n.1, n.0 + n.1.len_utf8()));
+                Some((s, c, e))
             },
             None => None,
         }
     }
 
-    fn take_until<F>(&mut self, start: usize, mut terminate: F)
-        -> (usize, &'input str)
+    fn take_until<F>(&mut self, start: usize, mut end: usize,  mut terminate: F)
+        -> (&'input str, usize)
         where F: FnMut(char) -> bool
     {
-        let mut end = start + 1;
-        while let Some((e, c)) = self.lookahead {
+        while let Some((_, c, _)) = self.lookahead {
             if terminate(c) {
-                return (e, &self.input[start..end]);
+                return (&self.input[start..end], end);
             } else {
-                end = e + 1;
-                self.advance();
+                if let Some((_, _, e)) = self.advance() {
+                    end = e;
+                }
             }
         }
-        (end, &self.input[start..end])
+        (&self.input[start..end], end)
     }
 
-    fn take_while<F>(&mut self, start: usize, mut keep_going: F)
-        -> (usize, &'input str)
+    fn take_while<F>(&mut self, start: usize, end: usize, mut keep_going: F)
+        -> (&'input str, usize)
         where F: FnMut(char) -> bool,
     {
-        self.take_until(start, |c| !keep_going(c))
+        self.take_until(start, end, |c| !keep_going(c))
     }
 
-    fn single_quote(&mut self, start: usize)
+    fn single_quote(&mut self, start: usize, end: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
         // TODO: This quitely stops at EOF.
-        let (end, _) = self.take_while(start, |c| c != '\'');
+        let (_, end) = self.take_while(start, end, |c| c != '\'');
         self.advance();  // Consume the ending single quote.
         Ok((start, Token::Word(&self.input[start+1..end]), end))
     }
 
     // TODO: Escapes
     // TODO: Should we expand $ variables here?
-    fn double_quote(&mut self, start: usize)
+    fn double_quote(&mut self, start: usize, end: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
         // TODO: This quitely stops at EOF.
-        let (end, _) = self.take_while(start, |c| c != '"');
+        let (_, end) = self.take_while(start, end, |c| c != '"');
         self.advance();  // Consume the ending double quote.
         Ok((start, Token::Word(&self.input[start+1..end]), end))
     }
 
-    fn word(&mut self, start: usize)
+    fn word(&mut self, start: usize, end: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
-        let (end, word) = self.take_while(start, is_word_continue);
+        let (word, end) = self.take_while(start, end, is_word_continue);
         let tok = match word {
             "if"    => Token::If,
             "then"  => Token::Then,
@@ -240,19 +242,19 @@ impl<'input> Lexer<'input> {
         Ok((start, tok, end))
     }
 
-    fn block(&mut self, start: usize)
+    fn block(&mut self, start: usize, end: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
         #[cfg(feature = "shebang-block")]
         {
-            if let Some((_, '#')) = self.lookahead {
-                let (end, _) = self.take_until(start, |c| c == ';');
+            if let Some((_, '#', _)) = self.lookahead {
+                let (_, end) = self.take_until(start, end, |c| c == ';');
                 self.advance();  // Consume the ';' delimeter.
-                self.take_while(end, is_whitespace);
+                self.take_while(end, end, |c| c.is_whitespace());
                 self.in_shebang = true;
 
                 // TODO: Distinguish kinds of Shebang.
-                if let Some((_, '!')) = self.lookahead {
+                if let Some((_, '!', _)) = self.lookahead {
                     let tok = Token::Shebang(&self.input[(start+4)..end]);
                     return Ok((start, tok, end));
                 } else {
@@ -262,15 +264,15 @@ impl<'input> Lexer<'input> {
             }
         }
 
-        Ok((start, Token::LBrace, start+1))
+        Ok((start, Token::LBrace, end))
     }
 
     #[cfg(feature = "shebang-block")]
-    fn text(&mut self, start: usize)
+    fn text(&mut self, start: usize, end: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
         // TODO: Count matching braces in TEXT.
-        let (end, _) = self.take_until(start, |d| d == '}');
+        let (_, end) = self.take_until(start, end, |d| d == '}');
         self.in_shebang = false;
         Ok((start, Token::Text(&self.input[start..end]), end))
     }
@@ -278,24 +280,27 @@ impl<'input> Lexer<'input> {
 
 fn is_word_start(ch: char) -> bool {
     match ch {
-        '-' | '_' | '.' | ':' | '/' |
-        'a'...'z' | 'A'...'Z' |
-        '0'...'9' => true,
-        _ => false,
+        // Ignore C0 and C1 control character words.
+        // TODO: Test
+        '\u{007F}' |
+        '\u{0000}'..='\u{001F}' |
+        '\u{0080}'..='\u{009F}' => false,
+        _ => is_word_continue(ch),
     }
 }
 
 fn is_word_continue(ch: char) -> bool {
     match ch {
-        '\'' => true,
-        ch => is_word_start(ch),
+        // List of syntax from above.
+        // TODO: Make this list generated.
+        ';' | ')' | '(' | '`' | '!' |
+        '$' | '=' | '\\' | '\'' | '"' |
+        '>' | '<' | '&' | '|' | '{' | '}' |
+        '*' => false,
+
+        _ => !ch.is_whitespace()
     }
 }
-
-fn is_whitespace(ch: char) -> bool {
-    ch == ' ' || ch == '\t'
-}
-
 
 #[cfg(test)]
 mod tests {
@@ -311,7 +316,7 @@ mod tests {
     fn error() {
         let mut lexer = Lexer::new("*");
         assert_matches!(lexer.next(),
-                        Some(Err(Error::UnrecognizedChar(_, '*'))));
+                        Some(Err(Error::UnrecognizedChar(_, '*', _))));
     }
 
     #[test]
@@ -328,6 +333,30 @@ mod tests {
                         Some(Ok((_, Token::Word("ls"), _))));
         assert_matches!(lexer.next(),
                         Some(Ok((_, Token::Word("-la"), _))));
+    }
+
+    #[test]
+    fn whitespace_words() {
+        let mut lexer = Lexer::new("ls\n");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("ls"), _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Linefeed, _))));
+    }
+
+    #[test]
+    fn unicode_words() {
+        let mut lexer = Lexer::new("😀 -🧪");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("😀"), _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("-🧪"), _))));
+
+        let mut lexer = Lexer::new("😀 -🧪💀");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("😀"), _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("-🧪💀"), _))));
     }
 
     #[test]
