@@ -108,6 +108,10 @@ fn main() -> Result<()> {
 
 fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
     move |text: &String| {
+        if text.is_empty() {
+            return Ok(());
+        }
+
         // Parse with the primary grammar and run each command in order.
         if args.get_bool("-#") {
             let program = match parse_alternate(text.as_bytes()) {
