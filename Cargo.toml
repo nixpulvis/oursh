@@ -1,6 +1,6 @@
 [package]
 name = "oursh"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
 description = "Modern, fast POSIX compatible shell"
 license-file = "LICENSE"
@@ -27,10 +27,10 @@ history       = []
 raw           = []
 
 [dependencies]
-docopt = "1.0"
+docopt = "1"
 lalrpop-util = "*"
 nix = "*"
-pwd = "1.3"
+pwd = "1"
 ctrlc = "*"
 # Option 1: http://man7.org/linux/man-pages/man3/termios.3.html
 #termios = "*"
@@ -41,8 +41,8 @@ termion = { git = "https://github.com/redox-os/termion" }
 lalrpop = "*"
 
 [dev-dependencies]
-chrono = "0.4"
-assert_matches = "1.3"
+chrono = "*"
+assert_matches = "1"
 criterion = "*"
 
 [[bench]]
