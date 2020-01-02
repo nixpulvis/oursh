@@ -115,10 +115,11 @@
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
 use std::{
-    thread,
     ffi::CString,
     io::{Write, BufRead},
     process::{self, Stdio},
+    cell::RefCell,
+    rc::Rc,
 };
 use lalrpop_util::ParseError;
 use nix::{
@@ -127,7 +128,7 @@ use nix::{
 };
 use crate::{
     job::Job,
-    program::{Result, Error, Program as ProgramTrait},
+    program::{Result, Error},
 };
 
 #[cfg(feature = "shebang-block")]
@@ -200,8 +201,11 @@ impl super::Program for Program {
 // const BUILTINS: HashMap<&'static str, &'static Builtin> = HashMap::new(...);
 
 // The semantics of a single POSIX command.
-impl super::Command for Command {
-    fn run(&self) -> Result<WaitStatus> {
+impl super::Command for Command {}
+
+impl super::Run for Command {
+    fn run(&self, background: bool, jobs: Rc<RefCell<Vec<(String, Job)>>>)
+    -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref words) => {
@@ -221,9 +225,28 @@ impl super::Command for Command {
                         "cd" => {
                             return builtin::Cd::run(argv)
                         },
+                        "jobs" => {
+                            for (id, job) in jobs.borrow().iter() {
+                                if let Some(pid) = job.pid() {
+                                    println!("[{}]\t{}", id, pid)
+                                }
+                            }
+                            Ok(WaitStatus::Exited(Pid::this(), 0))
+                        },
                         _ => {
-                            return Job::new(argv).run()
+                            let mut job = Job::new(argv);
+                            if background {
+                                let status = job.fork().map_err(|_| Error::Runtime);
+                                let id = "???".into();
+                                if let Some(pid) = job.pid() {
+                                    println!("[{}]\t{}", id, pid)
+                                }
+                                jobs.borrow_mut().push((id, job));
+                                return status
+                            } else {
+                                return job.fork_and_wait()
                                           .map_err(|_| Error::Runtime)
+                            }
                         },
                     }
                 } else {
@@ -233,12 +256,12 @@ impl super::Command for Command {
             Command::Compound(ref commands) => {
                 let mut last = WaitStatus::Exited(Pid::this(), 0);
                 for command in commands.iter() {
-                    last = command.run()?;
+                    last = command.run(false, jobs.clone())?;
                 }
                 Ok(last)
             },
             Command::Not(ref command) => {
-                match command.run() {
+                match command.run(false, jobs.clone()) {
                     Ok(WaitStatus::Exited(p, c)) => {
                         Ok(WaitStatus::Exited(p, (c == 0) as i32))
                     }
@@ -247,18 +270,18 @@ impl super::Command for Command {
                 }
             },
             Command::And(ref left, ref right) => {
-                match left.run() {
+                match left.run(false, jobs.clone()) {
                     Ok(WaitStatus::Exited(_, c)) if c == 0 => {
-                        right.run().map_err(|_| Error::Runtime)
+                        right.run(false, jobs.clone()).map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
                     Err(_) => Err(Error::Runtime),
                 }
             },
             Command::Or(ref left, ref right) => {
-                match left.run() {
+                match left.run(false, jobs.clone()) {
                     Ok(WaitStatus::Exited(_, c)) if c != 0 => {
-                        right.run().map_err(|_| Error::Runtime)
+                        right.run(false, jobs.clone()).map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
                     Err(_) => Err(Error::Runtime),
@@ -266,7 +289,7 @@ impl super::Command for Command {
             },
             Command::Subshell(ref program) => {
                 // TODO #4: Run in a *subshell* ffs.
-                program.run()
+                program.run(false, jobs)
             },
             Command::Pipeline(ref left, ref right) => {
                 // TODO: This is obviously a temporary hack.
@@ -301,14 +324,7 @@ impl super::Command for Command {
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Background(ref command) => {
-                println!("[?] ???");
-
-                // TODO: Track background jobs.
-                let command = command.clone();
-                thread::spawn(move || {
-                    command.run().unwrap();
-                });
-                Ok(WaitStatus::Exited(Pid::this(), 0))
+                command.run(true, jobs.clone())
             },
             #[cfg(feature = "shebang-block")]
             Command::Shebang(ref interpreter, ref text) => {

@@ -60,13 +60,18 @@
 
 use std::{
     result,
+    cell::RefCell,
     ffi::CString,
     fmt::Debug,
     io::BufRead,
+    rc::Rc,
 };
 use nix::{
     unistd::Pid,
     sys::wait::WaitStatus,
+};
+use crate::{
+    job::Job,
 };
 
 /// Convenience type for results with program errors.
@@ -87,6 +92,11 @@ pub enum Error {
     Runtime,
 }
 
+pub trait Run {
+    fn run(&self, background: bool, jobs: Rc<RefCell<Vec<(String, Job)>>>)
+    -> Result<WaitStatus>;
+}
+
 /// A program is as large as a file or as small as a line.
 ///
 /// Each program is to be treated as a complete single language entity, with
@@ -98,7 +108,7 @@ pub enum Error {
 /// - Is simply iterating a collection of `commands` really the correct
 ///   semantics for all the types of programs we want?
 /// - What language information do we still need to store?
-pub trait Program: Sized + Debug {
+pub trait Program: Sized + Debug + Run {
     /// The type of each of this program's commands.
     type Command: Command;
 
@@ -107,12 +117,14 @@ pub trait Program: Sized + Debug {
 
     /// Return a list of all the commands in this program.
     fn commands(&self) -> &[Box<Self::Command>];
+}
 
-    /// Run the program sequentially.
-    fn run(&self) -> Result<WaitStatus> {
+impl<P: Program> Run for P {
+    fn run(&self, background: bool, jobs: Rc<RefCell<Vec<(String, Job)>>>)
+    -> Result<WaitStatus> {
         let mut last = WaitStatus::Exited(Pid::this(), 0);
         for command in self.commands().iter() {
-            last = command.run()?;
+            last = command.run(background, jobs.clone())?;
         }
         Ok(last)
     }
@@ -127,10 +139,7 @@ pub trait Program: Sized + Debug {
 ///
 // TODO #4: We can reasonably reproduce the redirects, pwd... but is it
 //          sane to try this with ENV too?
-pub trait Command: Sized + Debug {
-    /// Run the command, returning a result of it's work.
-    fn run(&self) -> Result<WaitStatus>;
-
+pub trait Command: Sized + Debug + Run {
     /// Return the name of this command.
     ///
     /// This name *may* not be the same as the name given to the process by

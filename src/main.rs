@@ -8,9 +8,12 @@ use std::{
     process,
     fs::File,
     io::{self, Read},
+    cell::RefCell,
+    rc::Rc,
 };
 use docopt::{Docopt, ArgvMap, Value};
 use termion::is_tty;
+use nix::sys::wait::WaitStatus;
 use oursh::{
     repl::{
         self,
@@ -19,8 +22,9 @@ use oursh::{
     program::{
         parse_primary, parse_alternate,
         Result, Error,
-        Program,
+        Run,
     },
+    job::Job,
 };
 
 // Write the Docopt usage string.
@@ -44,8 +48,11 @@ fn main() -> Result<()> {
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
                       .unwrap_or_else(|e| e.exit());
 
+    // Elementary job management.
+    let jobs: Rc<RefCell<Vec<(String, Job)>>> = Rc::new(RefCell::new(vec![]));
+
     if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
-        parse_and_run(&args)(c)
+        parse_and_run(jobs, &args)(c)
     } else if let Some(Value::Plain(Some(ref filename))) = args.find("<file>") {
         let mut file = File::open(filename)
             .expect(&format!("error opening file: {}", filename));
@@ -56,7 +63,7 @@ fn main() -> Result<()> {
             .expect("error reading file");
 
         // Run the program.
-        parse_and_run(&args)(&text)
+        parse_and_run(jobs, &args)(&text)
     } else {
         // Standard input file descriptor (0), used for user input from the
         // user of the shell.
@@ -81,7 +88,7 @@ fn main() -> Result<()> {
             // Start a program running repl.
             // A styled static (for now) prompt.
             let prompt = Prompt::sh_style();
-            repl::start(prompt, stdin, stdout, parse_and_run(&args));
+            repl::start(prompt, stdin, stdout, parse_and_run(jobs, &args));
             Ok(())
         } else {
             // Fill a string buffer from STDIN.
@@ -89,7 +96,7 @@ fn main() -> Result<()> {
             stdin.lock().read_to_string(&mut text).unwrap();
 
             // Run the program.
-            match parse_and_run(&args)(&text) {
+            match parse_and_run(jobs, &args)(&text) {
                 Ok(u) => Ok(u),
                 Err(Error::Read) => {
                     process::exit(1);
@@ -106,8 +113,33 @@ fn main() -> Result<()> {
     }
 }
 
-fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
+fn parse_and_run<'a>(jobs: Rc<RefCell<Vec<(String, Job)>>>, args: &'a ArgvMap)
+-> impl Fn(&String) -> Result<()> + 'a {
     move |text: &String| {
+        jobs.borrow_mut().retain(|job| {
+            match job.1.status() {
+                Ok(WaitStatus::StillAlive) => {
+                    true
+                },
+                Ok(WaitStatus::Exited(pid, code)) => {
+                    println!("[{}]+\tExit({})\t{}", job.0, code, pid);
+                    false
+                },
+                Ok(WaitStatus::Signaled(pid, signal, _)) => {
+                    println!("[{}]+\t{}\t{}", job.0, signal, pid);
+                    false
+                },
+                Ok(_) => {
+                    println!("unhandled");
+                    true
+                },
+                Err(e) => {
+                    println!("err: {:?}", e);
+                    false
+                }
+            }
+        });
+
         if text.is_empty() {
             return Ok(());
         }
@@ -128,7 +160,7 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
             }
 
             // Run it!
-            program.run().map(|_| ())
+            program.run(false, jobs.clone()).map(|_| ())
         } else {
             let program = match parse_primary(text.as_bytes()) {
                 Ok(program) => program,
@@ -144,7 +176,7 @@ fn parse_and_run<'a>(args: &'a ArgvMap) -> impl Fn(&String) -> Result<()> + 'a {
             }
 
             // Run it!
-            program.run().map(|_| ())
+            program.run(false, jobs.clone()).map(|_| ())
         }
     }
 }

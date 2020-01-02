@@ -40,21 +40,21 @@ impl Job {
         self.child
     }
 
-    /// Run a shell job, waiting for the command to finish.
-    pub fn run(&mut self) -> nix::Result<WaitStatus> {
-        self.fork_and_wait()
+    pub fn status(&self) -> nix::Result<WaitStatus> {
+        match self.child {
+            Some(child) => {
+                waitpid(child, Some(WaitPidFlag::WNOHANG))
+            },
+            _ => unimplemented!(),
+        }
     }
 
     /// Run a shell job in the background.
-    pub fn run_background(&mut self) -> nix::Result<()> {
-        self.fork()
-    }
-
-    fn fork(&mut self) -> Result<(), nix::Error> {
+    pub fn fork(&mut self) -> nix::Result<WaitStatus> {
         match unistd::fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
-                Ok(())
+                self.status()
             },
             Ok(ForkResult::Child) => {
                 // TODO #20: When running with raw mode we could buffer
@@ -62,14 +62,15 @@ impl Job {
                 if let Err(_) = self.exec() {
                     exit(127);
                 } else {
-                    Ok(())
+                    self.status()
                 }
             },
             Err(e) => Err(e),
         }
     }
 
-    fn fork_and_wait(&mut self) -> nix::Result<WaitStatus> {
+    /// Run a shell job, waiting for the command to finish.
+    pub fn fork_and_wait(&mut self) -> nix::Result<WaitStatus> {
         match unistd::fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
@@ -91,15 +92,6 @@ impl Job {
         execvp(&self.argv[0], &self.argv.iter()
                                         .map(|a| a.as_c_str())
                                         .collect::<Vec<_>>()[..]).map(|_| ())
-    }
-
-    pub fn status(&self) -> nix::Result<WaitStatus> {
-        match self.child {
-            Some(child) => {
-                waitpid(child, Some(WaitPidFlag::WNOHANG))
-            },
-            _ => unimplemented!(),
-        }
     }
 
     fn wait(&mut self) -> nix::Result<WaitStatus> {

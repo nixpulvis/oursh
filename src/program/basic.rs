@@ -2,6 +2,8 @@
 use std::{
     io::BufRead,
     ffi::CString,
+    cell::RefCell,
+    rc::Rc,
 };
 use nix::sys::wait::WaitStatus;
 use crate::{
@@ -43,14 +45,23 @@ impl super::Program for Program {
 #[derive(Debug)]
 pub struct Command(String);
 
-impl super::Command for Command {
-    /// Treat each space blindly as an argument delimiter.
-    fn run(&self) -> Result<WaitStatus> {
+impl super::Command for Command {}
+
+impl super::Run for Command {
+    fn run(&self, background: bool, jobs: Rc<RefCell<Vec<(String, Job)>>>)
+    -> Result<WaitStatus> {
         let mut job = Job::new(self.0.split_whitespace().map(|a| {
             CString::new(a).expect("error reading argument")
         }).collect());
 
-        match job.run() {
+        let status = if background {
+            let status = job.fork();
+            jobs.borrow_mut().push(("???".into(), job));
+            status
+        } else {
+            job.fork_and_wait()
+        };
+        match status {
             Ok(WaitStatus::Exited(p, c)) if c == 0 => {
                 Ok(WaitStatus::Exited(p, c))
             },
