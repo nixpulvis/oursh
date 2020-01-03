@@ -60,18 +60,16 @@
 
 use std::{
     result,
-    cell::RefCell,
     ffi::CString,
     fmt::Debug,
     io::BufRead,
-    rc::Rc,
 };
 use nix::{
     unistd::Pid,
     sys::wait::WaitStatus,
 };
 use crate::{
-    job::Job,
+    job::Jobs,
 };
 
 /// Convenience type for results with program errors.
@@ -93,8 +91,7 @@ pub enum Error {
 }
 
 pub trait Run {
-    fn run(&self, background: bool, jobs: Rc<RefCell<Vec<(String, Job)>>>)
-    -> Result<WaitStatus>;
+    fn run(&self, background: bool, jobs: Jobs) -> Result<WaitStatus>;
 }
 
 /// A program is as large as a file or as small as a line.
@@ -120,8 +117,7 @@ pub trait Program: Sized + Debug + Run {
 }
 
 impl<P: Program> Run for P {
-    fn run(&self, background: bool, jobs: Rc<RefCell<Vec<(String, Job)>>>)
-    -> Result<WaitStatus> {
+    fn run(&self, background: bool, jobs: Jobs) -> Result<WaitStatus> {
         let mut last = WaitStatus::Exited(Pid::this(), 0);
         for command in self.commands().iter() {
             last = command.run(background, jobs.clone())?;

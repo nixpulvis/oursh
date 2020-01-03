@@ -2,12 +2,10 @@
 use std::{
     io::BufRead,
     ffi::CString,
-    cell::RefCell,
-    rc::Rc,
 };
 use nix::sys::wait::WaitStatus;
 use crate::{
-    job::Job,
+    job::{Job, Jobs},
     program::{Result, Error},
 };
 
@@ -48,8 +46,7 @@ pub struct Command(String);
 impl super::Command for Command {}
 
 impl super::Run for Command {
-    fn run(&self, background: bool, jobs: Rc<RefCell<Vec<(String, Job)>>>)
-    -> Result<WaitStatus> {
+    fn run(&self, background: bool, jobs: Jobs) -> Result<WaitStatus> {
         let mut job = Job::new(self.0.split_whitespace().map(|a| {
             CString::new(a).expect("error reading argument")
         }).collect());

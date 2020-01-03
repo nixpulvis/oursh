@@ -24,7 +24,7 @@ use oursh::{
         Result, Error,
         Run,
     },
-    job::Job,
+    job::Jobs,
 };
 
 // Write the Docopt usage string.
@@ -49,7 +49,7 @@ fn main() -> Result<()> {
                       .unwrap_or_else(|e| e.exit());
 
     // Elementary job management.
-    let jobs: Rc<RefCell<Vec<(String, Job)>>> = Rc::new(RefCell::new(vec![]));
+    let jobs: Jobs = Rc::new(RefCell::new(vec![]));
 
     if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
         parse_and_run(jobs, &args)(c)
@@ -113,7 +113,7 @@ fn main() -> Result<()> {
     }
 }
 
-fn parse_and_run<'a>(jobs: Rc<RefCell<Vec<(String, Job)>>>, args: &'a ArgvMap)
+fn parse_and_run<'a>(jobs: Jobs, args: &'a ArgvMap)
 -> impl Fn(&String) -> Result<()> + 'a {
     move |text: &String| {
         jobs.borrow_mut().retain(|job| {

@@ -4,8 +4,11 @@
 //! a *job*. This helps manage the commands the shell runs.
 
 use std::{
+    borrow::Cow,
     process::exit,
     ffi::CString,
+    cell::RefCell,
+    rc::Rc,
 };
 use nix::{
     unistd::{self, execvp, Pid, ForkResult},
@@ -34,6 +37,12 @@ impl Job {
             argv: argv,
             child: None,
         }
+    }
+
+    pub fn body(&self) -> String {
+        self.argv.iter().map(|a| {
+            a.to_string_lossy()
+        }).collect::<Vec<Cow<str>>>().join(" ")
     }
 
     pub fn pid(&self) -> Option<Pid> {
@@ -114,3 +123,5 @@ impl Job {
         }
     }
 }
+
+pub type Jobs = Rc<RefCell<Vec<(String, Job)>>>;

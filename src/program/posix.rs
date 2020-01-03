@@ -118,8 +118,6 @@ use std::{
     ffi::CString,
     io::{Write, BufRead},
     process::{self, Stdio},
-    cell::RefCell,
-    rc::Rc,
 };
 use lalrpop_util::ParseError;
 use nix::{
@@ -127,7 +125,7 @@ use nix::{
     unistd::Pid,
 };
 use crate::{
-    job::Job,
+    job::{Job, Jobs},
     program::{Result, Error},
 };
 
@@ -204,8 +202,7 @@ impl super::Program for Program {
 impl super::Command for Command {}
 
 impl super::Run for Command {
-    fn run(&self, background: bool, jobs: Rc<RefCell<Vec<(String, Job)>>>)
-    -> Result<WaitStatus> {
+    fn run(&self, background: bool, jobs: Jobs) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref words) => {
@@ -217,35 +214,30 @@ impl super::Run for Command {
                 if let Some(command) = argv.clone().first() {
                     match command.to_string_lossy().as_ref() {
                         ":" => {
-                            return builtin::Null::run(argv)
+                            builtin::Null::run(argv, jobs)
                         }
                         "exit" => {
-                            return builtin::Exit::run(argv)
+                            builtin::Exit::run(argv, jobs)
                         },
                         "cd" => {
-                            return builtin::Cd::run(argv)
+                            builtin::Cd::run(argv, jobs)
                         },
                         "jobs" => {
-                            for (id, job) in jobs.borrow().iter() {
-                                if let Some(pid) = job.pid() {
-                                    println!("[{}]\t{}", id, pid)
-                                }
-                            }
-                            Ok(WaitStatus::Exited(Pid::this(), 0))
+                            builtin::Jobs::run(argv, jobs)
                         },
                         _ => {
+                            let id = (jobs.borrow().len() + 1).to_string();
                             let mut job = Job::new(argv);
                             if background {
                                 let status = job.fork().map_err(|_| Error::Runtime);
-                                let id = "???".into();
                                 if let Some(pid) = job.pid() {
                                     println!("[{}]\t{}", id, pid)
                                 }
                                 jobs.borrow_mut().push((id, job));
-                                return status
+                                status
                             } else {
-                                return job.fork_and_wait()
-                                          .map_err(|_| Error::Runtime)
+                                job.fork_and_wait()
+                                   .map_err(|_| Error::Runtime)
                             }
                         },
                     }
@@ -254,6 +246,8 @@ impl super::Run for Command {
                 }
             },
             Command::Compound(ref commands) => {
+                // TODO: Need a way to run a set of commands as one in the
+                // background. Kinda like a subshell.
                 let mut last = WaitStatus::Exited(Pid::this(), 0);
                 for command in commands.iter() {
                     last = command.run(false, jobs.clone())?;
