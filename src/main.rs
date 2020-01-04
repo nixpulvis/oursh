@@ -2,6 +2,7 @@ extern crate docopt;
 extern crate nix;
 extern crate oursh;
 extern crate termion;
+extern crate dirs;
 
 use std::{
     env,
@@ -13,6 +14,7 @@ use std::{
 };
 use docopt::{Docopt, ArgvMap, Value};
 use termion::is_tty;
+use dirs::home_dir;
 use nix::sys::wait::WaitStatus;
 use oursh::{
     repl::{
@@ -50,6 +52,21 @@ fn main() -> Result<()> {
 
     // Elementary job management.
     let jobs: Jobs = Rc::new(RefCell::new(vec![]));
+
+    // Run the profile before anything else.
+    // TODO:
+    // - ourshrc
+    // - oursh_logout
+    // - Others?
+    if let Some(mut path) = home_dir() {
+        path.push(".oursh_profile");
+        if let Ok(mut file) = File::open(path) {
+            let mut contents = String::new();
+            if let Ok(_) = file.read_to_string(&mut contents) {
+                parse_and_run(jobs.clone(), &args)(&contents)?;
+            }
+        }
+    }
 
     if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
         parse_and_run(jobs, &args)(c)

@@ -28,6 +28,7 @@ raw           = []
 
 [dependencies]
 docopt = "1"
+dirs = "*"
 lalrpop-util = "*"
 nix = "*"
 pwd = "1"
