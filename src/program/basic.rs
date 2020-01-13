@@ -6,7 +6,7 @@ use std::{
 use nix::sys::wait::WaitStatus;
 use crate::{
     job::{Job, Jobs},
-    program::{Result, Error},
+    program::{Result, Error, IO},
 };
 
 
@@ -46,7 +46,7 @@ pub struct Command(String);
 impl super::Command for Command {}
 
 impl super::Run for Command {
-    fn run(&self, background: bool, jobs: Jobs) -> Result<WaitStatus> {
+    fn run(&self, background: bool, io: IO, jobs: Jobs) -> Result<WaitStatus> {
         let mut job = Job::new(self.0.split_whitespace().map(|a| {
             CString::new(a).expect("error reading argument")
         }).collect());

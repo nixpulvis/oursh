@@ -25,6 +25,7 @@ use oursh::{
         parse_primary, parse_alternate,
         Result, Error,
         Run,
+        IO,
     },
     job::Jobs,
 };
@@ -54,6 +55,9 @@ fn main() -> Result<()> {
     // Elementary job management.
     let jobs: Jobs = Rc::new(RefCell::new(vec![]));
 
+    // Default inputs and outputs.
+    let io = IO::default();
+
     // Run the profile before anything else.
     // TODO:
     // - ourshrc
@@ -65,14 +69,14 @@ fn main() -> Result<()> {
             if let Ok(mut file) = File::open(path) {
                 let mut contents = String::new();
                 if let Ok(_) = file.read_to_string(&mut contents) {
-                    parse_and_run(jobs.clone(), &args)(&contents)?;
+                    parse_and_run(io, jobs.clone(), &args)(&contents)?;
                 }
             }
         }
     }
 
     if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
-        parse_and_run(jobs, &args)(c)
+        parse_and_run(io, jobs, &args)(c)
     } else if let Some(Value::Plain(Some(ref filename))) = args.find("<file>") {
         let mut file = File::open(filename)
             .expect(&format!("error opening file: {}", filename));
@@ -83,7 +87,7 @@ fn main() -> Result<()> {
             .expect("error reading file");
 
         // Run the program.
-        parse_and_run(jobs, &args)(&text)
+        parse_and_run(io, jobs, &args)(&text)
     } else {
         // Standard input file descriptor (0), used for user input from the
         // user of the shell.
@@ -108,7 +112,7 @@ fn main() -> Result<()> {
             // Start a program running repl.
             // A styled static (for now) prompt.
             let prompt = Prompt::sh_style();
-            repl::start(prompt, stdin, stdout, parse_and_run(jobs, &args));
+            repl::start(prompt, stdin, stdout, parse_and_run(io, jobs, &args));
             Ok(())
         } else {
             // Fill a string buffer from STDIN.
@@ -116,7 +120,7 @@ fn main() -> Result<()> {
             stdin.lock().read_to_string(&mut text).unwrap();
 
             // Run the program.
-            match parse_and_run(jobs, &args)(&text) {
+            match parse_and_run(io, jobs, &args)(&text) {
                 Ok(u) => Ok(u),
                 Err(Error::Read) => {
                     process::exit(1);
@@ -133,7 +137,7 @@ fn main() -> Result<()> {
     }
 }
 
-fn parse_and_run<'a>(jobs: Jobs, args: &'a ArgvMap)
+fn parse_and_run<'a>(io: IO, jobs: Jobs, args: &'a ArgvMap)
 -> impl Fn(&String) -> Result<()> + 'a {
     move |text: &String| {
         jobs.borrow_mut().retain(|job| {
@@ -180,7 +184,7 @@ fn parse_and_run<'a>(jobs: Jobs, args: &'a ArgvMap)
             }
 
             // Run it!
-            program.run(false, jobs.clone()).map(|_| ())
+            program.run(false, io, jobs.clone()).map(|_| ())
         } else {
             let program = match parse_primary(text.as_bytes()) {
                 Ok(program) => program,
@@ -196,7 +200,7 @@ fn parse_and_run<'a>(jobs: Jobs, args: &'a ArgvMap)
             }
 
             // Run it!
-            program.run(false, jobs.clone()).map(|_| ())
+            program.run(false, io, jobs.clone()).map(|_| ())
         }
     }
 }

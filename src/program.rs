@@ -63,6 +63,7 @@ use std::{
     ffi::CString,
     fmt::Debug,
     io::BufRead,
+    os::unix::io::RawFd,
 };
 use nix::{
     unistd::Pid,
@@ -91,7 +92,24 @@ pub enum Error {
 }
 
 pub trait Run {
-    fn run(&self, background: bool, jobs: Jobs) -> Result<WaitStatus>;
+    fn run(&self, background: bool, io: IO, jobs: Jobs) -> Result<WaitStatus>;
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct IO {
+    stdin: RawFd,
+    stderr: RawFd,
+    stdout: RawFd,
+}
+
+impl Default for IO {
+    fn default() -> Self {
+        IO {
+            stdin: 0,
+            stderr: 1,
+            stdout: 2,
+        }
+    }
 }
 
 /// A program is as large as a file or as small as a line.
@@ -117,10 +135,10 @@ pub trait Program: Sized + Debug + Run {
 }
 
 impl<P: Program> Run for P {
-    fn run(&self, background: bool, jobs: Jobs) -> Result<WaitStatus> {
+    fn run(&self, background: bool, io: IO, jobs: Jobs) -> Result<WaitStatus> {
         let mut last = WaitStatus::Exited(Pid::this(), 0);
         for command in self.commands().iter() {
-            last = command.run(background, jobs.clone())?;
+            last = command.run(background, io, jobs.clone())?;
         }
         Ok(last)
     }

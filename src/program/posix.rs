@@ -126,7 +126,7 @@ use nix::{
 };
 use crate::{
     job::{Job, Jobs},
-    program::{Result, Error},
+    program::{Result, Error, IO},
 };
 
 #[cfg(feature = "shebang-block")]
@@ -202,7 +202,7 @@ impl super::Program for Program {
 impl super::Command for Command {}
 
 impl super::Run for Command {
-    fn run(&self, background: bool, jobs: Jobs) -> Result<WaitStatus> {
+    fn run(&self, background: bool, io: IO, jobs: Jobs) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref _assignments, ref words, ref _redirects) => {
@@ -244,12 +244,12 @@ impl super::Run for Command {
                 // background. Kinda like a subshell.
                 let mut last = WaitStatus::Exited(Pid::this(), 0);
                 for command in commands.iter() {
-                    last = command.run(false, jobs.clone())?;
+                    last = command.run(false, io, jobs.clone())?;
                 }
                 Ok(last)
             },
             Command::Not(ref command) => {
-                match command.run(false, jobs.clone()) {
+                match command.run(false, io, jobs.clone()) {
                     Ok(WaitStatus::Exited(p, c)) => {
                         Ok(WaitStatus::Exited(p, (c == 0) as i32))
                     }
@@ -258,18 +258,18 @@ impl super::Run for Command {
                 }
             },
             Command::And(ref left, ref right) => {
-                match left.run(false, jobs.clone()) {
+                match left.run(false, io, jobs.clone()) {
                     Ok(WaitStatus::Exited(_, c)) if c == 0 => {
-                        right.run(false, jobs.clone()).map_err(|_| Error::Runtime)
+                        right.run(false, io, jobs.clone()).map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
                     Err(_) => Err(Error::Runtime),
                 }
             },
             Command::Or(ref left, ref right) => {
-                match left.run(false, jobs.clone()) {
+                match left.run(false, io, jobs.clone()) {
                     Ok(WaitStatus::Exited(_, c)) if c != 0 => {
-                        right.run(false, jobs.clone()).map_err(|_| Error::Runtime)
+                        right.run(false, io, jobs.clone()).map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
                     Err(_) => Err(Error::Runtime),
@@ -277,7 +277,7 @@ impl super::Run for Command {
             },
             Command::Subshell(ref program) => {
                 // TODO #4: Run in a *subshell* ffs.
-                program.run(false, jobs)
+                program.run(false, io, jobs)
             },
             Command::Pipeline(ref left, ref right) => {
                 // TODO: This is obviously a temporary hack.
@@ -312,7 +312,7 @@ impl super::Run for Command {
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Background(ref command) => {
-                command.run(true, jobs.clone())
+                command.run(true, io, jobs.clone())
             },
             #[cfg(feature = "shebang-block")]
             Command::Shebang(ref interpreter, ref text) => {
