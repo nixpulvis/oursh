@@ -231,7 +231,7 @@ impl super::Run for Command {
                             if background {
                                 let status = job.fork().map_err(|_| Error::Runtime);
                                 if let Some(pid) = job.pid() {
-                                    println!("[{}]\t{}", id, pid)
+                                    eprintln!("[{}]\t{}", id, pid)
                                 }
                                 jobs.borrow_mut().push((id, job));
                                 status

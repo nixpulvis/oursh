@@ -11,7 +11,6 @@ fn builtin_cd() {
     // assert_oursh!("cd; pwd", "$HOME\n");
     // assert_oursh!("cd ~; pwd", "$HOME\n");
     // assert_oursh!("cd /; cd /home; cd -", "/\n");
-    // assert_oursh!(! "cd a b");  // TODO: Check output status somehow.
 }
 
 #[test]
@@ -45,11 +44,13 @@ fn simple_command() {
 #[test]
 fn chained_command() {
     assert_oursh!("false; true; echo 1", "1\n");
+    assert_oursh!("true; false; echo 2;", "2\n");
 }
 
 #[test]
 fn single_compound_command() {
     assert_oursh!("{ echo pi; }", "pi\n");
+    // assert_oursh!("{ echo pi }");  // TODO: write test for fail to parse
 }
 
 #[test]
@@ -89,6 +90,7 @@ fn subshell_command() {
     assert_oursh!("( true )");
     assert_oursh!("(echo 1)", "1\n");
     assert_oursh!("(false; echo 1)", "1\n");
+    // TODO: Test some actual subshell usage.
 }
 
 #[test]
@@ -104,7 +106,8 @@ fn chained_pipeline_command() {
 #[test]
 fn background_command() {
     assert_oursh!("sleep 1 & echo 1", "1\n");
-    // TODO: I'm thinking the Job status should go to STDERR.
+    // TODO: How to test the output with a PID in it?
+    // assert_oursh!("sleep 1 & echo 1", "1\n", "[1]\t(\d*)\n");
 }
 
 #[test]

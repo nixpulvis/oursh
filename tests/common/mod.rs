@@ -81,7 +81,6 @@ macro_rules! assert_oursh {
         let stderr = String::from_utf8_lossy(&stderr);
         println!("stdout: {}\nstderr: {}", stdout, stderr);
         assert!(status.success());
-        assert!(stderr.is_empty());
     }};
     ($text:expr, $stdout:expr) => {{
         use std::process::Output;
@@ -92,7 +91,6 @@ macro_rules! assert_oursh {
         println!("stdout: {}\nstderr: {}", stdout, stderr);
         assert!(status.success());
         assert_eq!($stdout, stdout);
-        assert!(stderr.is_empty());
     }};
     ($text:expr, $stdout:expr, $stderr:expr) => {{
         use std::process::Output;
