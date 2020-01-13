@@ -41,6 +41,7 @@ Options:
     -v --verbose    Print extra information.
     -a --ast        Print program ASTs.
     -# --alternate  Use alternate program syntax.
+    --noprofile     Don't load and profile code on launch.
 ";
 
 // Our shell, for the greater good. Ready and waiting.
@@ -58,12 +59,14 @@ fn main() -> Result<()> {
     // - ourshrc
     // - oursh_logout
     // - Others?
-    if let Some(mut path) = home_dir() {
-        path.push(".oursh_profile");
-        if let Ok(mut file) = File::open(path) {
-            let mut contents = String::new();
-            if let Ok(_) = file.read_to_string(&mut contents) {
-                parse_and_run(jobs.clone(), &args)(&contents)?;
+    if !args.get_bool("--noprofile") {
+        if let Some(mut path) = home_dir() {
+            path.push(".oursh_profile");
+            if let Ok(mut file) = File::open(path) {
+                let mut contents = String::new();
+                if let Ok(_) = file.read_to_string(&mut contents) {
+                    parse_and_run(jobs.clone(), &args)(&contents)?;
+                }
             }
         }
     }

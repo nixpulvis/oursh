@@ -1,10 +1,11 @@
 #[macro_export]
 macro_rules! shell {
-    ($executable:expr, $text:expr) => {{
+    ($executable:expr, $args:expr, $text:expr) => {{
         use std::io::Write;
         use std::process::{Command, Stdio};
 
         let mut child = Command::new($executable)
+            .args($args)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -23,11 +24,12 @@ macro_rules! shell {
 
         output
     }};
-    (> $executable:expr, $filename:expr) => {{
+    (> $executable:expr, $args:expr, $filename:expr) => {{
         use std::process::{Command, Stdio};
 
         let child = Command::new($executable)
             .arg($filename)
+            .args($args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
@@ -43,11 +45,11 @@ macro_rules! shell {
 #[macro_export]
 macro_rules! oursh_release {
     ($text:expr) => {{
-        shell!("target/release/oursh", $text)
+        shell!("target/release/oursh", &["--noprofile"], $text)
     }};
     // Run `oursh` on a script file argument and collect it's output.
     (> $filename:expr) => {{
-        shell!(> "target/release/oursh", $filename)
+        shell!(> "target/release/oursh", &["--noprofile"], $filename)
     }};
 }
 
@@ -55,11 +57,11 @@ macro_rules! oursh_release {
 #[macro_export]
 macro_rules! oursh {
     ($text:expr) => {{
-        shell!("target/debug/oursh", $text)
+        shell!("target/debug/oursh", &["--noprofile"], $text)
     }};
     // Run `oursh` on a script file argument and collect it's output.
     (> $filename:expr) => {{
-        shell!(> "target/debug/oursh", $filename)
+        shell!(> "target/debug/oursh", &["--noprofile"], $filename)
     }};
 }
 
