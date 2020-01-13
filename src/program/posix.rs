@@ -205,7 +205,9 @@ impl super::Run for Command {
     fn run(&self, background: bool, jobs: Jobs) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
-            Command::Simple(ref words) => {
+            Command::Simple(ref _assignments, ref words, ref _redirects) => {
+                // TODO: Setup ENV with assignments.
+                // TODO: Setup IO with redirects.
                 let argv: Vec<CString> = words.iter().map(|w| {
                     CString::new(&w.0 as &str)
                         .expect("error in word UTF-8")
@@ -213,18 +215,10 @@ impl super::Run for Command {
 
                 if let Some(command) = argv.clone().first() {
                     match command.to_string_lossy().as_ref() {
-                        ":" => {
-                            builtin::Null::run(argv, jobs)
-                        }
-                        "exit" => {
-                            builtin::Exit::run(argv, jobs)
-                        },
-                        "cd" => {
-                            builtin::Cd::run(argv, jobs)
-                        },
-                        "jobs" => {
-                            builtin::Jobs::run(argv, jobs)
-                        },
+                        ":"    => builtin::Null::run(argv, jobs),
+                        "exit" => builtin::Exit::run(argv, jobs),
+                        "cd"   => builtin::Cd::run(argv, jobs),
+                        "jobs" => builtin::Jobs::run(argv, jobs),
                         _ => {
                             let id = (jobs.borrow().len() + 1).to_string();
                             let mut job = Job::new(argv);
@@ -287,9 +281,9 @@ impl super::Run for Command {
             },
             Command::Pipeline(ref left, ref right) => {
                 // TODO: This is obviously a temporary hack.
-                if let box Command::Simple(left_words) = left {
-                    let child = process::Command::new(&left_words[0].0)
-                        .args(left_words.iter().skip(1).map(|w| &w.0))
+                if let box Command::Simple(_assigns, lwords, _redirs) = left {
+                    let child = process::Command::new(&lwords[0].0)
+                        .args(lwords.iter().skip(1).map(|w| &w.0))
                         .stdout(Stdio::piped())
                         .spawn()
                         .expect("error swawning pipeline process");
@@ -297,9 +291,9 @@ impl super::Run for Command {
                     let output = child.wait_with_output()
                         .expect("error reading stdout");
 
-                    if let box Command::Simple(right_words) = right {
-                        let mut child = process::Command::new(&right_words[0].0)
-                            .args(right_words.iter().skip(1).map(|w| &w.0))
+                    if let box Command::Simple(_assigns, rwords, _redirs) = right {
+                        let mut child = process::Command::new(&rwords[0].0)
+                            .args(rwords.iter().skip(1).map(|w| &w.0))
                             .stdin(Stdio::piped())
                             .spawn()
                             .expect("error swawning pipeline process");

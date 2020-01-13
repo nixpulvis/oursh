@@ -16,7 +16,7 @@ pub enum Command {
     /// date --iso-8601
     /// ```
     // TODO #8: Simple should not just be a vec of words.
-    Simple(Vec<Word>),
+    Simple(Vec<Assignment>, Vec<Word>, Vec<Redirect>),
 
     /// A full program embedded in a compound command.
     ///
@@ -107,6 +107,56 @@ pub enum Command {
 #[derive(Debug, Clone)]
 pub struct Word(pub String);
 
+#[derive(Debug, Clone)]
+pub enum Redirect {
+    // Redirecting Input and Output
+    // [n]<>word
+    IO { n: usize, filename: String },
+    // Redirecting Input
+    // [n]<word  (duplicate = false)
+    // [n]<&word (duplicate = true)
+    Input {
+        n: usize,
+        duplicate: bool,
+        filename: String,
+    },
+    // Redirecting Output
+    // [n]>word  // NOTE: clobber flag needed.
+    // [n]>|word (clobber = true)
+    // [n]>>word (append = true)
+    // [n]>&word (duplicate = true)
+    Output {
+        n: usize,
+        duplicate: bool,
+        clobber: bool,
+        append: bool,
+        filename: String,
+    },
+    // // Here-Document
+    // // [n]<<word
+    // //     here-document
+    // // delimiter (above word)
+    // Here {
+    //     n: usize,
+    //     leading: bool,
+    //     string: String,
+    // },
+}
+
+impl Redirect {
+    pub fn n(&mut self) -> &mut usize {
+        match self {
+            Redirect::IO { ref mut n, .. } => n,
+            Redirect::Input { ref mut n, .. } => n,
+            Redirect::Output { ref mut n, .. } => n,
+            // Redirect::Here { ref mut n, .. } => n,
+        }
+    }
+}
+
+// TODO: name: String, value: ?
+#[derive(Debug, Clone)]
+pub struct Assignment;
 
 impl Command {
     pub fn push(mut self, command: &Command) -> Self {

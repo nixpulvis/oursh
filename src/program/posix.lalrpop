@@ -135,40 +135,84 @@ PipelineSeq: ast::Command = {
 }
 
 Simple: ast::Command = {
-    Prefix* <words: "WORD"+> Redirect* => {
-        ast::Command::Simple(words.iter().map(|w| {
+    <prefix: Prefix*> <words: "WORD"+> <suffix: Redirect*> => {
+        let assignments = vec![];
+        // TODO: Collect and group redirects from prefix and suffix?
+        let redirects = suffix;
+        ast::Command::Simple(assignments, words.iter().map(|w| {
             ast::Word(w.to_string())
-        }).collect())
+        }).collect(), redirects)
     }
 }
 
 Prefix: () = {
     Redirect,
-    Assignment,
+    // Assignment,
 }
 
-Redirect: () = {
-    File,
-    "IO_NUMBER" File,
-    Here,
-    "IO_NUMBER" Here,
+Redirect: ast::Redirect = {
+    File => <>,
+    // Here => <>,
+    <n: "IO_NUMBER"> <mut r: File> => { *r.n() = n; r },
+    // <n: "IO_NUMBER"> <mut r: Here> => { *r.n() = n; r },
 }
 
-File: () = {
-    "<"  "WORD",
-    "<&" "WORD",
-    ">"  "WORD",
-    ">&" "WORD",
-    ">>" "WORD",
-    "<>" "WORD",
-    ">|" "WORD",
+File: ast::Redirect = {
+    "<"  <f: "WORD"> => ast::Redirect::Input {
+        n: 0,
+        duplicate: false,
+        filename: f.into(),
+    },
+    "<&" <f: "WORD"> => ast::Redirect::Input {
+        n: 0,
+        duplicate: true,
+        filename: f.into(),
+    },
+    ">"  <f: "WORD"> => ast::Redirect::Output {
+        n: 1,
+        duplicate: false,
+        clobber: false,
+        append: false,
+        filename: f.into(),
+    },
+    ">&" <f: "WORD"> => ast::Redirect::Output {
+        n: 1,
+        duplicate: true,
+        clobber: false,
+        append: false,
+        filename: f.into(),
+    },
+    ">>" <f: "WORD"> => ast::Redirect::Output {
+        n: 1,
+        duplicate: false,
+        clobber: false,
+        append: true,
+        filename: f.into(),
+    },
+    ">|" <f: "WORD"> => ast::Redirect::Output {
+        n: 1,
+        duplicate: false,
+        clobber: true,
+        append: false,
+        filename: f.into(),
+    },
+    "<>" <f: "WORD"> => ast::Redirect::IO {
+        n: 0,
+        filename: f.into(),
+    },
 }
 
-Here: () = {
-    "<<" "WORD",
-    "<<-" "WORD",
-}
+// Here: ast::Redirect = {
+//     "<<" < <words: "WORD"+>  => {
+//         let s = "".into();
+//         ast::Redirect::Here { n: 0, leading: true, string: s }
+//     },
+//     "<<-" <words: "WORD"+> => {
+//         let s = "".into();
+//         ast::Redirect::Here { n: 0, leading: false, string: s }
+//     },
+// }
 
-Assignment: () = {
-    "WORD" "=" "WORD",
-}
+// Assignment: () = {
+//     "WORD" "=" "WORD",
+// }

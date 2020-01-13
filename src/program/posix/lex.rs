@@ -84,6 +84,8 @@ pub struct Lexer<'input> {
     #[cfg(feature = "shebang-block")]
     /// A boolean indicating we're currently lexing inside a shebang block,
     /// and should therefor output TEXT.
+    //
+    // TODO: Generalize over this abstraction and the one needed for HERE docs.
     in_shebang: bool,
 }
 
