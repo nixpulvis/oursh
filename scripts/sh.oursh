@@ -1,1 +1,1 @@
-{#!/bin/sh; echo "hello world"}
+{#!/bin/sh; echo "hello world" $(echo "scale=5; 4*a(1)" | bc -l)}
