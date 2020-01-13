@@ -80,7 +80,7 @@
 //! [shell.py]: /doc/shell.py
 //! [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
 //! [basp2]: https://nixpulvis.com/ramblings/2018-10-15-building-a-shell-part-2
-#![feature(box_syntax, box_patterns)]
+#![feature(box_syntax, box_patterns, with_options)]
 #![forbid(unsafe_code)]
 
 extern crate nix;

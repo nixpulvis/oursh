@@ -63,14 +63,13 @@ use std::{
     ffi::CString,
     fmt::Debug,
     io::BufRead,
-    os::unix::io::RawFd,
 };
 use nix::{
     unistd::Pid,
     sys::wait::WaitStatus,
 };
 use crate::{
-    job::Jobs,
+    job::{IO, Jobs},
 };
 
 /// Convenience type for results with program errors.
@@ -93,23 +92,6 @@ pub enum Error {
 
 pub trait Run {
     fn run(&self, background: bool, io: IO, jobs: Jobs) -> Result<WaitStatus>;
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct IO {
-    stdin: RawFd,
-    stderr: RawFd,
-    stdout: RawFd,
-}
-
-impl Default for IO {
-    fn default() -> Self {
-        IO {
-            stdin: 0,
-            stderr: 1,
-            stdout: 2,
-        }
-    }
 }
 
 /// A program is as large as a file or as small as a line.

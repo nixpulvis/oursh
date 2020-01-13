@@ -52,11 +52,11 @@ impl super::Run for Command {
         }).collect());
 
         let status = if background {
-            let status = job.fork();
+            let status = job.fork(io);
             jobs.borrow_mut().push(("???".into(), job));
             status
         } else {
-            job.fork_and_wait()
+            job.fork_and_wait(io)
         };
         match status {
             Ok(WaitStatus::Exited(p, c)) if c == 0 => {

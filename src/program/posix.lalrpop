@@ -153,50 +153,50 @@ Prefix: () = {
 Redirect: ast::Redirect = {
     File => <>,
     // Here => <>,
-    <n: "IO_NUMBER"> <mut r: File> => { *r.n() = n; r },
-    // <n: "IO_NUMBER"> <mut r: Here> => { *r.n() = n; r },
+    <n: "IO_NUMBER"> <mut r: File> => { *r.fd() = n as i32; r },
+    // <n: "IO_NUMBER"> <mut r: Here> => { *r.fd() = n; r },
 }
 
 File: ast::Redirect = {
-    "<"  <f: "WORD"> => ast::Redirect::Input {
+    "<"  <f: "WORD"> => ast::Redirect::Read {
         n: 0,
         duplicate: false,
         filename: f.into(),
     },
-    "<&" <f: "WORD"> => ast::Redirect::Input {
+    "<&" <f: "WORD"> => ast::Redirect::Read {
         n: 0,
         duplicate: true,
         filename: f.into(),
     },
-    ">"  <f: "WORD"> => ast::Redirect::Output {
+    ">"  <f: "WORD"> => ast::Redirect::Write {
         n: 1,
         duplicate: false,
         clobber: false,
         append: false,
         filename: f.into(),
     },
-    ">&" <f: "WORD"> => ast::Redirect::Output {
+    ">&" <f: "WORD"> => ast::Redirect::Write {
         n: 1,
         duplicate: true,
         clobber: false,
         append: false,
         filename: f.into(),
     },
-    ">>" <f: "WORD"> => ast::Redirect::Output {
+    ">>" <f: "WORD"> => ast::Redirect::Write {
         n: 1,
         duplicate: false,
         clobber: false,
         append: true,
         filename: f.into(),
     },
-    ">|" <f: "WORD"> => ast::Redirect::Output {
+    ">|" <f: "WORD"> => ast::Redirect::Write {
         n: 1,
         duplicate: false,
         clobber: true,
         append: false,
         filename: f.into(),
     },
-    "<>" <f: "WORD"> => ast::Redirect::IO {
+    "<>" <f: "WORD"> => ast::Redirect::RW {
         n: 0,
         filename: f.into(),
     },

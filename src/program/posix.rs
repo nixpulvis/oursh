@@ -118,6 +118,8 @@ use std::{
     ffi::CString,
     io::{Write, BufRead},
     process::{self, Stdio},
+    fs::File,
+    os::unix::io::IntoRawFd,
 };
 use lalrpop_util::ParseError;
 use nix::{
@@ -128,6 +130,7 @@ use crate::{
     job::{Job, Jobs},
     program::{Result, Error, IO},
 };
+use self::ast::Redirect;
 
 #[cfg(feature = "shebang-block")]
 use {
@@ -202,12 +205,45 @@ impl super::Program for Program {
 impl super::Command for Command {}
 
 impl super::Run for Command {
-    fn run(&self, background: bool, io: IO, jobs: Jobs) -> Result<WaitStatus> {
+    fn run(&self, background: bool, mut io: IO, jobs: Jobs) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
-            Command::Simple(ref _assignments, ref words, ref _redirects) => {
+            Command::Simple(ref _assignments, ref words, ref redirects) => {
                 // TODO: Setup ENV with assignments.
-                // TODO: Setup IO with redirects.
+
+                for r in redirects {
+                    match r {
+                        Redirect::RW { n, filename, .. } => {
+                            let file = File::with_options()
+                                            .create(true)
+                                            .read(true)
+                                            .write(true)
+                                            .open(filename).unwrap();
+                            let fd = file.into_raw_fd();
+                            io.0[*n as usize] = fd;
+                        },
+                        Redirect::Read { n, filename, .. } => {
+                            let file = File::with_options()
+                                            .read(true)
+                                            .write(false)
+                                            .open(filename).unwrap();
+                            let fd = file.into_raw_fd();
+                            io.0[*n as usize] = fd;
+                        },
+                        Redirect::Write { n, filename, append, .. } => {
+                            // TODO: Clobber
+                            let file = File::with_options()
+                                            .create(true)
+                                            .read(false)
+                                            .write(true)
+                                            .append(*append)
+                                            .open(filename).unwrap();
+                            let fd = file.into_raw_fd();
+                            io.0[*n as usize] = fd;
+                        },
+                    };
+                }
+
                 let argv: Vec<CString> = words.iter().map(|w| {
                     CString::new(&w.0 as &str)
                         .expect("error in word UTF-8")
@@ -215,6 +251,7 @@ impl super::Run for Command {
 
                 if let Some(command) = argv.clone().first() {
                     match command.to_string_lossy().as_ref() {
+                        // TODO: IO for builtins.
                         ":"    => builtin::Null::run(argv, jobs),
                         "exit" => builtin::Exit::run(argv, jobs),
                         "cd"   => builtin::Cd::run(argv, jobs),
@@ -223,14 +260,14 @@ impl super::Run for Command {
                             let id = (jobs.borrow().len() + 1).to_string();
                             let mut job = Job::new(argv);
                             if background {
-                                let status = job.fork().map_err(|_| Error::Runtime);
+                                let status = job.fork(io).map_err(|_| Error::Runtime);
                                 if let Some(pid) = job.pid() {
                                     eprintln!("[{}]\t{}", id, pid)
                                 }
                                 jobs.borrow_mut().push((id, job));
                                 status
                             } else {
-                                job.fork_and_wait()
+                                job.fork_and_wait(io)
                                    .map_err(|_| Error::Runtime)
                             }
                         },

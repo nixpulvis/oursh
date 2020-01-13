@@ -9,11 +9,21 @@ use std::{
     ffi::CString,
     cell::RefCell,
     rc::Rc,
+    os::unix::io::RawFd,
 };
 use nix::{
-    unistd::{self, execvp, Pid, ForkResult},
+    unistd::{self, execvp, dup2, Pid, ForkResult},
     sys::wait::{waitpid, WaitStatus, WaitPidFlag},
 };
+
+#[derive(Debug, Copy, Clone)]
+pub struct IO(pub [RawFd; 3]);
+
+impl Default for IO {
+    fn default() -> Self {
+        IO([0, 1, 2])
+    }
+}
 
 /// A job to be executed by various means.
 ///
@@ -34,7 +44,7 @@ impl Job {
     // TODO #4: Return result.
     pub fn new(argv: Vec<CString>) -> Self {
         Job {
-            argv: argv,
+            argv,
             child: None,
         }
     }
@@ -59,13 +69,17 @@ impl Job {
     }
 
     /// Run a shell job in the background.
-    pub fn fork(&mut self) -> nix::Result<WaitStatus> {
+    pub fn fork(&mut self, io: IO) -> nix::Result<WaitStatus> {
         match unistd::fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
                 self.status()
             },
             Ok(ForkResult::Child) => {
+                // TODO: DRY and generalize?
+                dup2(io.0[0], 0)?;
+                dup2(io.0[1], 1)?;
+                dup2(io.0[2], 2)?;
                 // TODO #20: When running with raw mode we could buffer
                 // this and print it later, all at once in suspended raw mode.
                 if let Err(_) = self.exec() {
@@ -79,13 +93,17 @@ impl Job {
     }
 
     /// Run a shell job, waiting for the command to finish.
-    pub fn fork_and_wait(&mut self) -> nix::Result<WaitStatus> {
+    pub fn fork_and_wait(&mut self, io: IO) -> nix::Result<WaitStatus> {
         match unistd::fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.child = Some(child);
                 self.wait()
             },
             Ok(ForkResult::Child) => {
+                // TODO: DRY and generalize?
+                dup2(io.0[0], 0)?;
+                dup2(io.0[1], 1)?;
+                dup2(io.0[2], 2)?;
                 if let Err(_) = self.exec() {
                     exit(127);
                 } else {

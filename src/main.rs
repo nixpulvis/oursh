@@ -25,9 +25,8 @@ use oursh::{
         parse_primary, parse_alternate,
         Result, Error,
         Run,
-        IO,
     },
-    job::Jobs,
+    job::{Jobs, IO},
 };
 
 // Write the Docopt usage string.

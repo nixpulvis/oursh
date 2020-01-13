@@ -1,4 +1,5 @@
 //! Abstract Syntax Tree for the POSIX language.
+use std::os::unix::io::RawFd;
 
 /// A program is the result of parsing a sequence of commands.
 #[derive(Debug, Clone)]
@@ -111,44 +112,44 @@ pub struct Word(pub String);
 pub enum Redirect {
     // Redirecting Input and Output
     // [n]<>word
-    IO { n: usize, filename: String },
+    RW { n: RawFd, filename: String },
     // Redirecting Input
     // [n]<word  (duplicate = false)
     // [n]<&word (duplicate = true)
-    Input {
-        n: usize,
-        duplicate: bool,
+    Read {
+        n: RawFd,
         filename: String,
+        duplicate: bool,
     },
     // Redirecting Output
     // [n]>word  // NOTE: clobber flag needed.
     // [n]>|word (clobber = true)
     // [n]>>word (append = true)
     // [n]>&word (duplicate = true)
-    Output {
-        n: usize,
+    Write {
+        n: RawFd,
+        filename: String,
         duplicate: bool,
         clobber: bool,
         append: bool,
-        filename: String,
     },
     // // Here-Document
     // // [n]<<word
     // //     here-document
     // // delimiter (above word)
     // Here {
-    //     n: usize,
+    //     n: RawFd,
     //     leading: bool,
     //     string: String,
     // },
 }
 
 impl Redirect {
-    pub fn n(&mut self) -> &mut usize {
+    pub fn fd(&mut self) -> &mut RawFd {
         match self {
-            Redirect::IO { ref mut n, .. } => n,
-            Redirect::Input { ref mut n, .. } => n,
-            Redirect::Output { ref mut n, .. } => n,
+            Redirect::RW { ref mut n, .. } => n,
+            Redirect::Read { ref mut n, .. } => n,
+            Redirect::Write { ref mut n, .. } => n,
             // Redirect::Here { ref mut n, .. } => n,
         }
     }
