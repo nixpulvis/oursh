@@ -40,8 +40,15 @@ pub enum Token<'input> {
     Backslash,
     DoubleQuote,
     SingleQuote,
-    RCaret,
-    LCaret,
+    Great,
+    DGreat,
+    GreatAnd,
+    Clobber,
+    Less,
+    DLess,
+    DLessDash,
+    LessAnd,
+    LessGreat,
     And,
     Or,
     If,
@@ -57,6 +64,7 @@ pub enum Token<'input> {
     Until,
     For,
     Word(&'input str),
+    IoNumber(usize),
     Shebang(&'input str),
     Text(&'input str),
 }
@@ -128,8 +136,45 @@ impl<'input> Iterator for Lexer<'input> {
                 '\\' => Some(Ok((s, Token::Backslash, e))),
                 '\'' => Some(self.single_quote(s, e)),
                 '"'  => Some(self.double_quote(s, e)),
-                '>'  => Some(Ok((s, Token::RCaret, e))),
-                '<'  => Some(Ok((s, Token::LCaret, e))),
+                '>'  => {
+                    match self.lookahead {
+                        Some((_, '>', e)) => {
+                            self.advance();
+                            Some(Ok((s, Token::DGreat, e)))
+                        },
+                        Some((_, '&', e)) => {
+                            self.advance();
+                            Some(Ok((s, Token::GreatAnd, e)))
+                        },
+                        Some((_, '|', e)) => {
+                            self.advance();
+                            Some(Ok((s, Token::Clobber, e)))
+                        },
+                        _ => Some(Ok((s, Token::Great, e))),
+                    }
+                },
+                '<'  => {
+                    match self.lookahead {
+                        Some((_, '&', e)) => {
+                            self.advance();
+                            Some(Ok((s, Token::LessAnd, e)))
+                        },
+                        Some((_, '<', e)) => {
+                            self.advance();
+                            if let Some((_, '-', e)) = self.lookahead {
+                                self.advance();
+                                Some(Ok((s, Token::DLessDash, e)))
+                            } else {
+                                Some(Ok((s, Token::DLess, e)))
+                            }
+                        },
+                        Some((_, '>', e)) => {
+                            self.advance();
+                            Some(Ok((s, Token::LessGreat, e)))
+                        },
+                        _ => Some(Ok((s, Token::Less, e))),
+                    }
+                },
                 '&' => {
                     if let Some((_, '&', e)) = self.lookahead {
                         self.advance();
@@ -236,10 +281,22 @@ impl<'input> Lexer<'input> {
             "while" => Token::While,
             "until" => Token::Until,
             "for"   => Token::For,
-            w       => Token::Word(w),
+            word    => self.io_number(word),
         };
 
         Ok((start, tok, end))
+    }
+
+    fn io_number<'a>(&mut self, word: &'a str) -> Token<'a> {
+        if let Some((_, c, _)) = self.lookahead {
+            if c == '<' || c == '>' {
+                if let Ok(n) = word.parse::<usize>() {
+                    return Token::IoNumber(n);
+                }
+            }
+        }
+
+        Token::Word(word)
     }
 
     fn block(&mut self, start: usize, end: usize)
@@ -337,6 +394,57 @@ mod tests {
                         Some(Ok((_, Token::Word("ls"), _))));
         assert_matches!(lexer.next(),
                         Some(Ok((_, Token::Word("-la"), _))));
+        // Numbers are still words on their own.
+        let mut lexer = Lexer::new("123");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("123"), _))));
+    }
+
+    #[test]
+    fn redirects() {
+        let mut lexer = Lexer::new(">");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Great, _))));
+        let mut lexer = Lexer::new(">>");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::DGreat, _))));
+        let mut lexer = Lexer::new(">&");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::GreatAnd, _))));
+        let mut lexer = Lexer::new(">|");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Clobber, _))));
+
+        let mut lexer = Lexer::new("<");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Less, _))));
+        let mut lexer = Lexer::new("<<");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::DLess, _))));
+        let mut lexer = Lexer::new("<<-");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::DLessDash, _))));
+        let mut lexer = Lexer::new("<&");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::LessAnd, _))));
+        let mut lexer = Lexer::new("<>");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::LessGreat, _))));
+    }
+
+    #[test]
+    fn io_number() {
+        let mut lexer = Lexer::new("ls -la 1> /dev/null");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("ls"), _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("-la"), _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::IoNumber(1), _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Great, _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("/dev/null"), _))));
     }
 
     #[test]

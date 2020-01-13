@@ -8,35 +8,43 @@ extern {
     type Error = lex::Error;
 
     enum lex::Token<'input> {
-        " "    => lex::Token::Space,
-        "\t"   => lex::Token::Tab,
-        "\n"   => lex::Token::Linefeed,
-        ";"    => lex::Token::Semi,
-        "&"    => lex::Token::Amper,
-        "{"    => lex::Token::LBrace,
-        "}"    => lex::Token::RBrace,
-        "("    => lex::Token::LParen,
-        ")"    => lex::Token::RParen,
-        "`"    => lex::Token::Backtick,
-        "!"    => lex::Token::Bang,
-        "|"    => lex::Token::Pipe,
-        "$"    => lex::Token::Dollar,
-        "="    => lex::Token::Equals,
-        "\\"   => lex::Token::Backslash,
-        "\""   => lex::Token::DoubleQuote,
-        "'"    => lex::Token::SingleQuote,
-        ">"    => lex::Token::RCaret,
-        "<"    => lex::Token::LCaret,
-        "&&"   => lex::Token::And,
-        "||"   => lex::Token::Or,
-        "if"   => lex::Token::If,
-        "then" => lex::Token::Then,
-        "else" => lex::Token::Else,
-        "elif" => lex::Token::Elif,
-        "fi"   => lex::Token::Fi,
-        "WORD" => lex::Token::Word(<&'input str>),
-        "{#!"  => lex::Token::Shebang(<&'input str>),
-        "TEXT" => lex::Token::Text(<&'input str>),
+        " "         => lex::Token::Space,
+        "\t"        => lex::Token::Tab,
+        "\n"        => lex::Token::Linefeed,
+        ";"         => lex::Token::Semi,
+        "&"         => lex::Token::Amper,
+        "{"         => lex::Token::LBrace,
+        "}"         => lex::Token::RBrace,
+        "("         => lex::Token::LParen,
+        ")"         => lex::Token::RParen,
+        "`"         => lex::Token::Backtick,
+        "!"         => lex::Token::Bang,
+        "|"         => lex::Token::Pipe,
+        "$"         => lex::Token::Dollar,
+        "="         => lex::Token::Equals,
+        "\\"        => lex::Token::Backslash,
+        "\""        => lex::Token::DoubleQuote,
+        "'"         => lex::Token::SingleQuote,
+        ">"         => lex::Token::Great,
+        ">>"        => lex::Token::DGreat,
+        ">&"        => lex::Token::GreatAnd,
+        ">|"        => lex::Token::Clobber,
+        "<"         => lex::Token::Less,
+        "<<"        => lex::Token::DLess,
+        "<<-"       => lex::Token::DLessDash,
+        "<&"        => lex::Token::LessAnd,
+        "<>"        => lex::Token::LessGreat,
+        "&&"        => lex::Token::And,
+        "||"        => lex::Token::Or,
+        "if"        => lex::Token::If,
+        "then"      => lex::Token::Then,
+        "else"      => lex::Token::Else,
+        "elif"      => lex::Token::Elif,
+        "fi"        => lex::Token::Fi,
+        "WORD"      => lex::Token::Word(<&'input str>),
+        "IO_NUMBER" => lex::Token::IoNumber(<usize>),
+        "{#!"       => lex::Token::Shebang(<&'input str>),
+        "TEXT"      => lex::Token::Text(<&'input str>),
     }
 }
 
@@ -127,7 +135,40 @@ PipelineSeq: ast::Command = {
 }
 
 Simple: ast::Command = {
-    "WORD"+ => ast::Command::Simple(<>.iter().map(|w| {
-        ast::Word(w.to_string())
-    }).collect())
+    Prefix* <words: "WORD"+> Redirect* => {
+        ast::Command::Simple(words.iter().map(|w| {
+            ast::Word(w.to_string())
+        }).collect())
+    }
+}
+
+Prefix: () = {
+    Redirect,
+    Assignment,
+}
+
+Redirect: () = {
+    File,
+    "IO_NUMBER" File,
+    Here,
+    "IO_NUMBER" Here,
+}
+
+File: () = {
+    "<"  "WORD",
+    "<&" "WORD",
+    ">"  "WORD",
+    ">&" "WORD",
+    ">>" "WORD",
+    "<>" "WORD",
+    ">|" "WORD",
+}
+
+Here: () = {
+    "<<" "WORD",
+    "<<-" "WORD",
+}
+
+Assignment: () = {
+    "WORD" "=" "WORD",
 }
