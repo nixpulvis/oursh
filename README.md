@@ -18,8 +18,8 @@ programs, the language this will be written in.
 - [ ] POSIX compatibility
     - [x] Simple commands `ls`
     - [ ] Quotes `echo "foo"; echo 'bar'`
+    - [x] Assignment `LOG=trace cargo run`
     - [ ] Variables `echo $foo`
-    - [ ] Environment `echo $TERM`
     - [ ] Special variables `echo $?; echo $1`
     - [x] Boolean status syntax `! true && false || true`
     - [x] Conditionals `if ; then ; elif ; then ; else ; fi`

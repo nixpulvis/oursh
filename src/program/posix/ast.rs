@@ -155,9 +155,8 @@ impl Redirect {
     }
 }
 
-// TODO: name: String, value: ?
 #[derive(Debug, Clone)]
-pub struct Assignment;
+pub struct Assignment(pub String, pub String);
 
 impl Command {
     pub fn push(mut self, command: &Command) -> Self {

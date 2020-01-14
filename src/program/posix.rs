@@ -120,6 +120,7 @@ use std::{
     process::{self, Stdio},
     fs::File,
     os::unix::io::IntoRawFd,
+    env::set_var,
 };
 use lalrpop_util::ParseError;
 use nix::{
@@ -130,7 +131,7 @@ use crate::{
     job::{Job, Jobs},
     program::{Result, Error, IO},
 };
-use self::ast::Redirect;
+use self::ast::{Assignment, Redirect};
 
 #[cfg(feature = "shebang-block")]
 use {
@@ -208,8 +209,10 @@ impl super::Run for Command {
     fn run(&self, background: bool, mut io: IO, jobs: Jobs) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
-            Command::Simple(ref _assignments, ref words, ref redirects) => {
-                // TODO: Setup ENV with assignments.
+            Command::Simple(ref assignments, ref words, ref redirects) => {
+                for Assignment(name, value) in assignments {
+                    set_var(name, value);
+                }
 
                 for r in redirects {
                     match r {

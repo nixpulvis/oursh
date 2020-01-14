@@ -104,6 +104,18 @@ fn chained_pipeline_command() {
 }
 
 #[test]
+fn assignment_command() {
+    assert_oursh!("PI=3.1415 printenv PI", "3.1415\n");
+    assert_oursh!("X=1 Y=2 printenv X Y", "1\n2\n");
+    assert_oursh!("X=1; printenv X", "\n");
+}
+
+#[test]
+fn variable_command() {
+    assert_oursh!("X=1; echo $X", "1\n");
+}
+
+#[test]
 fn background_command() {
     assert_oursh!("sleep 1 & echo 1", "1\n");
     // TODO: How to test the output with a PID in it?

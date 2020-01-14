@@ -134,20 +134,24 @@ PipelineSeq: ast::Command = {
     <c: Simple> => c,
 }
 
+
+
 Simple: ast::Command = {
-    <prefix: Prefix*> <words: "WORD"+> <suffix: Redirect*> => {
-        let assignments = vec![];
-        // TODO: Collect and group redirects from prefix and suffix?
-        let redirects = suffix;
+    <assignments: Assignment+> => {
+        ast::Command::Simple(assignments, vec![], vec![])
+    },
+    <redirects: Redirect+> => {
+        ast::Command::Simple(vec![], vec![], redirects)
+    },
+    <assignments: Assignment*>
+    <mut prefix: Redirect*>
+    <words: "WORD"+>
+    <mut suffix: Redirect*> => {
+        let redirects = { prefix.append(&mut suffix); prefix };
         ast::Command::Simple(assignments, words.iter().map(|w| {
             ast::Word(w.to_string())
         }).collect(), redirects)
-    }
-}
-
-Prefix: () = {
-    Redirect,
-    // Assignment,
+    },
 }
 
 Redirect: ast::Redirect = {
@@ -213,6 +217,7 @@ File: ast::Redirect = {
 //     },
 // }
 
-// Assignment: () = {
-//     "WORD" "=" "WORD",
-// }
+Assignment: ast::Assignment = {
+    // TODO: Variable expansion.
+    <n: "WORD"> "=" <v: "WORD"> => ast::Assignment(n.into(), v.into()),
+}
