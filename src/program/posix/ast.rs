@@ -98,7 +98,7 @@ pub enum Command {
     /// This is **non-POSIX**
     ///
     /// TODO: How bad is it?
-    Shebang(Interpreter, String),
+    Lang(Interpreter, String),
 }
 
 /// A parsed word, already having gone through expansion.
@@ -199,7 +199,8 @@ impl Command {
 pub enum Interpreter {
     Primary,
     Alternate,
-    Other(String),
+    HashLang(String),
+    Shebang(String),
 }
 
 impl Program {

@@ -65,6 +65,7 @@ pub enum Token<'input> {
     For,
     Word(&'input str),
     IoNumber(usize),
+    HashLang(&'input str),
     Shebang(&'input str),
     Text(&'input str),
 }
@@ -193,7 +194,7 @@ impl<'input> Iterator for Lexer<'input> {
                         Some(Ok((s, Token::Pipe, e)))
                     }
                 },
-                '{' => Some(self.block(s, e)),
+                '{' => Some(self.block(s, s+e)),
                 '}' => Some(Ok((s, Token::RBrace, e))),
                 c if is_word_start(c) => Some(self.word(s, e)),
                 c if c.is_whitespace() => continue,
@@ -223,6 +224,7 @@ impl<'input> Lexer<'input> {
         }
     }
 
+    // TODO: start and end arguments aren't quite right here.
     fn take_until<F>(&mut self, start: usize, mut end: usize,  mut terminate: F)
         -> (&'input str, usize)
         where F: FnMut(char) -> bool
@@ -308,7 +310,6 @@ impl<'input> Lexer<'input> {
         {
             if let Some((_, '#', s)) = self.lookahead {
                 self.advance();  // Consume the '#'.
-                // TODO: Distinguish kinds of Shebang.
                 if let Some((_, '!', s)) = self.lookahead {
                     let (_, end) = self.take_until(s, end, |c| c == ';');
                     self.advance();  // Consume the ';' delimeter.
@@ -318,10 +319,11 @@ impl<'input> Lexer<'input> {
                     let tok = Token::Shebang(&self.input[s..end]);
                     return Ok((start, tok, end));
                 } else {
-                    let (_, end) = self.take_until(s, end, char::is_whitespace);
+                    let (_, end) = self.take_until(s, s, char::is_whitespace);
+                    self.advance();
+                    let tok = Token::HashLang(&self.input[s..end]);
                     self.in_shebang = true;
 
-                    let tok = Token::Shebang(&self.input[s..end]);
                     return Ok((start, tok, end));
                 }
             }

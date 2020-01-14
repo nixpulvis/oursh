@@ -355,9 +355,8 @@ impl super::Run for Command {
                 command.run(true, io, jobs.clone())
             },
             #[cfg(feature = "shebang-block")]
-            Command::Shebang(ref interpreter, ref text) => {
-                // TODO: Pass text off to another parser.
-                if let Interpreter::Other(ref interpreter) = interpreter {
+            Command::Lang(ref interpreter, ref text) => {
+                fn bridge(interpreter: &str, text: &str) -> io::Result<ExitStatus> {
                     // TODO: Even for the Shebang interpretor, we shouldn't
                     // create files like this.
                     // XXX: Length is the worlds worst hash function.
@@ -366,46 +365,55 @@ impl super::Run for Command {
                         // TODO: Use our job interface without creating any
                         // fucking files... The shebang isn't even a real
                         // POSIX standard.
-                        let mut file = File::create(&bridgefile).unwrap();
+                        let mut file = File::create(&bridgefile)?;
                         let mut interpreter = interpreter.chars()
-                                                       .map(|c| c as u8)
-                                                       .collect::<Vec<u8>>();
+                                                         .map(|c| c as u8)
+                                                         .collect::<Vec<u8>>();
                         interpreter.insert(0, '!' as u8);
                         interpreter.insert(0, '#' as u8);
-                        // XXX: This is a huge gross hack.
-                        interpreter = match &*String::from_utf8_lossy(&interpreter) {
-                            "#!ruby"   => "#!/usr/bin/env ruby",
-                            "#!node"   => "#!/usr/bin/env node",
-                            "#!python" => "#!/usr/bin/env python",
-                            "#!racket" => "#!/usr/bin/env racket",
-                            i => i,
-                        }.as_bytes().to_owned();
-                        file.write_all(&interpreter).unwrap();
-                        file.write_all(b"\n").unwrap();
+                        file.write_all(&interpreter)?;
+                        file.write_all(b"\n")?;
                         let text = text.chars()
                                        .map(|c| c as u8)
                                        .collect::<Vec<u8>>();
-                        file.write_all(&text).unwrap();
+                        file.write_all(&text)?;
 
-                        let mut perms = fs::metadata(&bridgefile).unwrap()
-                                                               .permissions();
+                        let mut perms = fs::metadata(&bridgefile)?.permissions();
                         perms.set_mode(0o777);
-                        fs::set_permissions(&bridgefile, perms).unwrap();
+                        fs::set_permissions(&bridgefile, perms)?;
                     }
                     // TODO #4: Suspend and restore raw mode.
-                    let mut child = process::Command::new(&format!("{}", bridgefile))
-                        .spawn()
-                        .expect("error swawning shebang block process");
-                    child.wait()
-                        .expect("error waiting for shebang block process");
-
-                    Ok(WaitStatus::Exited(Pid::this(), 0))
-                } else {
-                    Err(Error::Runtime)
+                    // TODO: Use our jobs, this will allow WaitStatus' too.
+                    process::Command::new(&bridgefile).spawn()?.wait()
+                }
+                // TODO: Pass text off to another parser.
+                match interpreter {
+                    Interpreter::Primary => {
+                        unimplemented!()
+                    }
+                    Interpreter::Alternate => {
+                        bridge("/bin/sh", text).map_err(|_| Error::Read)?;
+                        Ok(WaitStatus::Exited(Pid::this(), 0))
+                    },
+                    Interpreter::HashLang(ref language) => {
+                        let interpreter = match language.as_str() {
+                            "ruby"   => "/usr/bin/env ruby",
+                            "node"   => "/usr/bin/env node",
+                            "python" => "/usr/bin/env python",
+                            "racket" => "/usr/bin/env racket",
+                            _        => return Err(Error::Read),
+                        };
+                        bridge(interpreter, text).map_err(|_| Error::Read)?;
+                        Ok(WaitStatus::Exited(Pid::this(), 0))
+                    },
+                    Interpreter::Shebang(ref interpreter) => {
+                        bridge(interpreter, text).map_err(|_| Error::Read)?;
+                        Ok(WaitStatus::Exited(Pid::this(), 0))
+                    },
                 }
             },
             #[cfg(not(feature = "shebang-block"))]
-            Command::Shebang(_,_) => {
+            Command::Lang(_,_) => {
                 unimplemented!();
             },
         }

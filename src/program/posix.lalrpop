@@ -43,6 +43,7 @@ extern {
         "fi"        => lex::Token::Fi,
         "WORD"      => lex::Token::Word(<&'input str>),
         "IO_NUMBER" => lex::Token::IoNumber(<usize>),
+        "{#"        => lex::Token::HashLang(<&'input str>),
         "{#!"       => lex::Token::Shebang(<&'input str>),
         "TEXT"      => lex::Token::Text(<&'input str>),
     }
@@ -86,8 +87,16 @@ pub Command: ast::Command = {
     // TODO #15: Hopefully in fixing #8 and #10 this can play nicely.
     // NOTE: This can be successfully complied, but will break a doc tests.
     <s: "{#!"> <t: "TEXT"> "}" => {
-        let i = ast::Interpreter::Other(s.into());
-        ast::Command::Shebang(i, t.into())
+        let i = ast::Interpreter::Shebang(s.into());
+        ast::Command::Lang(i, t.into())
+    },
+    <l: "{#"> <t: "TEXT"> "}" => {
+        let i = if l.is_empty() {
+            ast::Interpreter::Alternate
+        } else {
+            ast::Interpreter::HashLang(l.into())
+        };
+        ast::Command::Lang(i, t.into())
     },
     "(" <p: Program> ")" => {
         ast::Command::Subshell(box p)
