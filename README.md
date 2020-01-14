@@ -23,11 +23,11 @@ programs, the language this will be written in.
     - [ ] Special variables `echo $?; echo $1`
     - [x] Boolean status syntax `! true && false || true`
     - [x] Conditionals `if ; then ; elif ; then ; else ; fi`
-    - [~] Compound commands `{ ls; date; }`
-    - [~] Subshells `(sleep 1; date)`
-    - [~] Background jobs `{ sleep 1; date; }& date`
-    - [~] Redirection `date > now.txt`
-    - [~] Pipes `ls | wc -l`
+    - [ ] Compound commands `{ ls; date; }`
+    - [ ] Subshells `(sleep 1; date)`
+    - [x] Background jobs `{ sleep 1; date; }& date`
+    - [x] Redirection `date > now.txt`
+    - [ ] Pipes `ls | wc -l`
 - [ ] Shebang block programs
     - [ ] Alternate syntax `{# ...}`
     - [ ] Hashlang syntax `{#lang; ...}`, i.e. `{#posix ls}`
