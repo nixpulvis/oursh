@@ -134,7 +134,7 @@ use self::ast::Redirect;
 
 #[cfg(feature = "shebang-block")]
 use {
-    std::fs::{self, File},
+    std::fs,
     std::os::unix::fs::PermissionsExt,
     self::ast::Interpreter,
 };

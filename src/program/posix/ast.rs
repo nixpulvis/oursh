@@ -122,7 +122,7 @@ pub enum Redirect {
         duplicate: bool,
     },
     // Redirecting Output
-    // [n]>word  // NOTE: clobber flag needed.
+    // [n]>word  // TODO: clobber flag needed.
     // [n]>|word (clobber = true)
     // [n]>>word (append = true)
     // [n]>&word (duplicate = true)
