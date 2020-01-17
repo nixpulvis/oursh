@@ -135,6 +135,8 @@ use self::ast::{Assignment, Redirect};
 
 #[cfg(feature = "shebang-block")]
 use {
+    std::io,
+    std::process::ExitStatus,
     std::fs,
     std::os::unix::fs::PermissionsExt,
     self::ast::Interpreter,
