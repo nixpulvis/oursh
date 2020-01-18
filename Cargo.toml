@@ -23,10 +23,23 @@ travis-ci = { repository = "https://github.com/nixpulvis/oursh" }
 default = ["shebang-block", "raw", "history", "completion"]
 
 # TODO: Justify and explain features.
+
+# Enables lexing of TEXT tokens, and parsing of `SheBang`, `HashLang`,
+# `AltLang` blocks. Without this feature, the POSIX shell aims not to vary
+# from a proper POSIX implementation at all.
 shebang-block = []
-completion    = []
-history       = []
-raw           = []
+
+# Raw terminal mode for better control of the IO interactions. This allows
+# things like arrow keys for history, and cursor editing.
+raw = []
+
+# Save the history of commands (entered) for quick recall.
+# TODO: Stop depending on raw if this ever interacts with anything beside the
+# RELP input.
+history = ["raw"]
+
+# REPL tab completion.
+completion = ["raw"]
 
 [dependencies]
 docopt = "1"
