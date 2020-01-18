@@ -1,26 +1,27 @@
 [package]
 name = "oursh"
-version = "0.4.0"
+version = "0.4.1"
+edition = "2018"
 authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
 description = "Modern, fast POSIX compatible shell"
-license-file = "LICENSE"
-documentation = "https://docs.rs/oursh"
-homepage = "https://nixpulvis/oursh/oursh"
+readme = "README"
+license = "MIT"
+keywords = ["shell", "POSIX", "language", "lalrpop"]
+categories = ["command-line-utilities", "parser-implementations"]
+homepage = "https://nixpulvis.com/oursh/oursh"
 repository = "https://github.com/nixpulvis/oursh"
-
-# Get with the times.
-edition = "2018"
 
 # Compile our parser grammars.
 build = "build.rs"
 
 [badges]
-maintenance = { status = "dexperimental" }
+maintenance = { status = "experimental" }
 travis-ci = { repository = "https://github.com/nixpulvis/oursh" }
 
 [features]
-default = ["raw", "history", "completion"]
+default = ["shebang-block", "raw", "history", "completion"]
 
+# TODO: Justify and explain features.
 shebang-block = []
 completion    = []
 history       = []
@@ -36,7 +37,7 @@ ctrlc = "*"
 # Option 1: http://man7.org/linux/man-pages/man3/termios.3.html
 #termios = "*"
 # Option 2: http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/
-termion = { git = "https://github.com/redox-os/termion" }
+termion = "*"
 
 [build-dependencies]
 lalrpop = "*"
