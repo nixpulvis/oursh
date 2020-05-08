@@ -59,6 +59,12 @@ fn multiple_compound_command() {
 }
 
 #[test]
+fn multiple_tee_command() {
+    // TODO: Might need a way to test order independent output.
+    assert_oursh!("echo foo | tee >(wc -c) | base64", "4\nZm9vCg==")
+}
+
+#[test]
 fn not_command() {
     // TODO: Test status of the `oursh` command too.
     // `assert_oursh!(! "! true");`
