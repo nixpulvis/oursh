@@ -172,6 +172,8 @@ pub fn path_complete(text: &str) -> Completion {
 mod tests {
     use super::*;
 
+    // TODO: Mock PATH to make deterministic.
+
     #[test]
     fn lexicographical_order() {
         assert_eq!("cargo", complete("car").first());
