@@ -209,7 +209,9 @@ pub mod posix;
 pub use self::posix::Program as PosixProgram;
 
 // TODO: Replace program::Result
-pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvMap) -> crate::program::Result<()> {
+pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvMap)
+    -> crate::program::Result<()>
+{
     if !text.is_empty() {
         // Parse with the primary grammar and run each command in order.
         let program = match parse_primary(text.as_bytes()) {
@@ -226,10 +228,9 @@ pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvM
         }
 
         // Run it!
-        program.run(false, io, jobs).map(|_| ())?
+        program.run(false, io, jobs)?;
     }
 
-    retain_alive_jobs(jobs)?;
-
+    retain_alive_jobs(jobs);
     Ok(())
 }

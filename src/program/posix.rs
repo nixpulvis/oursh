@@ -266,9 +266,7 @@ impl super::Run for Command {
                             let mut job = Process::new(argv);
                             if background {
                                 let status = job.fork(io).map_err(|_| Error::Runtime);
-                                if let Some(pid) = job.pid() {
-                                    eprintln!("[{}]\t{}", id, pid)
-                                }
+                                eprintln!("[{}]\t{}", id, job.pid());
                                 jobs.borrow_mut().push((id, ProcessGroup(job)));
                                 status
                             } else {

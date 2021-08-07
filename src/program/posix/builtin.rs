@@ -97,10 +97,8 @@ pub struct Jobs;
 impl Builtin for Jobs {
     fn run(_: Vec<CString>, jobs: &mut JobsRef) -> Result<WaitStatus> {
         for (id, job) in jobs.borrow().iter() {
-            if let Some(pid) = job.leader().pid() {
-                println!("[{}]\t{}\t\t{}",
-                         id, pid, job.leader().body());
-            }
+            println!("[{}]\t{}\t\t{}",
+                     id, job.leader().pid(), job.leader().body());
         }
         Ok(WaitStatus::Exited(Pid::this(), 0))
     }

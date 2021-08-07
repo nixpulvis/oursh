@@ -8,6 +8,9 @@
 //! - Signals
 //! - Process groups
 //! - Sessions
+//!
+//! More resources from the source at:
+//! [www.win.tue.nl/~aeb/linux/lk/lk-10](https://www.win.tue.nl/~aeb/linux/lk/lk-10.html).
 
 use std::{
     borrow::Cow,
@@ -21,8 +24,9 @@ use nix::{
     unistd::{self, execvp, dup2, close, Pid, ForkResult},
     sys::wait::{waitpid, WaitStatus, WaitPidFlag},
 };
+use retain_mut::RetainMut;
 
-/// File descriptors for use in processes and threads.
+/// File descriptors for use in processes and threads
 #[derive(Debug, Copy, Clone)]
 pub struct IO(pub [RawFd; 3]);
 
@@ -51,7 +55,7 @@ impl Default for IO {
     }
 }
 
-/// A process to be executed by various means.
+/// A process to be executed by various means
 ///
 /// The shell's main job is to run commands. Each job has various arguments, and rules about what
 /// things should be done.
@@ -59,10 +63,11 @@ impl Default for IO {
 /// - TODO #4: Redirection example.
 /// - TODO #6: Background example.
 /// - TODO #4: Environment example?
+#[derive(Debug)]
 pub struct Process {
     argv: Vec<CString>,
-    // TODO: Call this pid?
-    child: Option<Pid>,
+    pid: Pid,
+    children: Vec<Pid>,
 }
 
 impl Process {
@@ -71,7 +76,8 @@ impl Process {
     pub fn new(argv: Vec<CString>) -> Self {
         Process {
             argv,
-            child: None,
+            pid: nix::unistd::getpid(),
+            children: Vec::new(),
         }
     }
 
@@ -81,27 +87,19 @@ impl Process {
         }).collect::<Vec<Cow<str>>>().join(" ")
     }
 
-    pub fn pid(&self) -> Option<Pid> {
-        self.child
-    }
-
-    pub fn status(&self) -> nix::Result<WaitStatus> {
-        match self.child {
-            Some(child) => {
-                waitpid(child, Some(WaitPidFlag::WNOHANG))
-            },
-            _ => unimplemented!(),
-        }
+    pub fn pid(&self) -> Pid {
+        self.pid
     }
 
     /// Run a shell job in the background.
     pub fn fork(&mut self, io: IO) -> nix::Result<WaitStatus> {
         match unistd::fork() {
             Ok(ForkResult::Parent { child, .. }) => {
-                self.child = Some(child);
-                self.status()
+                self.children.push(child);
+                child.status()
             },
             Ok(ForkResult::Child) => {
+                self.pid = nix::unistd::getpid();
                 io.dup()?;
                 // TODO #20: When running with raw mode we could buffer
                 // this and print it later, all at once in suspended raw mode.
@@ -119,16 +117,22 @@ impl Process {
     pub fn fork_and_wait(&mut self, io: IO) -> nix::Result<WaitStatus> {
         match unistd::fork() {
             Ok(ForkResult::Parent { child, .. }) => {
-                self.child = Some(child);
-                self.wait()
+                self.children.push(child);
+                match child.wait() {
+                    s @ Ok(WaitStatus::Exited(_, 127)) => {
+                        let name = self.argv[0].to_string_lossy();
+                        eprintln!("oursh: {}: command not found", name);
+                        s
+                    },
+                    s => s,
+                }
             },
             Ok(ForkResult::Child) => {
                 io.dup()?;
                 if let Err(_) = self.exec() {
                     exit(127);
                 } else {
-                    // TODO: Waiting in the child?
-                    unimplemented!();
+                    self.wait()
                 }
             },
             Err(e) => Err(e),
@@ -140,88 +144,118 @@ impl Process {
                                         .map(|a| a.as_c_str())
                                         .collect::<Vec<_>>()[..]).map(|_| ())
     }
+}
 
-    fn wait(&mut self) -> nix::Result<WaitStatus> {
-        match self.child {
-            Some(child) => {
-                loop {
-                    match waitpid(child, None) {
-                        // TODO #4: Cover other cases?
-                        Ok(WaitStatus::StillAlive) => {},
-                        s @ Ok(WaitStatus::Exited(_, 127)) => {
-                            let name = self.argv[0].to_string_lossy();
-                            eprintln!("oursh: {}: command not found", name);
-                            return s;
-                        },
-                        s => return s,
-                    };
-                }
-            },
-            _ => unimplemented!(),
-        }
+pub trait Wait {
+    fn wait(&self) -> nix::Result<WaitStatus>;
+    fn status(&self) -> nix::Result<WaitStatus>;
+}
+
+impl Wait for Pid {
+    fn wait(&self) -> nix::Result<WaitStatus> {
+        waitpid(Some(*self), None)
+    }
+
+    fn status(&self) -> nix::Result<WaitStatus> {
+        waitpid(Some(*self), Some(WaitPidFlag::WNOHANG))
     }
 }
 
+impl Wait for Process {
+    fn wait(&self) -> nix::Result<WaitStatus> {
+        self.pid.wait()
+    }
 
+    fn status(&self) -> nix::Result<WaitStatus> {
+        self.pid.status()
+    }
+}
+
+/// Threads are distinguished by a thread ID (TID)
+///
+/// An ordinary process has a single thread with TID equal to PID.
+///
 /// TODO: Syntax for this?
 /// TODO: Differences between &?
-struct Thread;
+pub struct Thread;
 
 /// TODO: What signal handling can we put here?
-struct Signal;
+pub struct Signal;
 
-/// Processes groups are used for things like pipelines and background jobs. The system call `int
-/// setpgid(pid_t pid, pid_t pgid)` is used to set.
+/// Processes groups are used for things like pipelines and background jobs
 ///
+/// The system call `int setpgid(pid_t pid, pid_t pgid)` is used to set.
 ///
-/// OLD TODO: Major flaw! Process need to be more than a single command's execution
-/// parameters. Jobs for example can be backgrounded on compound (etc.) types,
-/// `{ echo 1; sleep 2; }&` or `echo 1 hello world | wc &`. Each should be
-/// exactly **one** Job each.
+/// Every process is member of a unique process group, identified by its process group ID. (When
+/// the process is created, it becomes a member of the process group of its parent.) By convention,
+/// the process group ID of a process group equals the process ID of the first member of the
+/// process group, called the process group leader. A process finds the ID of its process group
+/// using the system call getpgrp(), or, equivalently, getpgid(0). One finds the process group ID
+/// of process p using getpgid(p).
+#[derive(Debug)]
 pub struct ProcessGroup(pub Process); // TODO: Make a sorted vector of Process?
 
 impl ProcessGroup {
     pub fn leader(&self) -> &Process {
         &self.0
     }
+
+    pub fn leader_mut(&mut self) -> &mut Process {
+        &mut self.0
+    }
 }
 
 
+/// Shared job handling structure
+///
+/// Maintains a collection of process groups.
 // TODO: Make into slightly better struct.
 pub type Jobs = Rc<RefCell<Vec<(String, ProcessGroup)>>>;
 
+/// Enumerate the given jobs, pruning exited, signaled or otherwise errored process groups
 // TODO: Replace program::Result
-pub fn retain_alive_jobs(jobs: &mut Jobs) -> crate::program::Result<()> {
-    jobs.borrow_mut().retain(|job| {
-        match job.1.0.status() {
-            Ok(WaitStatus::StillAlive) => {
-                true
-            },
-            Ok(WaitStatus::Exited(pid, code)) => {
-                println!("[{}]+\tExit({})\t{}", job.0, code, pid);
-                false
-            },
-            Ok(WaitStatus::Signaled(pid, signal, _)) => {
-                println!("[{}]+\t{}\t{}", job.0, signal, pid);
-                false
-            },
-            Ok(_) => {
-                println!("unhandled");
-                true
-            },
-            Err(e) => {
-                println!("err: {:?}", e);
-                false
-            }
-        }
-    });
+pub fn retain_alive_jobs(jobs: &mut Jobs) {
+    jobs.borrow_mut().retain_mut(|job| {
+        let children = &mut job.1.leader_mut().children;
+        let id = job.0.clone();
 
-    Ok(())
+        children.retain_mut(|child| {
+            match child.status() {
+                Ok(WaitStatus::StillAlive) => {
+                    true
+                },
+                Ok(WaitStatus::Exited(pid, code)) => {
+                    println!("[{}]+\tExit({})\t{}", id, code, pid);
+                    false
+                },
+                Ok(WaitStatus::Signaled(pid, signal, _)) => {
+                    println!("[{}]+\t{}\t{}", id, signal, pid);
+                    false
+                },
+                Ok(_) => {
+                    println!("unhandled");
+                    true
+                },
+                Err(e) => {
+                    println!("err: {:?}", e);
+                    false
+                }
+            }
+        });
+
+        !children.is_empty()
+    });
 }
 
 
-/// The session's ID is the same as the pid of the process that created the session through the
-/// `setsid` system call. That process is known as the _session leader_ for that session group. All
-/// of that process's descendants are then members of that session unless they specifically remove
-/// themselves from it.
+/// Every process group is in a unique session.
+///
+/// (When the process is created, it becomes a member of the session of its parent.) By convention,
+/// the session ID of a session equals the process ID of the first member of the session, called
+/// the session leader. A process finds the ID of its session using the system call getsid().
+///
+/// Every session may have a controlling tty, that then also is called the controlling tty of each
+/// of its member processes. A file descriptor for the controlling tty is obtained by opening
+/// /dev/tty. (And when that fails, there was no controlling tty.) Given a file descriptor for the
+/// controlling tty, one may obtain the SID using tcgetsid(fd).
 struct Session;
