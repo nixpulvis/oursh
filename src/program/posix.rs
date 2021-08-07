@@ -128,7 +128,7 @@ use nix::{
     unistd::Pid,
 };
 use crate::{
-    job::{Job, Jobs},
+    process::{ProcessGroup, Process, Jobs},
     program::{Result, Error, IO},
 };
 use self::ast::{Assignment, Redirect};
@@ -263,13 +263,13 @@ impl super::Run for Command {
                         "jobs" => builtin::Jobs::run(argv, jobs),
                         _ => {
                             let id = (jobs.borrow().len() + 1).to_string();
-                            let mut job = Job::new(argv);
+                            let mut job = Process::new(argv);
                             if background {
                                 let status = job.fork(io).map_err(|_| Error::Runtime);
                                 if let Some(pid) = job.pid() {
                                     eprintln!("[{}]\t{}", id, pid)
                                 }
-                                jobs.borrow_mut().push((id, job));
+                                jobs.borrow_mut().push((id, ProcessGroup(job)));
                                 status
                             } else {
                                 job.fork_and_wait(io)

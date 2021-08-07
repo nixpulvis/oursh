@@ -70,7 +70,7 @@ use nix::{
 };
 use docopt::ArgvMap;
 use crate::{
-    job::{retain_alive_jobs, IO, Jobs},
+    process::{retain_alive_jobs, IO, Jobs},
 };
 
 /// Convenience type for results with program errors.
@@ -129,8 +129,8 @@ impl<P: Program> Run for P {
 
 /// A command is a task given by the user as part of a [`Program`](Program).
 ///
-/// Each command is handled by a `Job`, and a single command may be run
-/// multiple times each as a new `Job`. Each time a command is run, the
+/// Each command is handled by a [`Process`], and a single command may be run
+/// multiple times each as a new `Process`. Each time a command is run, the
 /// conditions within the control of the shell are reproduced; IO redirection,
 /// working directory, and even the environment are each faithfully preserved.
 ///
@@ -140,7 +140,7 @@ pub trait Command: Sized + Debug + Run {
     /// Return the name of this command.
     ///
     /// This name *may* not be the same as the name given to the process by
-    /// the running `Job`.
+    /// the running [`Process`].
     // TODO: Ids?
     fn name(&self) -> CString {
         CString::new(format!("{:?}", self))

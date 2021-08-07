@@ -20,8 +20,8 @@ use oursh::{
         self,
         Prompt,
     },
-    program::{Result, Error},
-    job::{parse_and_run, Jobs, IO},
+    program::{parse_and_run, Result, Error},
+    process::{Jobs, IO},
 };
 
 // Write the Docopt usage string.

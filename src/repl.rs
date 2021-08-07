@@ -5,7 +5,7 @@
 
 use std::io::{Stdin, Stdout};
 use docopt::ArgvMap;
-use crate::job::{Jobs, IO};
+use crate::process::{Jobs, IO};
 pub use self::prompt::Prompt;
 
 #[cfg(feature = "raw")]

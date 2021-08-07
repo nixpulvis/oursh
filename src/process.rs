@@ -17,34 +17,12 @@ use std::{
     rc::Rc,
     os::unix::io::RawFd,
 };
-use docopt::ArgvMap;
 use nix::{
     unistd::{self, execvp, dup2, close, Pid, ForkResult},
     sys::wait::{waitpid, WaitStatus, WaitPidFlag},
 };
-use crate::program::{Run, parse_primary, parse_alternate};
 
-/// TODO: Rename `Job` to `Process`
-struct Process;
-
-/// TODO: Syntax for this?
-/// TODO: Differences between &?
-struct Thread;
-
-/// TODO: What signal handling can we put here?
-struct Signal;
-
-/// Processes groups are used for things like pipelines and background jobs. The system call `int
-/// setpgid(pid_t pid, pid_t pgid)` is used to set.
-struct ProcessGroup;
-
-/// The session's ID is the same as the pid of the process that created the session through the
-/// `setsid` system call. That process is known as the _session leader_ for that session group. All
-/// of that process's descendants are then members of that session unless they specifically remove
-/// themselves from it.
-struct Session;
-
-
+/// File descriptors for use in processes and threads.
 #[derive(Debug, Copy, Clone)]
 pub struct IO(pub [RawFd; 3]);
 
@@ -73,30 +51,25 @@ impl Default for IO {
     }
 }
 
-/// A job to be executed by various means.
+/// A process to be executed by various means.
 ///
-/// The shell's main job (pun intended) is to run commands. Each job has various arguments, and
-/// rules about what things should be done.
+/// The shell's main job is to run commands. Each job has various arguments, and rules about what
+/// things should be done.
 ///
 /// - TODO #4: Redirection example.
 /// - TODO #6: Background example.
 /// - TODO #4: Environment example?
-///
-/// TODO: Major flaw! Jobs need to be more than a single command's execution
-/// parameters. Jobs for example can be backgrounded on compound (etc.) types,
-/// `{ echo 1; sleep 2; }&` or `echo 1 hello world | wc &`. Each should be
-/// exactly **one** Job each.
-pub struct Job {
+pub struct Process {
     argv: Vec<CString>,
     // TODO: Call this pid?
     child: Option<Pid>,
 }
 
-impl Job {
+impl Process {
     /// Create a new job from the given command.
     // TODO #4: Return result.
     pub fn new(argv: Vec<CString>) -> Self {
-        Job {
+        Process {
             argv,
             child: None,
         }
@@ -189,13 +162,38 @@ impl Job {
     }
 }
 
+
+/// TODO: Syntax for this?
+/// TODO: Differences between &?
+struct Thread;
+
+/// TODO: What signal handling can we put here?
+struct Signal;
+
+/// Processes groups are used for things like pipelines and background jobs. The system call `int
+/// setpgid(pid_t pid, pid_t pgid)` is used to set.
+///
+///
+/// OLD TODO: Major flaw! Process need to be more than a single command's execution
+/// parameters. Jobs for example can be backgrounded on compound (etc.) types,
+/// `{ echo 1; sleep 2; }&` or `echo 1 hello world | wc &`. Each should be
+/// exactly **one** Job each.
+pub struct ProcessGroup(pub Process); // TODO: Make a sorted vector of Process?
+
+impl ProcessGroup {
+    pub fn leader(&self) -> &Process {
+        &self.0
+    }
+}
+
+
 // TODO: Make into slightly better struct.
-pub type Jobs = Rc<RefCell<Vec<(String, Job)>>>;
+pub type Jobs = Rc<RefCell<Vec<(String, ProcessGroup)>>>;
 
 // TODO: Replace program::Result
 pub fn retain_alive_jobs(jobs: &mut Jobs) -> crate::program::Result<()> {
     jobs.borrow_mut().retain(|job| {
-        match job.1.status() {
+        match job.1.0.status() {
             Ok(WaitStatus::StillAlive) => {
                 true
             },
@@ -220,3 +218,10 @@ pub fn retain_alive_jobs(jobs: &mut Jobs) -> crate::program::Result<()> {
 
     Ok(())
 }
+
+
+/// The session's ID is the same as the pid of the process that created the session through the
+/// `setsid` system call. That process is known as the _session leader_ for that session group. All
+/// of that process's descendants are then members of that session unless they specifically remove
+/// themselves from it.
+struct Session;

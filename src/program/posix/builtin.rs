@@ -14,7 +14,7 @@ use nix::{
 };
 use crate::{
     program::{Result, Error},
-    job::Jobs as JobsRef,
+    process::Jobs as JobsRef,
 };
 
 /// A builtin is a custom shell command, often changing the state of the
@@ -97,9 +97,9 @@ pub struct Jobs;
 impl Builtin for Jobs {
     fn run(_: Vec<CString>, jobs: &mut JobsRef) -> Result<WaitStatus> {
         for (id, job) in jobs.borrow().iter() {
-            if let Some(pid) = job.pid() {
+            if let Some(pid) = job.leader().pid() {
                 println!("[{}]\t{}\t\t{}",
-                         id, pid, job.body());
+                         id, pid, job.leader().body());
             }
         }
         Ok(WaitStatus::Exited(Pid::this(), 0))

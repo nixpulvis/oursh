@@ -9,7 +9,7 @@ use termion::{
 };
 use docopt::ArgvMap;
 use crate::program::parse_and_run;
-use crate::job::{IO, Jobs};
+use crate::process::{IO, Jobs};
 
 #[cfg(feature = "history")]
 use super::history::History;

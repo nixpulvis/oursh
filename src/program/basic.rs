@@ -5,7 +5,7 @@ use std::{
 };
 use nix::sys::wait::WaitStatus;
 use crate::{
-    job::{Job, Jobs},
+    process::{ProcessGroup, Process, Jobs},
     program::{Result, Error, IO},
 };
 
@@ -47,13 +47,13 @@ impl super::Command for Command {}
 
 impl super::Run for Command {
     fn run(&self, background: bool, io: IO, jobs: &mut Jobs) -> Result<WaitStatus> {
-        let mut job = Job::new(self.0.split_whitespace().map(|a| {
+        let mut job = Process::new(self.0.split_whitespace().map(|a| {
             CString::new(a).expect("error reading argument")
         }).collect());
 
         let status = if background {
             let status = job.fork(io);
-            jobs.borrow_mut().push(("???".into(), job));
+            jobs.borrow_mut().push(("???".into(), ProcessGroup(job)));
             status
         } else {
             job.fork_and_wait(io)
