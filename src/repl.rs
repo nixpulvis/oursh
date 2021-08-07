@@ -4,7 +4,8 @@
 //! completion or other potentially slow, or user defined behavior.
 
 use std::io::{Stdin, Stdout};
-use crate::program::Result;
+use docopt::ArgvMap;
+use crate::job::{Jobs, IO};
 pub use self::prompt::Prompt;
 
 #[cfg(feature = "raw")]
@@ -41,8 +42,7 @@ use self::history::History;
 /// ```
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
-pub fn start<F>(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, runner: F)
-    where F: Fn(&String) -> Result<()>
+pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap)
 {
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
@@ -69,7 +69,9 @@ pub fn start<F>(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, runner
         // Create an context to pass to the actions.
         let mut context = ActionContext {
             stdout: &mut stdout,
-            runner: &runner,
+            io: io,
+            jobs: jobs,
+            args: args,
             prompt: &mut prompt,
             #[cfg(feature = "raw")]
             prompt_length: prompt_length,

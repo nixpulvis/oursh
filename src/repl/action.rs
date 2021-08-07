@@ -1,13 +1,15 @@
 //! Actions to be bound to input methods.
 use std::io::{Write, Stdout};
-use crate::program::Result;
 use super::prompt::Prompt;
 
-use {
-    std::process::exit,
-    termion::cursor::DetectCursorPos,
-    termion::raw::RawTerminal,
+use std::process::exit;
+use termion::{
+    cursor::DetectCursorPos,
+    raw::RawTerminal,
 };
+use docopt::ArgvMap;
+use crate::program::parse_and_run;
+use crate::job::{IO, Jobs};
 
 #[cfg(feature = "history")]
 use super::history::History;
@@ -20,7 +22,9 @@ pub struct Action;
 
 pub struct ActionContext<'a> {
     pub stdout: &'a mut RawTerminal<Stdout>,
-    pub runner: &'a dyn Fn(&String) -> Result<()>,
+    pub io: &'a mut IO,
+    pub jobs: &'a mut Jobs,
+    pub args: &'a mut ArgvMap,
     pub prompt: &'a mut Prompt,
     // TODO: Remove this field.
     #[cfg(feature = "raw")]
@@ -69,7 +73,7 @@ impl Action {
 
         // Run the command.
         context.stdout.suspend_raw_mode().unwrap();
-        if (context.runner)(&context.text).is_ok() {
+        if parse_and_run(context.text, *context.io, context.jobs, context.args).is_ok() {
             #[cfg(feature = "history")]
             context.history.add(&context.text, 1);
         }

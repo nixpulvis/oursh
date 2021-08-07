@@ -22,14 +22,14 @@ use crate::{
 pub trait Builtin {
     /// Execute the shell builtin command, returning a retult of the
     /// completion.
-    fn run(argv: Vec<CString>, jobs: JobsRef) -> Result<WaitStatus>;
+    fn run(argv: Vec<CString>, jobs: &mut JobsRef) -> Result<WaitStatus>;
 }
 
 /// Exit builtin, alternative to ctrl-d.
 pub struct Exit;
 
 impl Builtin for Exit {
-    fn run(argv: Vec<CString>, _: JobsRef) -> Result<WaitStatus> {
+    fn run(argv: Vec<CString>, _: &mut JobsRef) -> Result<WaitStatus> {
         match argv.len() {
             0 => {
                 panic!("command name not passed in argv[0]");
@@ -56,7 +56,7 @@ impl Builtin for Exit {
 pub struct Cd;
 
 impl Builtin for Cd {
-    fn run(argv: Vec<CString>, _: JobsRef) -> Result<WaitStatus> {
+    fn run(argv: Vec<CString>, _: &mut JobsRef) -> Result<WaitStatus> {
         match argv.len() {
             0 => {
                 panic!("command name not passed in argv[0]");
@@ -86,7 +86,7 @@ impl Builtin for Cd {
 pub struct Null;
 
 impl Builtin for Null {
-    fn run(_: Vec<CString>, _: JobsRef) -> Result<WaitStatus> {
+    fn run(_: Vec<CString>, _: &mut JobsRef) -> Result<WaitStatus> {
         Ok(WaitStatus::Exited(Pid::this(), 0))
     }
 }
@@ -95,7 +95,7 @@ impl Builtin for Null {
 pub struct Jobs;
 
 impl Builtin for Jobs {
-    fn run(_: Vec<CString>, jobs: JobsRef) -> Result<WaitStatus> {
+    fn run(_: Vec<CString>, jobs: &mut JobsRef) -> Result<WaitStatus> {
         for (id, job) in jobs.borrow().iter() {
             if let Some(pid) = job.pid() {
                 println!("[{}]\t{}\t\t{}",

@@ -68,8 +68,9 @@ use nix::{
     unistd::Pid,
     sys::wait::WaitStatus,
 };
+use docopt::ArgvMap;
 use crate::{
-    job::{IO, Jobs},
+    job::{retain_alive_jobs, IO, Jobs},
 };
 
 /// Convenience type for results with program errors.
@@ -91,7 +92,7 @@ pub enum Error {
 }
 
 pub trait Run {
-    fn run(&self, background: bool, io: IO, jobs: Jobs) -> Result<WaitStatus>;
+    fn run(&self, background: bool, io: IO, jobs: &mut Jobs) -> Result<WaitStatus>;
 }
 
 /// A program is as large as a file or as small as a line.
@@ -117,10 +118,10 @@ pub trait Program: Sized + Debug + Run {
 }
 
 impl<P: Program> Run for P {
-    fn run(&self, background: bool, io: IO, jobs: Jobs) -> Result<WaitStatus> {
+    fn run(&self, background: bool, io: IO, jobs: &mut Jobs) -> Result<WaitStatus> {
         let mut last = WaitStatus::Exited(Pid::this(), 0);
         for command in self.commands().iter() {
-            last = command.run(background, io, jobs.clone())?;
+            last = command.run(background, io, jobs)?;
         }
         Ok(last)
     }
@@ -206,3 +207,29 @@ pub mod basic;
 pub use self::basic::Program as BasicProgram;
 pub mod posix;
 pub use self::posix::Program as PosixProgram;
+
+// TODO: Replace program::Result
+pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvMap) -> crate::program::Result<()> {
+    if !text.is_empty() {
+        // Parse with the primary grammar and run each command in order.
+        let program = match parse_primary(text.as_bytes()) {
+            Ok(program) => program,
+            Err(e) => {
+                eprintln!("{:?}: {:#?}", e, text);
+                return Err(e);
+            }
+        };
+
+        // Print the program if the flag is given.
+        if args.get_bool("--ast") {
+            eprintln!("{:#?}", program);
+        }
+
+        // Run it!
+        program.run(false, io, jobs).map(|_| ())?
+    }
+
+    retain_alive_jobs(jobs)?;
+
+    Ok(())
+}
