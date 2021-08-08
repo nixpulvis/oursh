@@ -35,13 +35,7 @@ fn compare_benchmark(c: &mut Criterion) {
 
     let benches = vec![oursh, sh, zsh, fish];
 
-    let home = env::var("HOME").expect("HOME not set");
-    let config = format!("{}/.config/fish/config.fish", home);
-    let backup = format!("{}.old", &config);
-    rename(&config, &backup).expect("save fish config");
-    println!("moved {}", &config);
     c.bench_functions("hello world", benches, "scripts/hello_world.sh");
-    rename(&backup, &config).expect("restore fish config");
 }
 
 criterion_group!(benches, compare_benchmark);
