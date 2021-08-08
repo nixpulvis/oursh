@@ -21,7 +21,9 @@ use std::{
     os::unix::io::RawFd,
 };
 use nix::{
-    unistd::{self, execvp, dup2, close, Pid, ForkResult},
+    errno::Errno,
+    unistd::{self, execvp, dup2, close, getpid, setsid, Pid, ForkResult},
+    sys::termios::{tcgetattr, tcsetattr, SetArg, OutputFlags},
     sys::wait::{waitpid, WaitStatus, WaitPidFlag},
 };
 use retain_mut::RetainMut;
@@ -76,7 +78,7 @@ impl Process {
     pub fn new(argv: Vec<CString>) -> Self {
         Process {
             argv,
-            pid: nix::unistd::getpid(),
+            pid: getpid(),
             children: Vec::new(),
         }
     }
@@ -99,12 +101,38 @@ impl Process {
                 child.status()
             },
             Ok(ForkResult::Child) => {
-                self.pid = nix::unistd::getpid();
                 io.dup()?;
+                // dbg!(&io);
+                // self.pid = setsid()?;
                 // TODO #20: When running with raw mode we could buffer
                 // this and print it later, all at once in suspended raw mode.
-                if let Err(_) = self.exec() {
-                    exit(127);
+
+                if let Ok(mut term) = tcgetattr(io.0[1]) {
+                    dbg!(&term);
+                    term.output_flags |= OutputFlags::ONLCR;
+                    term.output_flags |= OutputFlags::NLDLY;
+                    tcsetattr(io.0[1], SetArg::TCSANOW, &term);
+                }
+
+                // if let Ok(mut term) = tcgetattr(io.0[1]) {
+                //     // term.output_flags &= !OutputFlags::OCRNL;
+                //     term.output_flags &= !OutputFlags::ONLCR;
+                //     tcsetattr(io.0[1], SetArg::TCSANOW, &term);
+                // }
+                // if let Ok(mut term) = tcgetattr(2) {
+                //     term.output_flags &= !OutputFlags::OCRNL;
+                //     tcsetattr(2, SetArg::TCSANOW, &term);
+                // }
+
+                if let Err(e) = self.exec() {
+                    match e {
+                        nix::Error::Sys(Errno::ENOENT) => {
+                            let name = self.argv[0].to_string_lossy();
+                            eprintln!("oursh: {}: command not found", name);
+                            exit(127);
+                        },
+                        _ => exit(128),
+                    }
                 } else {
                     self.status()
                 }
@@ -118,14 +146,15 @@ impl Process {
         match unistd::fork() {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.children.push(child);
-                match child.wait() {
-                    s @ Ok(WaitStatus::Exited(_, 127)) => {
+                let status = child.wait();
+                match status {
+                    Ok(WaitStatus::Exited(_, 127)) => {
                         let name = self.argv[0].to_string_lossy();
                         eprintln!("oursh: {}: command not found", name);
-                        s
                     },
-                    s => s,
+                    _ => {}
                 }
+                status
             },
             Ok(ForkResult::Child) => {
                 io.dup()?;

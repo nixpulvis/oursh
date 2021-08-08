@@ -1,1 +1,1 @@
-{#!python; import math; print("hello world", math.pi)}
+{#python import math; print("hello world", math.pi)}

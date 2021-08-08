@@ -17,19 +17,19 @@ fn compare_benchmark(c: &mut Criterion) {
 
     let sh = Fun::new("sh", |b, s| {
         b.iter(|| {
-            shell!(> "/bin/sh", s)
+            shell!(> "/bin/sh", [] as [&str; 0], s)
         })
     });
 
     let zsh = Fun::new("zsh", |b, s| {
         b.iter(|| {
-            shell!(> "/usr/bin/zsh", s)
+            shell!(> "/usr/bin/zsh", [] as [&str; 0], s)
         })
     });
 
     let fish = Fun::new("fish", |b, s| {
         b.iter(|| {
-            shell!(> "/usr/bin/fish", s)
+            shell!(> "/usr/bin/fish", [] as [&str; 0], s)
         });
     });
 

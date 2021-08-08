@@ -210,9 +210,11 @@ pub use self::posix::Program as PosixProgram;
 
 // TODO: Replace program::Result
 pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvMap)
-    -> crate::program::Result<()>
+    -> crate::program::Result<WaitStatus>
 {
-    if !text.is_empty() {
+    let result = if text.is_empty() {
+        Ok(WaitStatus::Exited(Pid::this(), 0))
+    } else {
         // Parse with the primary grammar and run each command in order.
         let program = match parse_primary(text.as_bytes()) {
             Ok(program) => program,
@@ -228,9 +230,9 @@ pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvM
         }
 
         // Run it!
-        program.run(false, io, jobs)?;
-    }
+        program.run(false, io, jobs)
+    };
 
     retain_alive_jobs(jobs);
-    Ok(())
+    result
 }

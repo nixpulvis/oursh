@@ -1,1 +1,1 @@
-{#!node; console.log("hello world", Math.PI)}
+{#node console.log("hello world", Math.PI)}

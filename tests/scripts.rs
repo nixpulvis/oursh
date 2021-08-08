@@ -27,25 +27,25 @@ fn date() {
 #[test]
 #[cfg(feature = "shebang-block")]
 fn sh() {
-    assert_oursh!(> "./scripts/sh.oursh", "hello world\n");
+    assert_oursh!(> "./scripts/sh.oursh", "hello world 3.14156\n");
 }
 
 #[test]
 #[cfg(feature = "shebang-block")]
 fn ruby() {
-    assert_oursh!(> "./scripts/ruby.oursh", "hello world\n");
+    assert_oursh!(> "./scripts/ruby.oursh", "hello world 3.141592653589793\n");
 }
 
 #[test]
 #[cfg(feature = "shebang-block")]
 fn node() {
-    assert_oursh!(> "./scripts/node.oursh", "hello world\n");
+    assert_oursh!(> "./scripts/node.oursh", "hello world 3.141592653589793\n");
 }
 
 #[test]
 #[cfg(feature = "shebang-block")]
 fn python() {
-    assert_oursh!(> "./scripts/python.oursh", "hello world\n");
+    assert_oursh!(> "./scripts/python.oursh", "hello world 3.141592653589793\n");
 }
 
 #[test]

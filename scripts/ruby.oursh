@@ -1,1 +1,1 @@
-{#!ruby; puts "hello world", Math::PI}
+{#ruby puts "hello world " + Math::PI.to_s }

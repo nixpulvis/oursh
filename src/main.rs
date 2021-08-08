@@ -1,3 +1,5 @@
+#![feature(termination_trait_lib)]
+
 extern crate docopt;
 extern crate nix;
 extern crate oursh;
@@ -6,12 +8,14 @@ extern crate dirs;
 
 use std::{
     env,
-    process,
+    process::Termination,
     fs::File,
     io::{self, Read},
     cell::RefCell,
     rc::Rc,
 };
+use nix::sys::wait::WaitStatus;
+use nix::unistd::Pid;
 use docopt::{Docopt, Value};
 use termion::is_tty;
 use dirs::home_dir;
@@ -42,7 +46,7 @@ Options:
 // Our shell, for the greater good. Ready and waiting.
 // TODO: Replace program::Result
 //
-fn main() -> Result<()> {
+fn main() -> MainResult {
     // Parse argv and exit the program with an error message if it fails.
     let mut args = Docopt::new(USAGE)
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
@@ -65,14 +69,14 @@ fn main() -> Result<()> {
             if let Ok(mut file) = File::open(path) {
                 let mut contents = String::new();
                 if let Ok(_) = file.read_to_string(&mut contents) {
-                    parse_and_run(&contents, io, &mut jobs, &args)?;
+                    parse_and_run(&contents, io, &mut jobs, &args);
                 }
             }
         }
     }
 
     if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
-        parse_and_run(c, io, &mut jobs, &args)
+        MainResult(parse_and_run(c, io, &mut jobs, &args))
     } else if let Some(Value::Plain(Some(ref filename))) = args.find("<file>") {
         let mut file = File::open(filename)
             .expect(&format!("error opening file: {}", filename));
@@ -83,7 +87,7 @@ fn main() -> Result<()> {
             .expect("error reading file");
 
         // Run the program.
-        parse_and_run(&text, io, &mut jobs, &args)
+        MainResult(parse_and_run(&text, io, &mut jobs, &args))
     } else {
         // Standard input file descriptor (0), used for user input from the
         // user of the shell.
@@ -109,26 +113,29 @@ fn main() -> Result<()> {
             // A styled static (for now) prompt.
             let prompt = Prompt::sh_style();
             repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &mut args);
-            Ok(())
+            MainResult(Ok(WaitStatus::Exited(Pid::this(), 0)))
         } else {
             // Fill a string buffer from STDIN.
             let mut text = String::new();
             stdin.lock().read_to_string(&mut text).unwrap();
 
             // Run the program.
-            match parse_and_run(&text, io, &mut jobs, &args) {
-                Ok(u) => Ok(u),
-                Err(Error::Read) => {
-                    process::exit(1);
-                },
-                Err(Error::Parse) => {
-                    process::exit(2);
-                },
-                Err(Error::Runtime) => {
-                    // TODO: Exit with the last status code?
-                    process::exit(127);
-                }
-            }
+            MainResult(parse_and_run(&text, io, &mut jobs, &args))
+        }
+    }
+}
+
+#[derive(Debug)]
+struct MainResult(Result<WaitStatus>);
+impl Termination for MainResult {
+    fn report(self) -> i32 {
+        match self.0 {
+            Ok(WaitStatus::Exited(pid, exit_code)) => exit_code,
+            Ok(WaitStatus::Signaled(pid, _signal, bool)) => 128,
+            Err(Error::Read) => 1,
+            Err(Error::Parse) => 2,
+            Err(Error::Runtime) => 127,
+            _ => unreachable!(),
         }
     }
 }
