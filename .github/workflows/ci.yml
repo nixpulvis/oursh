@@ -3,7 +3,7 @@ on: [push, pull_request]
 name: CI
 
 jobs:
-  test:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -12,6 +12,11 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+
+  test:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
       - uses: actions-rs/cargo@v1
         with:
           command: test
@@ -19,13 +24,8 @@ jobs:
 
   doc:
     runs-on: ubuntu-latest
+    needs: setup
     steps:
-      - uses: actions/checkout@v2
-      - uses: Swatinem/rust-cache@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
       - uses: actions-rs/cargo@v1
         with:
           command: doc
@@ -36,13 +36,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    needs: setup
     steps:
-      - uses: actions/checkout@v2
-      - uses: Swatinem/rust-cache@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
       - uses: actions-rs/cargo@v1
         with:
           command: build
