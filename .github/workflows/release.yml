@@ -1,9 +1,9 @@
-on: [push, pull_request]
+on: [tag]
 
 name: CI
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,8 +15,9 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
+          args: --release
 
-  test:
+  doc:
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -28,5 +29,8 @@ jobs:
           toolchain: stable
       - uses: actions-rs/cargo@v1
         with:
-          command: test
-          args: --all-features
+          command: doc
+      - uses: actions/upload-artifact@v2
+        with:
+          name: oursh docs
+          path: target/doc/
