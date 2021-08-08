@@ -1,8 +1,11 @@
 # oursh
 [![Documentation](https://docs.rs/oursh/badge.svg)](https://docs.rs/oursh)
-[![Build Status](https://travis-ci.org/nixpulvis/oursh.svg?branch=master)](https://travis-ci.org/nixpulvis/oursh)
+
+[![CV](https://github.com/nixpulvis/oursh/actions/workflows/cv.yml/badge.svg?branch=master&event=push)](https://github.com/nixpulvis/oursh/actions/workflows/cv.yml)
+
+[![CI](https://github.com/nixpulvis/oursh/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/nixpulvis/oursh/actions/workflows/ci.yml)
+
 [![Dependencies](https://deps.rs/repo/github/nixpulvis/oursh/status.svg)](https://deps.rs/repo/github/nixpulvis/oursh)
-[![Gitter Chat](https://badges.gitter.im/oursh.png)](https://gitter.im/oursh/Lobby)
 
 This shell should be both POSIX compatible and yet modern and exciting. Fancy
 features should not be prevented by POSIX compatibility. This will effect the
