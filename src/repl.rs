@@ -28,7 +28,7 @@ use self::history::History;
 ///
 /// ## Examples
 ///
-/// ```
+/// ```ignore
 /// use std::io;
 /// use oursh::program::Result;
 /// use oursh::repl;
