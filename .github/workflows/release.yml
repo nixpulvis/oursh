@@ -1,6 +1,6 @@
 on: [tag]
 
-name: CI
+name: Release
 
 jobs:
   release:
