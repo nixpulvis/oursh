@@ -160,6 +160,7 @@ print("hello world")
 }
 
 #[test]
+#[ignore]
 #[cfg(feature = "shebang-block")]
 fn shebang_block_racket_command() {
     assert_oursh!(r#"{#!/usr/bin/env racket;
