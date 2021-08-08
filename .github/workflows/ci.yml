@@ -15,6 +15,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
+          args: --all-features
 
   test:
     runs-on: ubuntu-latest
