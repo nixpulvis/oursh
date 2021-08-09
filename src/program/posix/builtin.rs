@@ -4,7 +4,7 @@
 //! These commands take precedence over any executables with the same name
 //! in the `$PATH`.
 use std::{
-    env,
+    env::{self, set_var},
     process,
     ffi::CString,
 };
@@ -52,6 +52,30 @@ impl Builtin for Exit {
     }
 }
 
+/// Export builtin, used to set global variables.
+pub struct Export;
+
+impl Builtin for Export {
+    fn run(argv: Vec<CString>, _: &mut JobsRef) -> Result<WaitStatus> {
+        match argv.len() {
+            0 => unreachable!(),
+            1 => {
+                // TODO: Print all env vars.
+                unimplemented!();
+            }
+            n => {
+                for assignment in argv[1..n].iter() {
+                    let mut split = assignment.to_str().unwrap().splitn(2, '=');
+                    if let (Some(key), Some(value)) = (split.next(), split.next()) {
+                        env::set_var(key, value);
+                    }
+                }
+                Ok(WaitStatus::Exited(Pid::this(), 0))
+            },
+        }
+    }
+}
+
 /// Change directory (`cd`) builtin.
 pub struct Cd;
 
@@ -66,12 +90,19 @@ impl Builtin for Cd {
                     Ok(path) => path,
                     Err(_) => return Err(Error::Runtime),
                 };
-                chdir(home.as_str()).map(|_| WaitStatus::Exited(Pid::this(), 0))
+                let dst = home.as_str();
+                chdir(dst).map(|_| {
+                    set_var("PWD", &dst);
+                    WaitStatus::Exited(Pid::this(), 0)
+                })
                           .map_err(|_| Error::Runtime)
             },
             2 => {
-                chdir(&*argv[1].to_string_lossy().as_ref())
-                    .map(|_| WaitStatus::Exited(Pid::this(), 1))
+                let dst = argv[1].to_string_lossy();
+                chdir(dst.as_ref()).map(|_| {
+                        set_var("PWD", dst.as_ref());
+                        WaitStatus::Exited(Pid::this(), 0)
+                    })
                     .map_err(|_| Error::Runtime)
             },
             _ => {

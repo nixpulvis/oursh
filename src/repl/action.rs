@@ -25,6 +25,7 @@ pub struct ActionContext<'a> {
     pub io: &'a mut IO,
     pub jobs: &'a mut Jobs,
     pub args: &'a mut ArgvMap,
+    pub rl: &'a mut Editor<()>,
     pub prompt: &'a mut Prompt,
     // TODO: Remove this field.
     #[cfg(feature = "raw")]
@@ -73,7 +74,7 @@ impl Action {
 
         // Run the command.
         context.stdout.suspend_raw_mode().unwrap();
-        if parse_and_run(context.text, *context.io, context.jobs, context.args).is_ok() {
+        if parse_and_run(context.text, *context.io, context.jobs, context.args, ).is_ok() {
             #[cfg(feature = "history")]
             context.history.add(&context.text, 1);
         }

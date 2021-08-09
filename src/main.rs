@@ -7,7 +7,7 @@ extern crate termion;
 extern crate dirs;
 
 use std::{
-    env,
+    env::{self, var},
     process::Termination,
     fs::File,
     io::{self, Read},
@@ -15,15 +15,11 @@ use std::{
     rc::Rc,
 };
 use nix::sys::wait::WaitStatus;
-use nix::unistd::Pid;
+use nix::unistd::{gethostname, Pid};
 use docopt::{Docopt, Value};
 use termion::is_tty;
 use dirs::home_dir;
 use oursh::{
-    repl::{
-        self,
-        Prompt,
-    },
     program::{parse_and_run, Result, Error},
     process::{Jobs, IO},
 };
@@ -48,7 +44,7 @@ Options:
 //
 fn main() -> MainResult {
     // Parse argv and exit the program with an error message if it fails.
-    let mut args = Docopt::new(USAGE)
+    let args = Docopt::new(USAGE)
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
                       .unwrap_or_else(|e| e.exit());
 
@@ -56,7 +52,7 @@ fn main() -> MainResult {
     let mut jobs: Jobs = Rc::new(RefCell::new(vec![]));
 
     // Default inputs and outputs.
-    let mut io = IO::default();
+    let io = IO::default();
 
     // Run the profile before anything else.
     // TODO:
@@ -69,7 +65,7 @@ fn main() -> MainResult {
             if let Ok(mut file) = File::open(path) {
                 let mut contents = String::new();
                 if let Ok(_) = file.read_to_string(&mut contents) {
-                    if let Err(e) = parse_and_run(&contents, io, &mut jobs, &args) {
+                    if let Err(e) = parse_and_run(&contents, io, &mut jobs, &args, None) {
                         eprintln!("failed to source profile: {:?}", e);
                     }
                 }
@@ -78,7 +74,7 @@ fn main() -> MainResult {
     }
 
     if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
-        MainResult(parse_and_run(c, io, &mut jobs, &args))
+        MainResult(parse_and_run(c, io, &mut jobs, &args, None))
     } else if let Some(Value::Plain(Some(ref filename))) = args.find("<file>") {
         let mut file = File::open(filename)
             .expect(&format!("error opening file: {}", filename));
@@ -89,7 +85,7 @@ fn main() -> MainResult {
             .expect("error reading file");
 
         // Run the program.
-        MainResult(parse_and_run(&text, io, &mut jobs, &args))
+        MainResult(parse_and_run(&text, io, &mut jobs, &args, None))
     } else {
         // Standard input file descriptor (0), used for user input from the
         // user of the shell.
@@ -102,29 +98,103 @@ fn main() -> MainResult {
 
         // Process text in raw mode style if we're attached to a tty.
         if is_tty(&stdin) {
-            // Standard output file descriptor (1), used to display program output
-            // to the user of the shell.
-            let stdout = io::stdout();
+            // // Standard output file descriptor (1), used to display program output
+            // // to the user of the shell.
+            // let stdout = io::stdout();
 
             // Trap SIGINT.
             ctrlc::set_handler(move || {
+                dbg!("HIT! help me!");
                 // noop for now.
             }).unwrap();
 
-            // Start a program running repl.
-            // A styled static (for now) prompt.
-            let prompt = Prompt::sh_style();
-            repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &mut args);
-            MainResult(Ok(WaitStatus::Exited(Pid::this(), 0)))
+            // // Start a program running repl.
+            // // A styled static (for now) prompt.
+            // let prompt = Prompt::sh_style();
+            // repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &mut args);
+
+            // use linefeed::{Interface, ReadResult};
+            // let mut reader = Interface::new("my-application").unwrap();
+
+            // let p: String = Prompt::sh_style().into();
+            // reader.set_prompt(&p).unwrap();
+
+            // while let ReadResult::Input(input) = reader.read_line().unwrap() {
+            //     parse_and_run(&input, io, &mut jobs, &args);
+            // }
+
+            use rustyline::error::ReadlineError;
+            use rustyline::Editor;
+            let home = env::var("HOME").expect("HOME variable not set.");
+            let history_path = format!("{}/.oursh_history", home);
+
+            let mut rl = Editor::<()>::new();
+            if rl.load_history(&history_path).is_err() {
+                println!("No previous history.");
+            }
+
+            let code;
+            loop {
+                let prompt = expand_prompt(env::var("PS1").unwrap_or(sh_style_prompt()));
+                let readline = rl.readline(&prompt);
+                match readline {
+                    Ok(line) => {
+                        parse_and_run(&line, io, &mut jobs, &args, Some(&mut rl)).unwrap();
+                    },
+                    Err(ReadlineError::Interrupted) => {
+                        println!("^C");
+                        continue;
+                    },
+                    Err(ReadlineError::Eof) => {
+                        println!("exit");
+                        code = 0;
+                        break;
+                    },
+                    Err(err) => {
+                        println!("error: {:?}", err);
+                        code = 130;
+                        break;
+                    }
+                }
+            }
+
+            rl.save_history(&history_path).unwrap();
+            MainResult(Ok(WaitStatus::Exited(Pid::this(), code)))
         } else {
             // Fill a string buffer from STDIN.
             let mut text = String::new();
             stdin.lock().read_to_string(&mut text).unwrap();
 
             // Run the program.
-            MainResult(parse_and_run(&text, io, &mut jobs, &args))
+            MainResult(parse_and_run(&text, io, &mut jobs, &args, None))
         }
     }
+}
+
+fn expand_prompt(prompt: String) -> String {
+    let mut result = String::new();
+    let mut command = false;
+    for c in prompt.chars() {
+        if command {
+            // TODO: https://ss64.com/bash/syntax-prompt.html
+            result += &match c {
+                'h' => {
+                    let mut buf = [0u8; 64];
+                    let cstr = gethostname(&mut buf).expect("error getting hostname");
+                    cstr.to_str().expect("error invalid UTF-8").into()
+                }
+                'u' => var("USER").unwrap_or("".into()),
+                'w' => var("PWD").unwrap_or("".into()),
+                '\\' => "".into(),
+                c => c.into(),
+            };
+        } else if c == '\\' {
+            command = true;
+        } else {
+            result.push(c);
+        }
+    }
+    result
 }
 
 #[derive(Debug)]
@@ -140,4 +210,14 @@ impl Termination for MainResult {
             _ => unreachable!(),
         }
     }
+}
+
+pub fn sh_style_prompt() -> String {
+    const NAME: &'static str = "oursh";
+    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    let version = &VERSION[0..(VERSION.len() - 2)];
+    // TODO: Add a flag for pretending to be `sh`.
+    // let name = "sh";
+    // let version = "4.4";
+    format!("{}-{}$ ", NAME, version)
 }

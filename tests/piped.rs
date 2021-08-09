@@ -119,7 +119,6 @@ fn assignment_command() {
 }
 
 #[test]
-#[ignore]
 fn variable_command() {
     assert_oursh!("X=1; echo $X", "1\n");
 }

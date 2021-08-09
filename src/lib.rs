@@ -119,7 +119,7 @@ macro_rules! debug {
 
 pub mod process;
 pub mod program;
-pub mod repl;
+// pub mod repl;
 
 
 #[macro_use]

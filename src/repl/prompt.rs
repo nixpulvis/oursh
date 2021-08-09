@@ -13,6 +13,12 @@ impl Default for Prompt {
     }
 }
 
+impl Into<String> for Prompt {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
 impl Prompt {
     pub fn new(prompt: &str) -> Self {
         Prompt(format!("{}", prompt))

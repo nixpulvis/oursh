@@ -69,6 +69,7 @@ use nix::{
     sys::wait::WaitStatus,
 };
 use docopt::ArgvMap;
+use rustyline::Editor;
 use crate::{
     process::{retain_alive_jobs, IO, Jobs},
 };
@@ -209,7 +210,7 @@ pub mod posix;
 pub use self::posix::Program as PosixProgram;
 
 // TODO: Replace program::Result
-pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvMap)
+pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvMap, rl: Option<&'a mut Editor<()>>)
     -> crate::program::Result<WaitStatus>
 {
     let result = if text.is_empty() {
@@ -223,6 +224,8 @@ pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvM
                 return Err(e);
             }
         };
+
+        if let Some(editor) = rl { editor.add_history_entry(text); }
 
         // Print the program if the flag is given.
         if args.get_bool("--ast") {
