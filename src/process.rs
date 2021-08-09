@@ -22,8 +22,7 @@ use std::{
 };
 use nix::{
     errno::Errno,
-    unistd::{self, execvp, dup2, close, getpid, setsid, Pid, ForkResult},
-    sys::termios::{tcgetattr, tcsetattr, SetArg, OutputFlags},
+    unistd::{self, execvp, dup2, close, getpid, Pid, ForkResult},
     sys::wait::{waitpid, WaitStatus, WaitPidFlag},
 };
 use retain_mut::RetainMut;
@@ -285,4 +284,4 @@ pub fn retain_alive_jobs(jobs: &mut Jobs) {
 /// of its member processes. A file descriptor for the controlling tty is obtained by opening
 /// /dev/tty. (And when that fails, there was no controlling tty.) Given a file descriptor for the
 /// controlling tty, one may obtain the SID using tcgetsid(fd).
-struct Session;
+pub struct Session;

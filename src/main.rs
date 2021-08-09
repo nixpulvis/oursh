@@ -69,7 +69,9 @@ fn main() -> MainResult {
             if let Ok(mut file) = File::open(path) {
                 let mut contents = String::new();
                 if let Ok(_) = file.read_to_string(&mut contents) {
-                    parse_and_run(&contents, io, &mut jobs, &args);
+                    if let Err(e) = parse_and_run(&contents, io, &mut jobs, &args) {
+                        eprintln!("failed to source profile: {:?}", e);
+                    }
                 }
             }
         }
@@ -130,8 +132,8 @@ struct MainResult(Result<WaitStatus>);
 impl Termination for MainResult {
     fn report(self) -> i32 {
         match self.0 {
-            Ok(WaitStatus::Exited(pid, exit_code)) => exit_code,
-            Ok(WaitStatus::Signaled(pid, _signal, bool)) => 128,
+            Ok(WaitStatus::Exited(_pid, exit_code)) => exit_code,
+            Ok(WaitStatus::Signaled(_pid, _signal, _coredump)) => 128,
             Err(Error::Read) => 1,
             Err(Error::Parse) => 2,
             Err(Error::Runtime) => 127,
