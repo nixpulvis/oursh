@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["PwdError",""]],"struct":[["Passwd","The main struct for the library, a safe version of the POSIX `struct passwd`"]],"type":[["Result",""]]});
