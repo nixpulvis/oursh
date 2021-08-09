@@ -141,10 +141,3 @@ impl Termination for MainResult {
         }
     }
 }
-
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_has_a_test() {}
-}
