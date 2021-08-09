@@ -102,17 +102,15 @@ impl Process {
             },
             Ok(ForkResult::Child) => {
                 io.dup()?;
-                // dbg!(&io);
                 // self.pid = setsid()?;
                 // TODO #20: When running with raw mode we could buffer
                 // this and print it later, all at once in suspended raw mode.
 
-                if let Ok(mut term) = tcgetattr(io.0[1]) {
-                    dbg!(&term);
-                    term.output_flags |= OutputFlags::ONLCR;
-                    term.output_flags |= OutputFlags::NLDLY;
-                    tcsetattr(io.0[1], SetArg::TCSANOW, &term);
-                }
+                // if let Ok(mut term) = tcgetattr(io.0[1]) {
+                //     term.output_flags |= OutputFlags::ONLCR;
+                //     term.output_flags |= OutputFlags::NLDLY;
+                //     tcsetattr(io.0[1], SetArg::TCSANOW, &term);
+                // }
 
                 // if let Ok(mut term) = tcgetattr(io.0[1]) {
                 //     // term.output_flags &= !OutputFlags::OCRNL;
