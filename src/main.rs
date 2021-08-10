@@ -16,9 +16,13 @@ use std::{
 };
 use nix::sys::wait::WaitStatus;
 use nix::unistd::{gethostname, Pid};
+use dirs::home_dir;
 use docopt::{Docopt, Value};
 use termion::is_tty;
-use dirs::home_dir;
+use rustyline::{
+    Editor,
+    error::ReadlineError,
+};
 use oursh::{
     program::{parse_and_run, Result, Error},
     process::{Jobs, IO},
@@ -108,23 +112,6 @@ fn main() -> MainResult {
                 // noop for now.
             }).unwrap();
 
-            // // Start a program running repl.
-            // // A styled static (for now) prompt.
-            // let prompt = Prompt::sh_style();
-            // repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &mut args);
-
-            // use linefeed::{Interface, ReadResult};
-            // let mut reader = Interface::new("my-application").unwrap();
-
-            // let p: String = Prompt::sh_style().into();
-            // reader.set_prompt(&p).unwrap();
-
-            // while let ReadResult::Input(input) = reader.read_line().unwrap() {
-            //     parse_and_run(&input, io, &mut jobs, &args);
-            // }
-
-            use rustyline::error::ReadlineError;
-            use rustyline::Editor;
             let home = env::var("HOME").expect("HOME variable not set.");
             let history_path = format!("{}/.oursh_history", home);
 

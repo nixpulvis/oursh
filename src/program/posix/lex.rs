@@ -257,7 +257,6 @@ impl<'input> Lexer<'input> {
     }
 
     // TODO: Escapes
-    // TODO: Should we expand $ variables here? Yes! As we go, greedy?
     // TODO: Honestly, I think this needs to be handled in the .lalrpop file.
     fn double_quote(&mut self, start: usize, end: usize)
         -> Result<(usize, Token<'input>, usize), Error>

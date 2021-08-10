@@ -6,7 +6,6 @@
 use std::io::{Stdin, Stdout};
 use docopt::ArgvMap;
 use crate::process::{Jobs, IO};
-pub use self::prompt::Prompt;
 
 #[cfg(feature = "raw")]
 use {
@@ -42,7 +41,7 @@ use self::history::History;
 /// ```
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
-pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap)
+pub fn start(mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap)
 {
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
@@ -54,7 +53,8 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
         .expect("error opening raw mode");
 
     // Display the inital prompt.
-    prompt.display(&mut stdout);
+    // TODO: From $PS1
+    // prompt.display(&mut stdout);
 
     // XXX: Hack to get the prompt length.
     #[cfg(feature = "raw")]
@@ -72,7 +72,6 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
             io: io,
             jobs: jobs,
             args: args,
-            prompt: &mut prompt,
             #[cfg(feature = "raw")]
             prompt_length: prompt_length,
             #[cfg(feature = "raw")]
@@ -120,14 +119,13 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
             }
         }
 
-        // Display a brand spanking new prompt.
-        prompt.display(&mut stdout);
+        // TODO: Display a brand spanking new prompt from $PS1
+        // prompt.display(&mut stdout);
     }
 }
 
 
 // pub mod display;
-pub mod prompt;
 #[cfg(feature = "raw")]
 pub mod action;
 #[cfg(feature = "completion")]

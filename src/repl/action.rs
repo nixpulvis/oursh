@@ -74,7 +74,7 @@ impl Action {
 
         // Run the command.
         context.stdout.suspend_raw_mode().unwrap();
-        if parse_and_run(context.text, *context.io, context.jobs, context.args, ).is_ok() {
+        if parse_and_run(context.text, *context.io, context.jobs, context.args).is_ok() {
             #[cfg(feature = "history")]
             context.history.add(&context.text, 1);
         }
