@@ -127,7 +127,20 @@ fn main() -> MainResult {
                 let readline = rl.readline(&prompt);
                 match readline {
                     Ok(line) => {
-                        parse_and_run(&line, io, &mut jobs, &args, Some(&mut rl)).unwrap();
+                        match parse_and_run(&line, io, &mut jobs, &args, Some(&mut rl)) {
+                            Ok(status) => {
+                                match status {
+                                    WaitStatus::Exited(_pid, _code) =>
+                                        rl.save_history(&history_path).unwrap(),
+                                    WaitStatus::Signaled(_pid, _signal, _coredump) =>
+                                        rl.save_history(&history_path).unwrap(),
+                                    _ => {},
+                                }
+                            }
+                            Err(e) => {
+                                dbg!(e);
+                            }
+                        }
                     },
                     Err(ReadlineError::Interrupted) => {
                         println!("^C");
