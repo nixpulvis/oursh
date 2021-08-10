@@ -8,7 +8,7 @@
 //! ### POSIX Shell Language
 //!
 //! The basic, portable POSIX shell language. For detailed information read the
-//! [`posix`](program::posix) module docs.
+//! [`posix`](crate::program::posix) module docs.
 //!
 //! ```sh
 //! for ((i=0; i<10; i++)); do echo $i; done
@@ -17,7 +17,7 @@
 //! ### Modern Shell Language
 //!
 //! A more modern and ergonomic language. For more detailed information read
-//! the [`modern`](program::modern) module docs.
+//! the [`modern`](crate::program::modern) module docs.
 //!
 //! ```sh
 //! # WIP
@@ -34,13 +34,13 @@
 //!
 //! ### `{#}` Language Blocks
 //!
-//! Both the [`posix`](program::posix) and [`modern`](program::modern)
-//! languages have support for a special expression which treats the body as a
-//! program from another language. This forms the basis of oursh's modern
-//! features, and backwards compatibility. While the primary goal of this
-//! syntax is to be able to mix both POSIX and non-POSIX shell scripts, the
-//! feature is much more powerful.  Any interperator can be used, just like
-//! with `#!`.
+//! Both the [`posix`](crate::program::posix) and
+//! [`modern`](crate::program::modern) languages have support for a special
+//! expression which treats the body as a program from another language. This
+//! forms the basis of oursh's modern features, and backwards compatibility.
+//! While the primary goal of this syntax is to be able to mix both POSIX and
+//! non-POSIX shell scripts, the feature is much more powerful.  Any
+//! interperator can be used, just like with `#!`.
 //!
 //! ```sh
 //! date      # Call `date` in the primary syntax.
@@ -130,10 +130,11 @@ impl<P: Program> Run for P {
 
 /// A command is a task given by the user as part of a [`Program`](Program).
 ///
-/// Each command is handled by a [`Process`], and a single command may be run
-/// multiple times each as a new `Process`. Each time a command is run, the
-/// conditions within the control of the shell are reproduced; IO redirection,
-/// working directory, and even the environment are each faithfully preserved.
+/// Each command is handled by a [`Process`](crate::process::Process), and a
+/// single command may be run multiple times each as a new `Process`. Each time
+/// a command is run, the conditions within the control of the shell are
+/// reproduced; IO redirection, working directory, and even the environment are
+/// each faithfully preserved.
 ///
 // TODO #4: We can reasonably reproduce the redirects, pwd... but is it
 //          sane to try this with ENV too?
@@ -141,7 +142,7 @@ pub trait Command: Sized + Debug + Run {
     /// Return the name of this command.
     ///
     /// This name *may* not be the same as the name given to the process by
-    /// the running [`Process`].
+    /// the running [`Process`](crate::process::Process).
     // TODO: Ids?
     fn name(&self) -> CString {
         CString::new(format!("{:?}", self))
@@ -208,6 +209,8 @@ pub mod basic;
 pub use self::basic::Program as BasicProgram;
 pub mod posix;
 pub use self::posix::Program as PosixProgram;
+pub mod modern;
+pub use self::modern::Program as ModernProgram;
 
 // TODO: Replace program::Result
 pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvMap, rl: Option<&'a mut Editor<()>>)
