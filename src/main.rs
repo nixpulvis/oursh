@@ -106,11 +106,6 @@ fn main() -> MainResult {
             // // to the user of the shell.
             // let stdout = io::stdout();
 
-            // Trap SIGINT.
-            ctrlc::set_handler(move || {
-                dbg!("HIT! help me!");
-                // noop for now.
-            }).unwrap();
 
             let home = env::var("HOME").expect("HOME variable not set.");
             let history_path = format!("{}/.oursh_history", home);
@@ -119,6 +114,9 @@ fn main() -> MainResult {
             if rl.load_history(&history_path).is_err() {
                 println!("No previous history.");
             }
+
+            // Trap SIGINT.
+            ctrlc::set_handler(move || println!()).unwrap();
 
             let code;
             loop {
