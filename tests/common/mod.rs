@@ -89,7 +89,6 @@ macro_rules! assert_oursh {
         let stdout = String::from_utf8_lossy(&stdout);
         let stderr = String::from_utf8_lossy(&stderr);
         println!("stdout: {}\nstderr: {}", stdout, stderr);
-        dbg!($text, status);
         assert!(status.success());
         assert_eq!($stdout, stdout);
     }};

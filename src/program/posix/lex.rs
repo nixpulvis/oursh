@@ -35,7 +35,6 @@ pub enum Token<'input> {
     Backtick,
     Bang,
     Pipe,
-    Dollar,
     Equals,
     Backslash,
     DoubleQuote,
@@ -56,6 +55,7 @@ pub enum Token<'input> {
     Else,
     Elif,
     Fi,
+    Export,
     Do,
     Done,
     Case,
@@ -134,7 +134,6 @@ impl<'input> Iterator for Lexer<'input> {
                 '('  => Some(Ok((s, Token::LParen, e))),
                 '`'  => Some(Ok((s, Token::Backtick, e))),
                 '!'  => Some(Ok((s, Token::Bang, e))),
-                '$'  => Some(Ok((s, Token::Dollar, e))),
                 '='  => Some(Ok((s, Token::Equals, e))),
                 '\\' => Some(Ok((s, Token::Backslash, e))),
                 '\'' => Some(self.single_quote(s, e)),
@@ -258,14 +257,14 @@ impl<'input> Lexer<'input> {
     }
 
     // TODO: Escapes
-    // TODO: Should we expand $ variables here?
+    // TODO: Honestly, I think this needs to be handled in the .lalrpop file.
     fn double_quote(&mut self, start: usize, end: usize)
         -> Result<(usize, Token<'input>, usize), Error>
     {
         // TODO: This quitely stops at EOF.
-        let (_, end) = self.take_while(start, end, |c| c != '"');
+        let (input, end) = self.take_while(start, end, |c| c != '"');
         self.advance();  // Consume the ending double quote.
-        Ok((start, Token::Word(&self.input[start+1..end]), end))
+        Ok((start, Token::Word(&input[1..]), end))
     }
 
     fn word(&mut self, start: usize, end: usize)
@@ -273,21 +272,21 @@ impl<'input> Lexer<'input> {
     {
         let (word, end) = self.take_while(start, end, is_word_continue);
         let tok = match word {
-            "if"    => Token::If,
-            "then"  => Token::Then,
-            "else"  => Token::Else,
-            "elif"  => Token::Elif,
-            "fi"    => Token::Fi,
-            "do"    => Token::Do,
-            "done"  => Token::Done,
-            "case"  => Token::Case,
-            "esac"  => Token::Esac,
-            "while" => Token::While,
-            "until" => Token::Until,
-            "for"   => Token::For,
-            word    => self.io_number(word),
+            "if"     => Token::If,
+            "then"   => Token::Then,
+            "else"   => Token::Else,
+            "elif"   => Token::Elif,
+            "fi"     => Token::Fi,
+            "export" => Token::Export,
+            "do"     => Token::Do,
+            "done"   => Token::Done,
+            "case"   => Token::Case,
+            "esac"   => Token::Esac,
+            "while"  => Token::While,
+            "until"  => Token::Until,
+            "for"    => Token::For,
+            word     => self.io_number(word),
         };
-
         Ok((start, tok, end))
     }
 
@@ -358,11 +357,9 @@ fn is_word_continue(ch: char) -> bool {
     match ch {
         // List of syntax from above.
         // TODO: Make this list generated.
-        ';' | ')' | '(' | '`' | '!' |
-        '$' | '=' | '\\' | '\'' | '"' |
-        '>' | '<' | '&' | '|' | '{' | '}' |
-        '*' => false,
-
+        ';' | ')' | '(' | '`' | '!' | '=' | '\\' | '\'' | '"'
+            | '>' | '<' | '&' | '|' | '{' | '}' | '*'
+          => false,
         _ => !ch.is_whitespace()
     }
 }
@@ -402,6 +399,9 @@ mod tests {
         let mut lexer = Lexer::new("123");
         assert_matches!(lexer.next(),
                         Some(Ok((_, Token::Word("123"), _))));
+        let mut lexer = Lexer::new("$PATH");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("$PATH"), _))));
     }
 
     #[test]

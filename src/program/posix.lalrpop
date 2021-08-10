@@ -20,7 +20,6 @@ extern {
         "`"         => lex::Token::Backtick,
         "!"         => lex::Token::Bang,
         "|"         => lex::Token::Pipe,
-        "$"         => lex::Token::Dollar,
         "="         => lex::Token::Equals,
         "\\"        => lex::Token::Backslash,
         "\""        => lex::Token::DoubleQuote,
@@ -41,6 +40,7 @@ extern {
         "else"      => lex::Token::Else,
         "elif"      => lex::Token::Elif,
         "fi"        => lex::Token::Fi,
+        "export"    => lex::Token::Export,
         "WORD"      => lex::Token::Word(<&'input str>),
         "IO_NUMBER" => lex::Token::IoNumber(<usize>),
         "{#"        => lex::Token::HashLang(<&'input str>),
@@ -161,6 +161,11 @@ Simple: ast::Command = {
             ast::Word(w.to_string())
         }).collect(), redirects)
     },
+
+    // Export support.
+    "export" <assignments: Assignment+> => {
+        ast::Command::Simple(assignments, vec![], vec![])
+    },
 }
 
 Redirect: ast::Redirect = {
@@ -226,7 +231,12 @@ File: ast::Redirect = {
 //     },
 // }
 
+// pub Word: ast::Word = {
+//     <w: "WORD"> => ast::Word(w.into()),
+//     "$" <v: "WORD"> => ast::Word(var(v).unwrap_or(format!("${}", v))),
+// }
+
 Assignment: ast::Assignment = {
     // TODO: Variable expansion.
-    <n: "WORD"> "=" <v: "WORD"> => ast::Assignment(n.into(), v.into()),
+    <k: "WORD"> "=" <v: "WORD"> => ast::Assignment(k.into(), v.into()),
 }

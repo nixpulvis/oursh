@@ -119,9 +119,13 @@ fn assignment_command() {
 }
 
 #[test]
-#[ignore]
 fn variable_command() {
     assert_oursh!("X=1; echo $X", "1\n");
+    assert_oursh!("export FOO=1 BAR=$FOO; echo $BAR", "1\n");
+    assert_oursh!("echo $BAR", "\n");
+    assert_oursh!("echo $", "$\n");
+    assert_oursh!("echo ' $ '", " $ \n");
+    assert_oursh!("echo \" $$ $ \"", " $$ $ \n");
 }
 
 #[test]

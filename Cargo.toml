@@ -1,6 +1,6 @@
 [package]
 name = "oursh"
-version = "0.4.1"
+version = "0.4.2"
 edition = "2018"
 authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
 description = "Modern, fast POSIX compatible shell"
@@ -52,6 +52,7 @@ ctrlc = "3.1"
 #termios = "*"
 # Option 2: http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/
 termion = "1.5"
+rustyline = "*"
 
 retain_mut = "0.1"
 

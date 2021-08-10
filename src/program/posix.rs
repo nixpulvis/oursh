@@ -120,13 +120,14 @@ use std::{
     process::{self, Stdio},
     fs::File,
     os::unix::io::IntoRawFd,
-    env::set_var,
+    env::{var, set_var}
 };
 use lalrpop_util::ParseError;
 use nix::{
     sys::wait::WaitStatus,
     unistd::Pid,
 };
+use dirs::home_dir;
 use crate::{
     process::{ProcessGroup, Process, Jobs},
     program::{Result, Error, IO},
@@ -213,7 +214,7 @@ impl super::Run for Command {
         match *self {
             Command::Simple(ref assignments, ref words, ref redirects) => {
                 for Assignment(name, value) in assignments {
-                    set_var(name, value);
+                    set_var(name, expand_vars(value));
                 }
 
                 for r in redirects {
@@ -249,8 +250,12 @@ impl super::Run for Command {
                     };
                 }
 
-                let argv: Vec<CString> = words.iter().map(|w| {
-                    CString::new(&w.0 as &str)
+                // expand order: variables then home
+                // $ FOO=~
+                // $ echo $FOO
+                // /home/nixpulvis
+                let argv: Vec<CString> = words.iter().map(|word| {
+                    CString::new(&expand_home(&expand_vars(&word.0)) as &str)
                         .expect("error in word UTF-8")
                 }).collect();
 
@@ -259,6 +264,7 @@ impl super::Run for Command {
                         // TODO: IO for builtins.
                         ":"    => builtin::Null::run(argv, jobs),
                         "exit" => builtin::Exit::run(argv, jobs),
+                        "export" => builtin::Export::run(argv, jobs),
                         "cd"   => builtin::Cd::run(argv, jobs),
                         "jobs" => builtin::Jobs::run(argv, jobs),
                         _ => {
@@ -279,12 +285,14 @@ impl super::Run for Command {
                     Ok(WaitStatus::Exited(Pid::this(), 0))
                 }
             },
+            // { sleep 3; date; }&
+            // { sleep 3; date; }& ls
             Command::Compound(ref commands) => {
-                // TODO: Need a way to run a set of commands as one in the
-                // background. Kinda like a subshell.
+                // TODO: Need a way to run a set of commands as one in the background. Kinda like a
+                // subshell. For now we just run them both as background as needed.
                 let mut last = WaitStatus::Exited(Pid::this(), 0);
                 for command in commands.iter() {
-                    last = command.run(false, io, jobs)?;
+                    last = command.run(background, io, jobs)?;
                 }
                 Ok(last)
             },
@@ -418,6 +426,60 @@ impl super::Run for Command {
             },
         }
     }
+}
+fn expand_home(word: &str) -> String {
+    if word.starts_with("~") {
+        if let Some(path) = home_dir() {
+            format!("{}{}", &path.to_str().expect("error: home not set"),
+                            &word[1..])
+        } else {
+            "~".into()
+        }
+    } else {
+        word.into()
+    }
+
+}
+
+// "$" => "$"
+// "$ " => "$ "
+// "$USER" => "nixpulvis"
+fn expand_vars(string: &str) -> String {
+    let mut result = String::new();
+    let mut variable = String::new();
+    let mut variable_start = -1;
+    for (i, c) in string.char_indices() {
+        if c == '$' || c == ' ' {
+            // It's not possible for these to be vars.
+            if variable.is_empty() {
+                result.push(c);
+            } else {
+                result += &var(&variable).unwrap_or("".into());
+            }
+            variable.clear();
+            variable_start = -1;
+        }
+
+        if c == '$' {
+            variable_start = i as i32;
+        } else if c == ' ' {
+            variable_start = -1;
+        } else if c == '@' || c == ':' {
+            result += &var(&variable).unwrap_or("".into());
+            variable.clear();
+            variable_start = -1;
+            result.push(c);
+        } else if variable_start > -1 {
+            if variable.is_empty() {
+                result.pop();  // remove the leading '$'.
+            }
+            variable.push(c);
+        } else {
+            result.push(c);
+        }
+    }
+    result += &var(&variable).unwrap_or("".into());
+    result
 }
 
 // Builtin functions for the POSIX language, like `exit` and `cd`.
