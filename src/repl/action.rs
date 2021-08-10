@@ -25,7 +25,6 @@ pub struct ActionContext<'a> {
     pub io: &'a mut IO,
     pub jobs: &'a mut Jobs,
     pub args: &'a mut ArgvMap,
-    pub rl: &'a mut Editor<()>,
     pub prompt: &'a mut Prompt,
     // TODO: Remove this field.
     #[cfg(feature = "raw")]
