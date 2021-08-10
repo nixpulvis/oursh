@@ -16,7 +16,6 @@ use std::{
 };
 use nix::sys::wait::WaitStatus;
 use nix::unistd::{gethostname, Pid};
-use dirs::home_dir;
 use docopt::{Docopt, Value};
 use termion::is_tty;
 use rustyline::{
@@ -24,6 +23,7 @@ use rustyline::{
     error::ReadlineError,
 };
 use oursh::{
+    config::{source_profile, Runtime},
     program::{parse_and_run, Result, Error},
     process::{Jobs, IO},
 };
@@ -56,33 +56,25 @@ fn main() -> MainResult {
                       .unwrap_or_else(|e| e.exit());
 
     // Elementary job management.
-    let mut jobs: Jobs = Rc::new(RefCell::new(vec![]));
+    let jobs: Jobs = Rc::new(RefCell::new(vec![]));
 
     // Default inputs and outputs.
     let io = IO::default();
+
+    let mut runtime = Runtime { io, jobs, args, rl: None };
 
     // Run the profile before anything else.
     // TODO:
     // - ourshrc
     // - oursh_logout
     // - Others?
-    if !args.get_bool("--noprofile") {
-        if let Some(mut path) = home_dir() {
-            path.push(".oursh_profile");
-            if let Ok(mut file) = File::open(path) {
-                let mut contents = String::new();
-                if let Ok(_) = file.read_to_string(&mut contents) {
-                    if let Err(e) = parse_and_run(&contents, io, &mut jobs, &args, None) {
-                        eprintln!("failed to source profile: {:?}", e);
-                    }
-                }
-            }
-        }
+    if !runtime.args.get_bool("--noprofile") {
+        source_profile(&mut runtime);
     }
 
-    if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
-        MainResult(parse_and_run(c, io, &mut jobs, &args, None))
-    } else if let Some(Value::Plain(Some(ref filename))) = args.find("<file>") {
+    if let Some(Value::Plain(Some(ref c))) = runtime.args.find("<command_string>") {
+        MainResult(parse_and_run(c, io, &mut runtime.jobs, &runtime.args, None))
+    } else if let Some(Value::Plain(Some(ref filename))) = runtime.args.find("<file>") {
         let mut file = File::open(filename)
             .expect(&format!("error opening file: {}", filename));
 
@@ -92,7 +84,7 @@ fn main() -> MainResult {
             .expect("error reading file");
 
         // Run the program.
-        MainResult(parse_and_run(&text, io, &mut jobs, &args, None))
+        MainResult(parse_and_run(&text, io, &mut runtime.jobs, &runtime.args, None))
     } else {
         // Standard input file descriptor (0), used for user input from the
         // user of the shell.
@@ -126,7 +118,7 @@ fn main() -> MainResult {
                 let readline = rl.readline(&prompt);
                 match readline {
                     Ok(line) => {
-                        match parse_and_run(&line, io, &mut jobs, &args, Some(&mut rl)) {
+                        match parse_and_run(&line, io, &mut runtime.jobs, &runtime.args, Some(&mut rl)) {
                             Ok(status) => {
                                 match status {
                                     WaitStatus::Exited(_pid, _code) =>
@@ -166,7 +158,7 @@ fn main() -> MainResult {
             stdin.lock().read_to_string(&mut text).unwrap();
 
             // Run the program.
-            MainResult(parse_and_run(&text, io, &mut jobs, &args, None))
+            MainResult(parse_and_run(&text, io, &mut runtime.jobs, &runtime.args, None))
         }
     }
 }

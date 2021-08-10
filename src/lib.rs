@@ -190,8 +190,10 @@ macro_rules! debug {
     };
 }
 
+pub mod config;
 pub mod process;
 pub mod program;
+
 // pub mod repl;
 
 
