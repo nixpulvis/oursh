@@ -68,10 +68,8 @@ use nix::{
     unistd::Pid,
     sys::wait::WaitStatus,
 };
-use docopt::ArgvMap;
-use rustyline::Editor;
 use crate::{
-    process::{retain_alive_jobs, IO, Jobs},
+    process::retain_alive_jobs,
 };
 
 /// Convenience type for results with program errors.
@@ -93,7 +91,7 @@ pub enum Error {
 }
 
 pub trait Run {
-    fn run(&self, background: bool, io: IO, jobs: &mut Jobs) -> Result<WaitStatus>;
+    fn run(&self, runtime: &mut Runtime) -> Result<WaitStatus>;
 }
 
 /// A program is as large as a file or as small as a line.
@@ -119,10 +117,10 @@ pub trait Program: Sized + Debug + Run {
 }
 
 impl<P: Program> Run for P {
-    fn run(&self, background: bool, io: IO, jobs: &mut Jobs) -> Result<WaitStatus> {
+    fn run(&self, runtime: &mut Runtime) -> Result<WaitStatus> {
         let mut last = WaitStatus::Exited(Pid::this(), 0);
         for command in self.commands().iter() {
-            last = command.run(background, io, jobs)?;
+            last = command.run(runtime)?;
         }
         Ok(last)
     }
@@ -205,6 +203,9 @@ pub fn parse<P: Program, R: BufRead>(reader: R) -> Result<P> {
 // If reading this code were like sking, you'd now be hitting blues. ASTs and
 // language semantics are somewhat tricky subjects.
 
+pub mod runtime;
+pub use self::runtime::Runtime;
+
 pub mod basic;
 pub use self::basic::Program as BasicProgram;
 pub mod posix;
@@ -213,7 +214,7 @@ pub mod modern;
 pub use self::modern::Program as ModernProgram;
 
 // TODO: Replace program::Result
-pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvMap, rl: Option<&'a mut Editor<()>>)
+pub fn parse_and_run<'a>(text: &str, runtime: &mut Runtime)
     -> crate::program::Result<WaitStatus>
 {
     let result = if text.is_empty() {
@@ -228,17 +229,17 @@ pub fn parse_and_run<'a>(text: &str, io: IO, jobs: &'a mut Jobs, args: &'a ArgvM
             }
         };
 
-        if let Some(editor) = rl { editor.add_history_entry(text); }
+        if let Some(editor) = &mut runtime.rl { editor.add_history_entry(text); }
 
         // Print the program if the flag is given.
-        if args.get_bool("--ast") {
+        if runtime.args.get_bool("--ast") {
             eprintln!("{:#?}", program);
         }
 
         // Run it!
-        program.run(false, io, jobs)
+        program.run(runtime)
     };
 
-    retain_alive_jobs(jobs);
+    retain_alive_jobs(runtime.jobs);
     result
 }

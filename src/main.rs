@@ -23,8 +23,8 @@ use rustyline::{
     error::ReadlineError,
 };
 use oursh::{
-    config::{source_profile, Runtime},
-    program::{parse_and_run, Result, Error},
+    config::source_profile,
+    program::{parse_and_run, Runtime, Result, Error},
     process::{Jobs, IO},
 };
 
@@ -51,17 +51,22 @@ Options:
 //
 fn main() -> MainResult {
     // Parse argv and exit the program with an error message if it fails.
-    let args = Docopt::new(USAGE)
+    let mut args = Docopt::new(USAGE)
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
                       .unwrap_or_else(|e| e.exit());
 
     // Elementary job management.
-    let jobs: Jobs = Rc::new(RefCell::new(vec![]));
+    let mut jobs: Jobs = Rc::new(RefCell::new(vec![]));
 
     // Default inputs and outputs.
     let io = IO::default();
 
-    let mut runtime = Runtime { io, jobs, args, rl: None };
+    let mut runtime = Runtime { io,
+        jobs: &mut jobs,
+        args: &mut args,
+        background: false,
+        rl: None
+    };
 
     // Run the profile before anything else.
     // TODO:
@@ -72,8 +77,9 @@ fn main() -> MainResult {
         source_profile(&mut runtime);
     }
 
-    if let Some(Value::Plain(Some(ref c))) = runtime.args.find("<command_string>") {
-        MainResult(parse_and_run(c, io, &mut runtime.jobs, &runtime.args, None))
+    let args = runtime.args.clone();
+    if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
+        MainResult(parse_and_run(c, &mut runtime))
     } else if let Some(Value::Plain(Some(ref filename))) = runtime.args.find("<file>") {
         let mut file = File::open(filename)
             .expect(&format!("error opening file: {}", filename));
@@ -84,7 +90,7 @@ fn main() -> MainResult {
             .expect("error reading file");
 
         // Run the program.
-        MainResult(parse_and_run(&text, io, &mut runtime.jobs, &runtime.args, None))
+        MainResult(parse_and_run(&text, &mut runtime))
     } else {
         // Standard input file descriptor (0), used for user input from the
         // user of the shell.
@@ -105,7 +111,8 @@ fn main() -> MainResult {
             let history_path = home.join(".oursh_history");
 
             let mut rl = Editor::<()>::new();
-            if rl.load_history(&history_path).is_err() {
+            runtime.rl = Some(&mut rl);
+            if runtime.rl.as_mut().unwrap().load_history(&history_path).is_err() {
                 println!("No previous history.");
             }
 
@@ -115,16 +122,16 @@ fn main() -> MainResult {
             let code;
             loop {
                 let prompt = expand_prompt(env::var("PS1").unwrap_or("\\s-\\v\\$ ".into()));
-                let readline = rl.readline(&prompt);
+                let readline = runtime.rl.as_mut().unwrap().readline(&prompt);
                 match readline {
                     Ok(line) => {
-                        match parse_and_run(&line, io, &mut runtime.jobs, &runtime.args, Some(&mut rl)) {
+                        match parse_and_run(&line, &mut runtime) {
                             Ok(status) => {
                                 match status {
                                     WaitStatus::Exited(_pid, _code) =>
-                                        rl.save_history(&history_path).unwrap(),
+                                        runtime.rl.as_mut().unwrap().save_history(&history_path).unwrap(),
                                     WaitStatus::Signaled(_pid, _signal, _coredump) =>
-                                        rl.save_history(&history_path).unwrap(),
+                                        runtime.rl.as_mut().unwrap().save_history(&history_path).unwrap(),
                                     _ => {},
                                 }
                             }
@@ -150,7 +157,7 @@ fn main() -> MainResult {
                 }
             }
 
-            rl.save_history(&history_path).unwrap();
+            runtime.rl.unwrap().save_history(&history_path).unwrap();
             MainResult(Ok(WaitStatus::Exited(Pid::this(), code)))
         } else {
             // Fill a string buffer from STDIN.
@@ -158,7 +165,7 @@ fn main() -> MainResult {
             stdin.lock().read_to_string(&mut text).unwrap();
 
             // Run the program.
-            MainResult(parse_and_run(&text, io, &mut runtime.jobs, &runtime.args, None))
+            MainResult(parse_and_run(&text, &mut runtime))
         }
     }
 }

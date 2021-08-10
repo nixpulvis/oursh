@@ -5,8 +5,8 @@ use std::{
 };
 use nix::sys::wait::WaitStatus;
 use crate::{
-    process::{ProcessGroup, Process, Jobs},
-    program::{Result, Error, IO},
+    process::{ProcessGroup, Process},
+    program::{Runtime, Result, Error},
 };
 
 
@@ -46,17 +46,17 @@ pub struct Command(String);
 impl super::Command for Command {}
 
 impl super::Run for Command {
-    fn run(&self, background: bool, io: IO, jobs: &mut Jobs) -> Result<WaitStatus> {
+    fn run(&self, runtime: &mut Runtime) -> Result<WaitStatus> {
         let mut job = Process::new(self.0.split_whitespace().map(|a| {
             CString::new(a).expect("error reading argument")
         }).collect());
 
-        let status = if background {
-            let status = job.fork(io);
-            jobs.borrow_mut().push(("???".into(), ProcessGroup(job)));
+        let status = if runtime.background {
+            let status = job.fork(runtime.io);
+            runtime.jobs.borrow_mut().push(("???".into(), ProcessGroup(job)));
             status
         } else {
-            job.fork_and_wait(io)
+            job.fork_and_wait(runtime.io)
         };
         match status {
             Ok(WaitStatus::Exited(p, c)) if c == 0 => {

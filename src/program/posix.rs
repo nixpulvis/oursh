@@ -129,8 +129,8 @@ use nix::{
 };
 use dirs::home_dir;
 use crate::{
-    process::{ProcessGroup, Process, Jobs},
-    program::{Result, Error, IO},
+    process::{ProcessGroup, Process},
+    program::{Runtime, Result, Error},
 };
 use self::ast::{Assignment, Redirect};
 
@@ -209,7 +209,7 @@ impl super::Program for Program {
 impl super::Command for Command {}
 
 impl super::Run for Command {
-    fn run(&self, background: bool, mut io: IO, jobs: &mut Jobs) -> Result<WaitStatus> {
+    fn run(&self, runtime: &mut Runtime) -> Result<WaitStatus> {
         #[allow(unreachable_patterns)]
         match *self {
             Command::Simple(ref assignments, ref words, ref redirects) => {
@@ -226,7 +226,7 @@ impl super::Run for Command {
                                             .write(true)
                                             .open(filename).unwrap();
                             let fd = file.into_raw_fd();
-                            io.0[*n as usize] = fd;
+                            runtime.io.0[*n as usize] = fd;
                         },
                         Redirect::Read { n, filename, .. } => {
                             let file = File::with_options()
@@ -234,7 +234,7 @@ impl super::Run for Command {
                                             .write(false)
                                             .open(filename).unwrap();
                             let fd = file.into_raw_fd();
-                            io.0[*n as usize] = fd;
+                            runtime.io.0[*n as usize] = fd;
                         },
                         Redirect::Write { n, filename, append, .. } => {
                             // TODO: Clobber
@@ -245,7 +245,7 @@ impl super::Run for Command {
                                             .append(*append)
                                             .open(filename).unwrap();
                             let fd = file.into_raw_fd();
-                            io.0[*n as usize] = fd;
+                            runtime.io.0[*n as usize] = fd;
                         },
                     };
                 }
@@ -262,21 +262,21 @@ impl super::Run for Command {
                 if let Some(command) = argv.clone().first() {
                     match command.to_string_lossy().as_ref() {
                         // TODO: IO for builtins.
-                        ":"    => builtin::Null::run(argv, jobs),
-                        "exit" => builtin::Exit::run(argv, jobs),
-                        "export" => builtin::Export::run(argv, jobs),
-                        "cd"   => builtin::Cd::run(argv, jobs),
-                        "jobs" => builtin::Jobs::run(argv, jobs),
+                        ":"    => builtin::Null::run(argv, runtime.jobs),
+                        "exit" => builtin::Exit::run(argv, runtime.jobs),
+                        "export" => builtin::Export::run(argv, runtime.jobs),
+                        "cd"   => builtin::Cd::run(argv, runtime.jobs),
+                        "jobs" => builtin::Jobs::run(argv, runtime.jobs),
                         _ => {
-                            let id = (jobs.borrow().len() + 1).to_string();
+                            let id = (runtime.jobs.borrow().len() + 1).to_string();
                             let mut job = Process::new(argv);
-                            if background {
-                                let status = job.fork(io).map_err(|_| Error::Runtime);
+                            if runtime.background {
+                                let status = job.fork(runtime.io).map_err(|_| Error::Runtime);
                                 eprintln!("[{}]\t{}", id, job.pid());
-                                jobs.borrow_mut().push((id, ProcessGroup(job)));
+                                runtime.jobs.borrow_mut().push((id, ProcessGroup(job)));
                                 status
                             } else {
-                                job.fork_and_wait(io)
+                                job.fork_and_wait(runtime.io)
                                    .map_err(|_| Error::Runtime)
                             }
                         },
@@ -292,12 +292,12 @@ impl super::Run for Command {
                 // subshell. For now we just run them both as background as needed.
                 let mut last = WaitStatus::Exited(Pid::this(), 0);
                 for command in commands.iter() {
-                    last = command.run(background, io, jobs)?;
+                    last = command.run(runtime)?;
                 }
                 Ok(last)
             },
             Command::Not(ref command) => {
-                match command.run(false, io, jobs) {
+                match command.run(runtime) {
                     Ok(WaitStatus::Exited(p, c)) => {
                         Ok(WaitStatus::Exited(p, (c == 0) as i32))
                     }
@@ -306,18 +306,18 @@ impl super::Run for Command {
                 }
             },
             Command::And(ref left, ref right) => {
-                match left.run(false, io, jobs) {
+                match left.run(runtime) {
                     Ok(WaitStatus::Exited(_, c)) if c == 0 => {
-                        right.run(false, io, jobs).map_err(|_| Error::Runtime)
+                        right.run(runtime).map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
                     Err(_) => Err(Error::Runtime),
                 }
             },
             Command::Or(ref left, ref right) => {
-                match left.run(false, io, jobs) {
+                match left.run(runtime) {
                     Ok(WaitStatus::Exited(_, c)) if c != 0 => {
-                        right.run(false, io, jobs).map_err(|_| Error::Runtime)
+                        right.run(runtime).map_err(|_| Error::Runtime)
                     },
                     Ok(s) => Ok(s),
                     Err(_) => Err(Error::Runtime),
@@ -325,7 +325,7 @@ impl super::Run for Command {
             },
             Command::Subshell(ref program) => {
                 // TODO #4: Run in a *subshell* ffs.
-                program.run(false, io, jobs)
+                program.run(runtime)
             },
             Command::Pipeline(ref left, ref right) => {
                 // TODO: This is obviously a temporary hack.
@@ -360,7 +360,8 @@ impl super::Run for Command {
                 Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             Command::Background(ref command) => {
-                command.run(true, io, jobs)
+                runtime.background = true;
+                command.run(runtime)
             },
             #[cfg(feature = "shebang-block")]
             Command::Lang(ref interpreter, ref text) => {
