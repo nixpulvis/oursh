@@ -250,9 +250,9 @@ impl super::Run for Command {
                     };
                 }
 
-                // resolve: home and variables
-                // sh-5.1$ FOO=~
-                // sh-5.1$ echo $FOO
+                // expand order: variables then home
+                // $ FOO=~
+                // $ echo $FOO
                 // /home/nixpulvis
                 let argv: Vec<CString> = words.iter().map(|word| {
                     CString::new(&expand_home(&expand_vars(&word.0)) as &str)

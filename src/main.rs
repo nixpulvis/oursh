@@ -28,6 +28,9 @@ use oursh::{
     process::{Jobs, IO},
 };
 
+pub const NAME: &'static str = "oursh";
+pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
 // Write the Docopt usage string.
 const USAGE: &'static str = "
 Usage:
@@ -120,7 +123,7 @@ fn main() -> MainResult {
 
             let code;
             loop {
-                let prompt = expand_prompt(env::var("PS1").unwrap_or(sh_style_prompt()));
+                let prompt = expand_prompt(env::var("PS1").unwrap_or("\\s-\\v\\$ ".into()));
                 let readline = rl.readline(&prompt);
                 match readline {
                     Ok(line) => {
@@ -170,6 +173,8 @@ fn expand_prompt(prompt: String) -> String {
                 }
                 'u' => var("USER").unwrap_or("".into()),
                 'w' => var("PWD").unwrap_or("".into()),
+                's' => NAME.into(),
+                'v' => VERSION[0..(VERSION.len() - 2)].into(),
                 '\\' => "".into(),
                 c => c.into(),
             };
@@ -195,14 +200,4 @@ impl Termination for MainResult {
             _ => unreachable!(),
         }
     }
-}
-
-pub fn sh_style_prompt() -> String {
-    const NAME: &'static str = "oursh";
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-    let version = &VERSION[0..(VERSION.len() - 2)];
-    // TODO: Add a flag for pretending to be `sh`.
-    // let name = "sh";
-    // let version = "4.4";
-    format!("{}-{}$ ", NAME, version)
 }
