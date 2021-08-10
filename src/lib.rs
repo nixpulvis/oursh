@@ -15,19 +15,66 @@
 //!
 //! ## Features
 //!
-//! - POSIX compatibility
-//! - Shebang block programs
-//! - bash/zsh autocomplete compatibility
-//! - `man` / `-h` / `--help` parsing
-//! - Multi-line input
-//! - Modern scripting language
-//! - Obfuscated strings (`!'password'!`)
-//! - mosh like remote session support
-//! - Smart history, sync'd across devices
-//! - Pipe old commands without rerunning
-//! - Package manager
-//! -  Sane defaults
+//! - [ ] POSIX compatibility
+//!     - [x] Simple commands `ls`
+//!     - [ ] Quotes `echo "foo"; echo 'bar'`
+//!     - [x] Assignment `LOG=trace cargo run`
+//!     - [ ] Variables `echo $foo`
+//!     - [ ] Special variables `echo $?; echo $1`
+//!     - [x] Boolean status syntax `! true && false || true`
+//!     - [x] Conditionals `if ; then ; elif ; then ; else ; fi`
+//!     - [ ] Compound commands `{ ls; date; }`
+//!     - [ ] Subshells `(sleep 1; date)`
+//!     - [x] Background jobs `{ sleep 1; date; }& date`
+//!     - [x] Redirection `date > now.txt`
+//!     - [ ] Pipes `ls | wc -l`
+//! - [ ] Shebang block programs
+//!     - [ ] Alternate syntax `{# ...}`
+//!     - [ ] Hashlang syntax `{#lang; ...}`, i.e. `{#posix ls}`
+//!     - [x] Shebang syntax `{#!/usr/bin/env ruby; puts :sym}`
+//! - [ ] bash/zsh autocomplete compatibility
+//!     - [x] Command completion
+//!     - [ ] Path completion
+//!     - [ ] Variable completion
+//!     - [ ] Job completion
+//!     - [ ] Syntax completion
+//!     - [ ] `man` / `-h` / `--help` parsing
+//! - [ ] Multi-line input
+//! - [ ] Modern scripting language
+//!     - [ ] Macros
+//!     - [ ] Types
+//!     - [ ] Higher-order functions
+//!     - [ ] Threading?
+//! - [ ] Obfuscated strings (`!'password'!`)
+//! - [ ] mosh like remote session support
+//! - [ ] Smart history, sync'd across devices
+//! - [ ] Pipe old commands without rerunning
+//! - [ ] Package manager
+//! - Sane defaults
 //! - Fast
+//!
+//!
+//! ## Usage
+//!
+//! While this project is in early stages, there are no OS packages to use.
+//! However, you can compile and run directly from source easily. Just ensure you
+//! have [`rustup`][rustup] installed.
+//!
+//! ```sh
+//! cargo build
+//! cargo run
+//! ```
+//!
+//!
+//! ## Testing
+//!
+//! We have four kinds of tests in this program. Crate unit tests, Executable unit
+//! tests, subprocess based integration tests, and documentation tests.
+//!
+//! ```sh
+//! # Run all tests.
+//! cargo test
+//! ```
 //!
 //! ## Previous Work
 //!
@@ -66,6 +113,32 @@
 //! - 2§2.3 Error Numbers
 //! - 1§11 General Terminal Interface
 //! - 2§2.4 Signal Concepts
+//!
+//!
+//! ## Implementation
+//!
+//! This shell will be written in Rust with minimal dependencies. Notably
+//! [termios][termios] and [libc][libc] will likely be used. The parsing library
+//! will be [lalrpop][lalrpop], which should support the syntax we want somewhat
+//! easily, though grammar's in general can be a tricky beast.
+//!
+//! We will want to create a few internal modules for the shell.
+//!
+//! **This design is subject to change.**
+//!
+//! - `process` - sub-process execution management.
+//! - `program` - parser and interpreter for the syntax of the shell.
+//!     - `posix` - POSIX (`sh`-like) syntax.
+//!     - `modern` - Modified syntax for supporting "modern" features, like lambdas.
+//! - `repl` - syntax aware, read eval print loop for an underlying terminal.
+//!     - `history` - records previous execution to a shared DB.
+//!     - `completion` - searches for autocompletions based on partial syntax.
+//!         - `bash` - bash completion support.
+//!         - `zsh` - zsh completion support.
+//!         - `parse` - dynamic completion generation, from `man` for example.
+//!     - `sync` - remote session and DB synchronization.
+//! - `config` - loading for `.ourshrc` and others.
+//! - `package` - simplistic package manager support (builtin function).
 //!
 //!
 //! [documentation]: https://nixpulvis.com/oursh/oursh

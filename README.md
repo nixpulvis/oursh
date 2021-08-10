@@ -125,7 +125,7 @@ We will want to create a few internal modules for the shell.
 
 **This design is subject to change.**
 
-- `job` - sub-process execution management.
+- `process` - sub-process execution management.
 - `program` - parser and interpreter for the syntax of the shell.
     - `posix` - POSIX (`sh`-like) syntax.
     - `modern` - Modified syntax for supporting "modern" features, like lambdas.
