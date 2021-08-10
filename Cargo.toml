@@ -20,7 +20,7 @@ maintenance = { status = "experimental" }
 travis-ci = { repository = "https://github.com/nixpulvis/oursh" }
 
 [features]
-default = ["shebang-block", "raw", "history", "completion"]
+default = ["shebang-block"]
 
 # TODO: Justify and explain features.
 
@@ -29,17 +29,17 @@ default = ["shebang-block", "raw", "history", "completion"]
 # from a proper POSIX implementation at all.
 shebang-block = []
 
-# Raw terminal mode for better control of the IO interactions. This allows
-# things like arrow keys for history, and cursor editing.
-raw = []
+# # Raw terminal mode for better control of the IO interactions. This allows
+# # things like arrow keys for history, and cursor editing.
+# raw = []
 
-# Save the history of commands (entered) for quick recall.
-# TODO: Stop depending on raw if this ever interacts with anything beside the
-# RELP input.
-history = ["raw"]
+# # Save the history of commands (entered) for quick recall.
+# # TODO: Stop depending on raw if this ever interacts with anything beside the
+# # RELP input.
+# history = ["raw"]
 
-# REPL tab completion.
-completion = ["raw"]
+# # REPL tab completion.
+# completion = ["raw"]
 
 [dependencies]
 docopt = "1.1"
