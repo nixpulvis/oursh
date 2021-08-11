@@ -33,17 +33,41 @@ pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 // Write the Docopt usage string.
 const USAGE: &'static str = "
+The oursh utility is a command language interpreter that shall execute commands
+read from a command line string, the standard input, or a specified file.
+
 Usage:
-    oursh    [options] [<file> [<arguments>...]]
-    oursh -c [options] <command_string> [<command_name> [<arguments>...]]
+    oursh    [options] [<command_file> [<arguments>...]]
     oursh -s [options] [<arguments>...]
+    oursh -c [options] <command_string> [<command_name> [<arguments>...]]
+
+By default our will read commands from the command_file operand. If there are no
+operands and the -c option is not specified, the -s option shall be assumed.
 
 Options:
+    -c              Read commands from the command_string operand.
+    -s              Read commands from the standard input.
+    -i              Specify that the shell is interactive.
+    --login         Act as if invoked as a login shell.
     -h --help       Show this screen.
     -v --verbose    Print extra information.
     -a --ast        Print program ASTs.
     -# --alternate  Use alternate program syntax.
+    --posix         Run using the (strict) POSIX language by default.
+    --init-file     Override the default profile.
+    --rcfile        and RC file locations for startup.
     --noprofile     Don't load and profile code on launch.
+    --norc
+
+    --debug
+    --debugger
+    --dump-po-strings
+    --dump-strings
+    --noediting
+    --restricted
+    --version
+
+TODO: Read set [-abCefhmnuvx] [-o option] for a complete list of arguments.
 ";
 
 // Our shell, for the greater good. Ready and waiting.
@@ -51,6 +75,10 @@ Options:
 //
 fn main() -> MainResult {
     // Parse argv and exit the program with an error message if it fails.
+    //
+    // TODO: From sh docs:
+    //     "with an extension for support of a
+    //      leading  <plus-sign> ('+') as noted below."
     let mut args = Docopt::new(USAGE)
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
                       .unwrap_or_else(|e| e.exit());
