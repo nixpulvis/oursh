@@ -1,4 +1,4 @@
-#![feature(termination_trait_lib)]
+#![feature(exclusive_range_pattern, termination_trait_lib)]
 
 extern crate docopt;
 extern crate nix;
@@ -109,9 +109,8 @@ fn main() -> MainResult {
             // // to the user of the shell.
             // let stdout = io::stdout();
 
-
-            let home = env::var("HOME").expect("HOME variable not set.");
-            let history_path = format!("{}/.oursh_history", home);
+            let home = home_dir().expect("HOME variable not set.");
+            let history_path = home.join(".oursh_history");
 
             let mut rl = Editor::<()>::new();
             if rl.load_history(&history_path).is_err() {
@@ -175,7 +174,25 @@ fn main() -> MainResult {
 fn expand_prompt(prompt: String) -> String {
     let mut result = String::new();
     let mut command = false;
+    let mut octal = vec![];
     for c in prompt.chars() {
+        let o = octal.iter().map(|c: &char| c.to_string())
+                     .collect::<Vec<_>>()
+                     .join("");
+        if !octal.is_empty() && octal.len() < 3 {
+            if ('0'..'8').contains(&c) {
+                octal.push(c);
+            } else {
+                result += &o;
+                octal.clear();
+            }
+        } else if octal.len() == 3 {
+            if let Ok(n) = u8::from_str_radix(&o, 8) {
+                result.push(n as char);
+            }
+            octal.clear();
+        }
+
         if command {
             // TODO: https://ss64.com/bash/syntax-prompt.html
             result += &match c {
@@ -184,16 +201,19 @@ fn expand_prompt(prompt: String) -> String {
                     let cstr = gethostname(&mut buf).expect("error getting hostname");
                     cstr.to_str().expect("error invalid UTF-8").into()
                 }
+                'e' => (0x1b as char).into(),
                 'u' => var("USER").unwrap_or("".into()),
                 'w' => var("PWD").unwrap_or("".into()),
                 's' => NAME.into(),
                 'v' => VERSION[0..(VERSION.len() - 2)].into(),
+                '0' => { octal.push(c); "".into() },
                 '\\' => "".into(),
                 c => c.into(),
             };
+            command = false;
         } else if c == '\\' {
             command = true;
-        } else {
+        } else if octal.is_empty() {
             result.push(c);
         }
     }
@@ -207,10 +227,10 @@ impl Termination for MainResult {
         match self.0 {
             Ok(WaitStatus::Exited(_pid, exit_code)) => exit_code,
             Ok(WaitStatus::Signaled(_pid, _signal, _coredump)) => 128,
+            Ok(w) => 0,  // TODO: Is this even remotely correct?
             Err(Error::Read) => 1,
             Err(Error::Parse) => 2,
             Err(Error::Runtime) => 127,
-            _ => unreachable!(),
         }
     }
 }
