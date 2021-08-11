@@ -262,12 +262,14 @@ impl super::Run for Command {
                 if let Some(command) = argv.clone().first() {
                     match command.to_string_lossy().as_ref() {
                         // TODO: IO for builtins.
-                        ":"       => builtin::Null::run(argv, runtime),
-                        "cd"      => builtin::Cd::run(argv, runtime),
-                        "command" => builtin::Command::run(argv, runtime),
-                        "exit"    => builtin::Exit::run(argv, runtime),
-                        "export"  => builtin::Export::run(argv, runtime),
-                        "jobs"    => builtin::Jobs::run(argv, runtime),
+                        ":"       => builtin::Return(0).run(argv, runtime),
+                        "cd"      => builtin::Cd.run(argv, runtime),
+                        "command" => builtin::Command.run(argv, runtime),
+                        "exit"    => builtin::Exit.run(argv, runtime),
+                        "export"  => builtin::Export.run(argv, runtime),
+                        "false"   => builtin::Return(1).run(argv, runtime),
+                        "jobs"    => builtin::Jobs.run(argv, runtime),
+                        "true"    => builtin::Return(0).run(argv, runtime),
                         _ => {
                             let id = (runtime.jobs.borrow().len() + 1).to_string();
                             let mut job = Process::new(argv);

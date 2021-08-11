@@ -21,14 +21,14 @@ use crate::{
 pub trait Builtin {
     /// Execute the shell builtin command, returning a retult of the
     /// completion.
-    fn run(argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus>;
+    fn run(self, argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus>;
 }
 
 /// Exit builtin, alternative to ctrl-d.
 pub struct Exit;
 
 impl Builtin for Exit {
-    fn run(argv: Vec<CString>, _: &mut Runtime) -> Result<WaitStatus> {
+    fn run(self, argv: Vec<CString>, _: &mut Runtime) -> Result<WaitStatus> {
         match argv.len() {
             0 => {
                 panic!("command name not passed in argv[0]");
@@ -55,7 +55,7 @@ impl Builtin for Exit {
 pub struct Export;
 
 impl Builtin for Export {
-    fn run(argv: Vec<CString>, _: &mut Runtime) -> Result<WaitStatus> {
+    fn run(self, argv: Vec<CString>, _: &mut Runtime) -> Result<WaitStatus> {
         match argv.len() {
             0 => unreachable!(),
             1 => {
@@ -79,7 +79,7 @@ impl Builtin for Export {
 pub struct Cd;
 
 impl Builtin for Cd {
-    fn run(argv: Vec<CString>, _: &mut Runtime) -> Result<WaitStatus> {
+    fn run(self, argv: Vec<CString>, _: &mut Runtime) -> Result<WaitStatus> {
         match argv.len() {
             0 => {
                 panic!("command name not passed in argv[0]");
@@ -112,11 +112,20 @@ impl Builtin for Cd {
     }
 }
 
+/// Noop builtin, same idea as `true`.
+pub struct Return(pub i32);
+
+impl Builtin for Return {
+    fn run(self, _: Vec<CString>, _: &mut Runtime) -> Result<WaitStatus> {
+        Ok(WaitStatus::Exited(Pid::this(), self.0))
+    }
+}
+
 /// Command builtin, I have no idea why you'd want this honestly.
 pub struct Command;
 
 impl Builtin for Command {
-    fn run(argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
+    fn run(self, argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
         let text = argv[1..].into_iter().map(|c| {
             c.to_str().unwrap()
         }).collect::<Vec<_>>().join(" ");
@@ -124,20 +133,11 @@ impl Builtin for Command {
     }
 }
 
-/// Noop builtin, same idea as `true`.
-pub struct Null;
-
-impl Builtin for Null {
-    fn run(_: Vec<CString>, _: &mut Runtime) -> Result<WaitStatus> {
-        Ok(WaitStatus::Exited(Pid::this(), 0))
-    }
-}
-
 /// Background job information.
 pub struct Jobs;
 
 impl Builtin for Jobs {
-    fn run(_: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
+    fn run(self, _: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
         for (id, job) in runtime.jobs.borrow().iter() {
             println!("[{}]\t{}\t\t{}",
                      id, job.leader().pid(), job.leader().body());
