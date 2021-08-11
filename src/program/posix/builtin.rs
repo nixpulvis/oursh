@@ -28,7 +28,11 @@ pub trait Builtin {
 pub struct Exit;
 
 impl Builtin for Exit {
-    fn run(self, argv: Vec<CString>, _: &mut Runtime) -> Result<WaitStatus> {
+    fn run(self, argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
+        if argv.len() == 1 || argv.len() == 2 {
+            runtime.rl.as_mut().unwrap().save_history(&runtime.history_path).unwrap();
+        }
+
         match argv.len() {
             0 => {
                 panic!("command name not passed in argv[0]");

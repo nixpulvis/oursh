@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use rustyline::Editor;
 use docopt::ArgvMap;
 use crate::process::{Jobs, IO};
@@ -9,4 +10,5 @@ pub struct Runtime<'a> {
     pub jobs: &'a mut Jobs,
     pub args: &'a mut ArgvMap,
     pub rl: Option<&'a mut Editor<()>>,
+    pub history_path: PathBuf,
 }

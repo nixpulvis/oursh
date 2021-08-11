@@ -89,11 +89,14 @@ fn main() -> MainResult {
     // Default inputs and outputs.
     let io = IO::default();
 
+    let home = dirs::home_dir().expect("HOME variable not set.");
+
     let mut runtime = Runtime { io,
         jobs: &mut jobs,
         args: &mut args,
         background: false,
-        rl: None
+        rl: None,
+        history_path: home.join(".oursh_history"),
     };
 
     // Run the profile before anything else.
@@ -135,12 +138,9 @@ fn main() -> MainResult {
             // // to the user of the shell.
             // let stdout = io::stdout();
 
-            let home = dirs::home_dir().expect("HOME variable not set.");
-            let history_path = home.join(".oursh_history");
-
             let mut rl = Editor::<()>::new();
             runtime.rl = Some(&mut rl);
-            if runtime.rl.as_mut().unwrap().load_history(&history_path).is_err() {
+            if runtime.rl.as_mut().unwrap().load_history(&runtime.history_path).is_err() {
                 println!("No previous history.");
             }
 
@@ -157,9 +157,9 @@ fn main() -> MainResult {
                             Ok(status) => {
                                 match status {
                                     WaitStatus::Exited(_pid, _code) =>
-                                        runtime.rl.as_mut().unwrap().save_history(&history_path).unwrap(),
+                                        runtime.rl.as_mut().unwrap().save_history(&runtime.history_path).unwrap(),
                                     WaitStatus::Signaled(_pid, _signal, _coredump) =>
-                                        runtime.rl.as_mut().unwrap().save_history(&history_path).unwrap(),
+                                        runtime.rl.as_mut().unwrap().save_history(&runtime.history_path).unwrap(),
                                     _ => {},
                                 }
                             }
@@ -185,7 +185,7 @@ fn main() -> MainResult {
                 }
             }
 
-            runtime.rl.unwrap().save_history(&history_path).unwrap();
+            runtime.rl.unwrap().save_history(&runtime.history_path).unwrap();
             MainResult(Ok(WaitStatus::Exited(Pid::this(), code)))
         } else {
             // Fill a string buffer from STDIN.
