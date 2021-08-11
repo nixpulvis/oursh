@@ -107,7 +107,7 @@ fn main() -> MainResult {
             // // to the user of the shell.
             // let stdout = io::stdout();
 
-            let home = home_dir().expect("HOME variable not set.");
+            let home = dirs::home_dir().expect("HOME variable not set.");
             let history_path = home.join(".oursh_history");
 
             let mut rl = Editor::<()>::new();
@@ -226,7 +226,7 @@ impl Termination for MainResult {
         match self.0 {
             Ok(WaitStatus::Exited(_pid, exit_code)) => exit_code,
             Ok(WaitStatus::Signaled(_pid, _signal, _coredump)) => 128,
-            Ok(w) => 0,  // TODO: Is this even remotely correct?
+            Ok(_) => 0,  // TODO: Is this even remotely correct?
             Err(Error::Read) => 1,
             Err(Error::Parse) => 2,
             Err(Error::Runtime) => 127,
