@@ -56,6 +56,7 @@ fn single_compound_command() {
 #[test]
 fn multiple_compound_command() {
     assert_oursh!("{ echo pi; echo e; }", "pi\ne\n");
+    assert_oursh!("{ FOO=1; }; echo $FOO", "1\n");
 }
 
 #[test]
