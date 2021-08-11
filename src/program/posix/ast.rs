@@ -106,7 +106,16 @@ pub enum Command {
 // TODO #8: This needs to handle escapes and all kinds of fun. We first
 //       need to decide on our custom Tokens and lexer.
 #[derive(Debug, Clone)]
-pub struct Word(pub String);
+pub enum Word {
+    Bare(String),
+    Quote(String, i8),
+    Variable(String),
+}
+// BARE WORDS
+// 'single quote'
+// "double!"
+// $FOO
+// "this var $foo is expanded, while 'this nested single quote $bar' is not"
 
 #[derive(Debug, Clone)]
 pub enum Redirect {

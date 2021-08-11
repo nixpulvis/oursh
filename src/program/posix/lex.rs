@@ -64,6 +64,7 @@ pub enum Token<'input> {
     Until,
     For,
     Word(&'input str),
+    Quote(&'input str, u8),
     IoNumber(usize),
     HashLang(&'input str),
     Shebang(&'input str),
@@ -136,8 +137,8 @@ impl<'input> Iterator for Lexer<'input> {
                 '!'  => Some(Ok((s, Token::Bang, e))),
                 '='  => Some(Ok((s, Token::Equals, e))),
                 '\\' => Some(Ok((s, Token::Backslash, e))),
-                '\'' => Some(self.single_quote(s, e)),
-                '"'  => Some(self.double_quote(s, e)),
+                '\'' => Some(self.quote(s, c, e, 1)),
+                '"'  => Some(self.quote(s, c, e, 2)),
                 '>'  => {
                     match self.lookahead {
                         Some((_, '>', e)) => {
@@ -247,24 +248,13 @@ impl<'input> Lexer<'input> {
         self.take_until(start, end, |c| !keep_going(c))
     }
 
-    fn single_quote(&mut self, start: usize, end: usize)
+    fn quote(&mut self, start: usize, c: char, end: usize, level: u8)
         -> Result<(usize, Token<'input>, usize), Error>
     {
         // TODO: This quitely stops at EOF.
-        let (_, end) = self.take_while(start, end, |c| c != '\'');
-        self.advance();  // Consume the ending single quote.
-        Ok((start, Token::Word(&self.input[start+1..end]), end))
-    }
-
-    // TODO: Escapes
-    // TODO: Honestly, I think this needs to be handled in the .lalrpop file.
-    fn double_quote(&mut self, start: usize, end: usize)
-        -> Result<(usize, Token<'input>, usize), Error>
-    {
-        // TODO: This quitely stops at EOF.
-        let (input, end) = self.take_while(start, end, |c| c != '"');
-        self.advance();  // Consume the ending double quote.
-        Ok((start, Token::Word(&input[1..]), end))
+        let (input, end) = self.take_while(start, end, |d| d != c);
+        self.advance();  // Consume the ending quote.
+        Ok((start, Token::Quote(&input[1..(end-start)], level), end))
     }
 
     fn word(&mut self, start: usize, end: usize)
