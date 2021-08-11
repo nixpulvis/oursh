@@ -111,7 +111,7 @@ fn main() -> MainResult {
     let args = runtime.args.clone();
     if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
         MainResult(parse_and_run(c, &mut runtime))
-    } else if let Some(Value::Plain(Some(ref filename))) = runtime.args.find("<file>") {
+    } else if let Some(Value::Plain(Some(ref filename))) = runtime.args.find("<command_file>") {
         let mut file = File::open(filename)
             .expect(&format!("error opening file: {}", filename));
 
