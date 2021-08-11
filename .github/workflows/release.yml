@@ -16,6 +16,10 @@ jobs:
         with:
           command: build
           args: --release
+      - uses: actions/upload-artifact@v2
+        with:
+          name: oursh
+          path: target/release/oursh
 
   bench:
     runs-on: ubuntu-latest
@@ -43,7 +47,4 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: doc
-      # - uses: actions/upload-artifact@v2
-      #   with:
-      #     name: oursh docs
-      #     path: target/doc/
+      # https://github.com/marketplace/actions/github-pages
