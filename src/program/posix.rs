@@ -399,30 +399,29 @@ impl super::Run for Command {
                     process::Command::new(&bridgefile).spawn()?.wait()
                 }
                 // TODO: Pass text off to another parser.
-                match interpreter {
+                let interpreter = match interpreter {
                     Interpreter::Primary => {
                         unimplemented!()
                     }
                     Interpreter::Alternate => {
-                        bridge("/bin/sh", text).map_err(|_| Error::Read)?;
-                        Ok(WaitStatus::Exited(Pid::this(), 0))
+                        "/bin/sh"
                     },
                     Interpreter::HashLang(ref language) => {
-                        let interpreter = match language.as_str() {
+                        match language.as_str() {
                             "ruby"   => "/usr/bin/env ruby",
                             "node"   => "/usr/bin/env node",
                             "python" => "/usr/bin/env python",
                             "racket" => "/usr/bin/env racket",
                             _        => return Err(Error::Read),
-                        };
-                        bridge(interpreter, text).map_err(|_| Error::Read)?;
-                        Ok(WaitStatus::Exited(Pid::this(), 0))
+                        }
                     },
                     Interpreter::Shebang(ref interpreter) => {
-                        bridge(interpreter, text).map_err(|_| Error::Read)?;
-                        Ok(WaitStatus::Exited(Pid::this(), 0))
+                        interpreter
                     },
-                }
+                };
+
+                bridge(interpreter, text).map_err(|_| Error::Read)?;
+                Ok(WaitStatus::Exited(Pid::this(), 0))
             },
             #[cfg(not(feature = "shebang-block"))]
             Command::Lang(_,_) => {
