@@ -258,7 +258,7 @@ impl super::Run for Command {
 
                 if let Some(command) = argv.clone().first() {
                     match command.to_string_lossy().as_ref() {
-                        // TODO: IO for builtins.
+                        "."       => builtin::Dot.run(argv, runtime),
                         ":"       => builtin::Return(0).run(argv, runtime),
                         "cd"      => builtin::Cd.run(argv, runtime),
                         "command" => builtin::Command.run(argv, runtime),
