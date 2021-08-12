@@ -53,6 +53,12 @@ programs, the language this will be written in.
 - Sane defaults
 - Fast
 
+## Releases, Tags, and Branches
+
+The `master` branch will run both the [`release`][action-release] and
+[`ci`][action-ci] actions, whereas `develop` only runs `ci`. All pull requests
+into `master` and release tagged (i.e. vX.Y.Z) pushes also trigger `release`
+builds.
 
 ## Usage
 
@@ -162,6 +168,8 @@ _Current modules as of: 2018-10-14_
 
 
 [documentation]: https://nixpulvis.com/oursh/oursh
+[action-release]: https://github.com/nixpulvis/oursh/blob/master/.github/workflows/release.yml
+[action-ci]: https://github.com/nixpulvis/oursh/blob/master/.github/workflows/ci.yml
 [rustup]: https://github.com/rust-lang-nursery/rustup.rs
 [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
 [termios]: https://crates.io/crates/termios
@@ -174,3 +182,4 @@ _Current modules as of: 2018-10-14_
 [shell.py]: /doc/shell.py
 [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
 [basp2]: https://nixpulvis.com/ramblings/2018-10-15-building-a-shell-part-2
+
