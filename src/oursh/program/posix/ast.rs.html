@@ -312,17 +312,13 @@
 <span id="312">312</span>
 <span id="313">313</span>
 <span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Abstract Syntax Tree for the POSIX language.</span>
 <span class="kw">use</span> <span class="ident">std::os::unix::io::RawFd</span>;
 
 <span class="doccomment">/// A program is the result of parsing a sequence of commands.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Program</span>(<span class="kw">pub</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span><span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Program</span>(<span class="kw">pub</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>);
 
 <span class="doccomment">/// A command is a *highly* mutually-recursive node with the main features</span>
 <span class="doccomment">/// of the POSIX language.</span>
@@ -342,7 +338,7 @@
     <span class="doccomment">/// ```sh</span>
     <span class="doccomment">/// { ls ; }</span>
     <span class="doccomment">/// ```</span>
-    <span class="ident">Compound</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+    <span class="ident">Compound</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>),
 
     <span class="doccomment">/// Performs boolean negation to the status code of the inner</span>
     <span class="doccomment">/// command.</span>
@@ -480,11 +476,9 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">command</span>: <span class="kw-2">&amp;</span><span class="ident">Command</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident">Command::Compound</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">c</span>.<span class="ident">push</span>(<span class="kw">box</span> <span class="ident">command</span>.<span class="ident">clone</span>());
+                <span class="ident">c</span>.<span class="ident">push</span>(<span class="ident">command</span>.<span class="ident">clone</span>());
             },
-            <span class="ident">c</span> @ <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">return</span> <span class="ident">Command::Compound</span>(<span class="macro">vec!</span>[<span class="kw">box</span> <span class="ident">c</span>, <span class="kw">box</span> <span class="ident">command</span>.<span class="ident">clone</span>()]);
-            },
+            <span class="ident">c</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Command::Compound</span>(<span class="macro">vec!</span>[<span class="ident">c</span>, <span class="ident">command</span>.<span class="ident">clone</span>()]),
         }
 
         <span class="self">self</span>
@@ -493,11 +487,9 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">insert</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">command</span>: <span class="kw-2">&amp;</span><span class="ident">Command</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident">Command::Compound</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">c</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="kw">box</span> <span class="ident">command</span>.<span class="ident">clone</span>());
+                <span class="ident">c</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">command</span>.<span class="ident">clone</span>());
             },
-            <span class="ident">c</span> @ <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">return</span> <span class="ident">Command::Compound</span>(<span class="macro">vec!</span>[<span class="kw">box</span> <span class="ident">command</span>.<span class="ident">clone</span>(), <span class="kw">box</span> <span class="ident">c</span>]);
-            },
+            <span class="ident">c</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Command::Compound</span>(<span class="macro">vec!</span>[<span class="ident">command</span>.<span class="ident">clone</span>(), <span class="ident">c</span>]),
         }
 
         <span class="self">self</span>
@@ -523,12 +515,12 @@
 
 <span class="kw">impl</span> <span class="ident">Program</span> {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">insert</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">command</span>: <span class="kw-2">&amp;</span><span class="ident">Command</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="kw">box</span> <span class="ident">command</span>.<span class="ident">clone</span>());
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">command</span>.<span class="ident">clone</span>());
         <span class="self">self</span>
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">append</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">program</span>: <span class="kw-2">&amp;</span><span class="ident">Program</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">program</span>.<span class="number">0</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>().<span class="ident">collect</span>());
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">program</span>.<span class="number">0</span>.<span class="ident">to_vec</span>());
         <span class="self">self</span>
     }
 }

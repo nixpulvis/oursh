@@ -355,7 +355,7 @@
     <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Return a list of all the commands in this program.</span>
-    <span class="kw">fn</span> <span class="ident">commands</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">Box</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Command</span><span class="op">&gt;</span>];
+    <span class="kw">fn</span> <span class="ident">commands</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident"><span class="self">Self</span>::Command</span>];
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Program</span><span class="op">&gt;</span> <span class="ident">Run</span> <span class="kw">for</span> <span class="ident">P</span> {
@@ -452,7 +452,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::modern::Program</span> <span class="kw">as</span> <span class="ident">ModernProgram</span>;
 
 <span class="comment">// TODO: Replace program::Result</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_and_run</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">text</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">runtime</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Runtime</span>)
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_and_run</span>(<span class="ident">text</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">runtime</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Runtime</span>)
     <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="kw">crate</span>::program::Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span>
 {
     <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">text</span>.<span class="ident">is_empty</span>() {

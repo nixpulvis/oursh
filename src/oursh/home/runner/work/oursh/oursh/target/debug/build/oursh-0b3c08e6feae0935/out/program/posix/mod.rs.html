@@ -5763,7 +5763,7 @@
 <span id="5763">5763</span>
 </pre><pre class="rust">
 <span class="comment">// auto-generated: &quot;lalrpop 0.19.6&quot;</span>
-<span class="comment">// sha3: b970fe89983eedd6b7caf3caad55bfaf8a3e2e470cb6d2c4cbc9b3f148445</span>
+<span class="comment">// sha3: 79e16697a97e6e494198ae18e1ad5c520dadf8db99f9ae3671fbbb2cd1559e9</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::program::posix</span>::{<span class="ident">ast</span>, <span class="ident">lex</span>};
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_extern_crates</span>)]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">lalrpop_util</span> <span class="kw">as</span> <span class="ident">__lalrpop_util</span>;
@@ -10462,7 +10462,7 @@
     (<span class="kw">_</span>, <span class="ident">__0</span>, <span class="kw">_</span>): (<span class="ident">usize</span>, <span class="ident">ast::Command</span>, <span class="ident">usize</span>),
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ast::Program</span>
 {
-    <span class="ident">ast::Program</span>(<span class="macro">vec!</span>[<span class="kw">box</span> <span class="ident">__0</span>])
+    <span class="ident">ast::Program</span>(<span class="macro">vec!</span>[<span class="ident">__0</span>])
 }
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
@@ -10503,7 +10503,7 @@
     {
         <span class="kw">match</span> <span class="ident">c</span> {
             <span class="ident">c</span> @ <span class="ident">ast::Command::Compound</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">c</span>.<span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="ident">cs</span>),
-            <span class="ident">c</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Command::Compound</span>(<span class="macro">vec!</span>[<span class="kw">box</span> <span class="ident">cs</span>, <span class="kw">box</span> <span class="ident">c</span>]),
+            <span class="ident">c</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Command::Compound</span>(<span class="macro">vec!</span>[<span class="ident">cs</span>, <span class="ident">c</span>]),
         }
     }
 }
@@ -10518,7 +10518,7 @@
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ast::Command</span>
 {
     {
-        <span class="ident">ast::Command::Compound</span>(<span class="macro">vec!</span>[<span class="kw">box</span> <span class="ident">cs</span>])
+        <span class="ident">ast::Command::Compound</span>(<span class="macro">vec!</span>[<span class="ident">cs</span>])
     }
 }
 
