@@ -3,11 +3,31 @@ on: [push, pull_request]
 name: CI
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: target/
+          key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --all-features
+
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: Swatinem/rust-cache@v1
+      - uses: actions/cache@v2
+        with:
+          path: target/
+          key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -22,7 +42,10 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v2
-      - uses: Swatinem/rust-cache@v1
+      - uses: actions/cache@v2
+        with:
+          path: target/
+          key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
