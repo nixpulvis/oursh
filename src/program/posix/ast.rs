@@ -16,7 +16,6 @@ pub enum Command {
     /// ```sh
     /// date --iso-8601
     /// ```
-    // TODO #8: Simple should not just be a vec of words.
     Simple(Vec<Assignment>, Vec<Word>, Vec<Redirect>),
 
     /// A full program embedded in a compound command.
@@ -253,7 +252,6 @@ mod tests {
 
     #[test]
     fn simple_command() {
-        // TODO: Just parse a command.
         assert!(parse_command("ls").is_ok());
         assert!(parse_command("git s").is_ok());
         assert!(parse_command("ls -la").is_ok());

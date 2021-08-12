@@ -100,27 +100,8 @@ impl Process {
                 child.status()
             },
             Ok(ForkResult::Child) => {
+                self.pid = getpid();
                 io.dup()?;
-                // self.pid = setsid()?;
-                // TODO #20: When running with raw mode we could buffer
-                // this and print it later, all at once in suspended raw mode.
-
-                // if let Ok(mut term) = tcgetattr(io.0[1]) {
-                //     term.output_flags |= OutputFlags::ONLCR;
-                //     term.output_flags |= OutputFlags::NLDLY;
-                //     tcsetattr(io.0[1], SetArg::TCSANOW, &term);
-                // }
-
-                // if let Ok(mut term) = tcgetattr(io.0[1]) {
-                //     // term.output_flags &= !OutputFlags::OCRNL;
-                //     term.output_flags &= !OutputFlags::ONLCR;
-                //     tcsetattr(io.0[1], SetArg::TCSANOW, &term);
-                // }
-                // if let Ok(mut term) = tcgetattr(2) {
-                //     term.output_flags &= !OutputFlags::OCRNL;
-                //     tcsetattr(2, SetArg::TCSANOW, &term);
-                // }
-
                 if let Err(e) = self.exec() {
                     match e {
                         Errno::ENOENT => {
@@ -154,6 +135,7 @@ impl Process {
                 status
             },
             Ok(ForkResult::Child) => {
+                self.pid = getpid();
                 io.dup()?;
                 if let Err(_) = self.exec() {
                     exit(127);
@@ -239,7 +221,6 @@ impl ProcessGroup {
 pub type Jobs = Rc<RefCell<Vec<(String, ProcessGroup)>>>;
 
 /// Enumerate the given jobs, pruning exited, signaled or otherwise errored process groups
-// TODO: Replace program::Result
 pub fn retain_alive_jobs(jobs: &mut Jobs) {
     jobs.borrow_mut().retain_mut(|job| {
         let children = &mut job.1.leader_mut().children;

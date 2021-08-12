@@ -133,9 +133,6 @@ impl<P: Program> Run for P {
 /// a command is run, the conditions within the control of the shell are
 /// reproduced; IO redirection, working directory, and even the environment are
 /// each faithfully preserved.
-///
-// TODO #4: We can reasonably reproduce the redirects, pwd... but is it
-//          sane to try this with ENV too?
 pub trait Command: Sized + Debug + Run {
     /// Return the name of this command.
     ///
@@ -192,7 +189,6 @@ pub fn parse_alternate<R: BufRead>(reader: R) -> Result<AlternateProgram> {
 ///
 /// let program = b"sleep 1; date & date";
 /// assert!(parse::<PosixProgram, &[u8]>(program).is_ok());
-/// // TODO: assert!(parse::<BasicProgram, &[u8]>(program).is_err());
 /// ```
 pub fn parse<P: Program, R: BufRead>(reader: R) -> Result<P> {
     P::parse(reader)

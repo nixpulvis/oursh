@@ -54,56 +54,12 @@
 //! - Fast
 //!
 //!
-//! ## Usage
-//!
-//! While this project is in early stages, there are no OS packages to use.
-//! However, you can compile and run directly from source easily. Just ensure you
-//! have [`rustup`][rustup] installed.
-//!
-//! ```sh
-//! cargo build
-//! cargo run
-//! ```
-//!
-//!
-//! ## Testing
-//!
-//! We have four kinds of tests in this program. Crate unit tests, Executable unit
-//! tests, subprocess based integration tests, and documentation tests.
-//!
-//! ```sh
-//! # Run all tests.
-//! cargo test
-//! ```
-//!
-//! ## Previous Work
-//!
-//! I've been using [`fish`][fish] as my main shell for a few years now. Fish
-//! inspires a lot of the modern syntax.
-//!
-//! POSIX compatibility comes from my desire to use this shell as my `chsh -s
-//! ...` shell on [Arch Linux][arch]. See the full POSIX reference for more
-//! information.
-//!
-//! Some of the shebang language interoperation was inspired by my time with
-//! the Northeastern University PL group, and generally from writing
-//! [Racket][racket].  The beauty of of merging the UNIX style `#!...` with
-//! Racket's `#lang ...` here is very exciting to me. I might just _have_ to
-//! make a `{#lang ...}` shortcut for Racket!
-//!
-//! I've built and wrote a few things about shells before:
-//!
-//! - [`rush`][rush] A glorified homework assignment for computer architecture
-//! - [`shell.py`][shell.py] My submission for computer organization a8
-//! - [Building a Shell - Part 1][basp1] Start of this project
-//! - [Building a Shell - Part 2][basp2] `program` module intro
-//!
-//!
-//! ## [POSIX Reference][posix]
+//! ## [POSIX Reference][posix-ref]
 //!
 //! See the following sections for building the POSIX `sh` compliant program
-//! language, and interactive terminal based REPL. While this mainly defines
-//! the `posix` module, there are a lot of common concepts to all shells here.
+//! language, and interactive terminal based REPL. While this mainly defines the
+//! [`posix`][program::posix] module, there are a lot of common concepts to all
+//! shells here.
 //!
 //! - 3§2 Shell Command Language
 //!     - 10.2 Shell Grammar Rules
@@ -118,9 +74,9 @@
 //! ## Implementation
 //!
 //! This shell will be written in Rust with minimal dependencies. Notably
-//! [termios][termios] and [libc][libc] will likely be used. The parsing library
-//! will be [lalrpop][lalrpop], which should support the syntax we want somewhat
-//! easily, though grammar's in general can be a tricky beast.
+//! `termios` and `libc` will likely be used. The parsing library will be
+//! `lalrpop`, which should support the syntax we want somewhat easily, though
+//! grammar's in general can be a tricky beast.
 //!
 //! We will want to create a few internal modules for the shell.
 //!
@@ -143,17 +99,7 @@
 //!
 //! [documentation]: https://nixpulvis.com/oursh/oursh
 //! [rustup]: https://github.com/rust-lang-nursery/rustup.rs
-//! [posix]: http://pubs.opengroup.org/onlinepubs/9699919799/
-//! [termios]: https://crates.io/crates/termios
-//! [libc]: https://crates.io/crates/libc
-//! [lalrpop]: https://github.com/lalrpop/lalrpop
-//! [fish]: https://github.com/fish-shell/fish-shell
-//! [arch]: https://www.archlinux.org/
-//! [racket]: https://racket-lang.org/
-//! [rush]: https://github.com/nixpulvis/rush
-//! [shell.py]: /doc/shell.py
-//! [basp1]: https://nixpulvis.com/ramblings/2018-07-11-building-a-shell-part-1
-//! [basp2]: https://nixpulvis.com/ramblings/2018-10-15-building-a-shell-part-2
+//! [posix-ref]: http://pubs.opengroup.org/onlinepubs/9699919799/
 #![feature(box_syntax, box_patterns, with_options)]
 
 extern crate nix;

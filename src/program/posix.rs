@@ -202,9 +202,6 @@ impl super::Program for Program {
     }
 }
 
-// TODO: lazy_static.
-// const BUILTINS: HashMap<&'static str, &'static Builtin> = HashMap::new(...);
-
 // The semantics of a single POSIX command.
 impl super::Command for Command {}
 
@@ -394,8 +391,6 @@ impl super::Run for Command {
                         perms.set_mode(0o777);
                         fs::set_permissions(&bridgefile, perms)?;
                     }
-                    // TODO #4: Suspend and restore raw mode.
-                    // TODO: Use our jobs, this will allow WaitStatus' too.
                     process::Command::new(&bridgefile).spawn()?.wait()
                 }
                 // TODO: Pass text off to another parser.
