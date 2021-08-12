@@ -56,7 +56,6 @@ jobs:
 
   doc:
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -69,7 +68,7 @@ jobs:
           toolchain: stable
       - uses: actions-rs/cargo@v1
         with:
-          command: doc --release
+          command: doc
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
