@@ -52,7 +52,7 @@ ctrlc = "3.1"
 #termios = "*"
 # Option 2: http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/
 termion = "1.5"
-rustyline = "*"
+rustyline = "8"
 
 retain_mut = "0.1"
 
