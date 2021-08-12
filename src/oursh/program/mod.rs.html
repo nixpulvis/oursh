@@ -239,10 +239,6 @@
 <span id="239">239</span>
 <span id="240">240</span>
 <span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Parsing and handling program syntax(es) of the shell.</span>
 <span class="doccomment">//!</span>
@@ -379,9 +375,6 @@
 <span class="doccomment">/// a command is run, the conditions within the control of the shell are</span>
 <span class="doccomment">/// reproduced; IO redirection, working directory, and even the environment are</span>
 <span class="doccomment">/// each faithfully preserved.</span>
-<span class="doccomment">///</span>
-<span class="comment">// TODO #4: We can reasonably reproduce the redirects, pwd... but is it</span>
-<span class="comment">//          sane to try this with ENV too?</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Command</span>: <span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Debug</span> <span class="op">+</span> <span class="ident">Run</span> {
     <span class="doccomment">/// Return the name of this command.</span>
     <span class="doccomment">///</span>
@@ -438,7 +431,6 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// let program = b&quot;sleep 1; date &amp; date&quot;;</span>
 <span class="doccomment">/// assert!(parse::&lt;PosixProgram, &amp;[u8]&gt;(program).is_ok());</span>
-<span class="doccomment">/// // TODO: assert!(parse::&lt;BasicProgram, &amp;[u8]&gt;(program).is_err());</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Program</span>, <span class="ident">R</span>: <span class="ident">BufRead</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
     <span class="ident">P::parse</span>(<span class="ident">reader</span>)

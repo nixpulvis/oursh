@@ -316,8 +316,6 @@
 <span id="316">316</span>
 <span id="317">317</span>
 <span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Abstract Syntax Tree for the POSIX language.</span>
 <span class="kw">use</span> <span class="ident">std::os::unix::io::RawFd</span>;
@@ -337,7 +335,6 @@
     <span class="doccomment">/// ```sh</span>
     <span class="doccomment">/// date --iso-8601</span>
     <span class="doccomment">/// ```</span>
-    <span class="comment">// TODO #8: Simple should not just be a vec of words.</span>
     <span class="ident">Simple</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Assignment</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Word</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Redirect</span><span class="op">&gt;</span>),
 
     <span class="doccomment">/// A full program embedded in a compound command.</span>
@@ -574,7 +571,6 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">simple_command</span>() {
-        <span class="comment">// TODO: Just parse a command.</span>
         <span class="macro">assert!</span>(<span class="ident">parse_command</span>(<span class="string">&quot;ls&quot;</span>).<span class="ident">is_ok</span>());
         <span class="macro">assert!</span>(<span class="ident">parse_command</span>(<span class="string">&quot;git s&quot;</span>).<span class="ident">is_ok</span>());
         <span class="macro">assert!</span>(<span class="ident">parse_command</span>(<span class="string">&quot;ls -la&quot;</span>).<span class="ident">is_ok</span>());
