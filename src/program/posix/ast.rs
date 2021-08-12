@@ -3,7 +3,7 @@ use std::os::unix::io::RawFd;
 
 /// A program is the result of parsing a sequence of commands.
 #[derive(Debug, Clone)]
-pub struct Program(pub Vec<Box<Command>>);
+pub struct Program(pub Vec<Command>);
 
 /// A command is a *highly* mutually-recursive node with the main features
 /// of the POSIX language.
@@ -23,7 +23,7 @@ pub enum Command {
     /// ```sh
     /// { ls ; }
     /// ```
-    Compound(Vec<Box<Command>>),
+    Compound(Vec<Command>),
 
     /// Performs boolean negation to the status code of the inner
     /// command.
@@ -161,11 +161,9 @@ impl Command {
     pub fn push(mut self, command: &Command) -> Self {
         match self {
             Command::Compound(ref mut c) => {
-                c.push(box command.clone());
+                c.push(command.clone());
             },
-            c @ _ => {
-                return Command::Compound(vec![box c, box command.clone()]);
-            },
+            c => return Command::Compound(vec![c, command.clone()]),
         }
 
         self
@@ -174,11 +172,9 @@ impl Command {
     pub fn insert(mut self, command: &Command) -> Self {
         match self {
             Command::Compound(ref mut c) => {
-                c.insert(0, box command.clone());
+                c.insert(0, command.clone());
             },
-            c @ _ => {
-                return Command::Compound(vec![box command.clone(), box c]);
-            },
+            c => return Command::Compound(vec![command.clone(), c]),
         }
 
         self
@@ -204,12 +200,12 @@ pub enum Interpreter {
 
 impl Program {
     pub(crate) fn insert(mut self, command: &Command) -> Self {
-        self.0.insert(0, box command.clone());
+        self.0.insert(0, command.clone());
         self
     }
 
     pub(crate) fn append(mut self, program: &Program) -> Self {
-        self.0.append(&mut program.0.iter().cloned().collect());
+        self.0.append(&mut program.0.to_vec());
         self
     }
 }

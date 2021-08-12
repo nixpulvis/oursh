@@ -12,7 +12,7 @@ use crate::{
 
 /// A basic program with only a single command.
 #[derive(Debug)]
-pub struct Program(Vec<Box<Command>>);
+pub struct Program(Vec<Command>);
 
 impl super::Program for Program {
     type Command = Command;
@@ -29,11 +29,11 @@ impl super::Program for Program {
         if reader.read_to_string(&mut command).is_err() {
             return Err(Error::Read);
         }
-        Ok(Program(vec![box Command(command)]))
+        Ok(Program(vec![Command(command)]))
     }
 
     /// Return the single parsed command.
-    fn commands(&self) -> &[Box<Self::Command>] {
+    fn commands(&self) -> &[Self::Command] {
         &self.0[..]
     }
 }

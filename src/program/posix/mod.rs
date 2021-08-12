@@ -197,7 +197,7 @@ impl super::Program for Program {
         }
     }
 
-    fn commands(&self) -> &[Box<Self::Command>] {
+    fn commands(&self) -> &[Self::Command] {
         &self.0[..]
     }
 }
@@ -378,8 +378,8 @@ impl super::Run for Command {
                         let mut interpreter = interpreter.chars()
                                                          .map(|c| c as u8)
                                                          .collect::<Vec<u8>>();
-                        interpreter.insert(0, '!' as u8);
-                        interpreter.insert(0, '#' as u8);
+                        interpreter.insert(0, b'!');
+                        interpreter.insert(0, b'#');
                         file.write_all(&interpreter)?;
                         file.write_all(b"\n")?;
                         let text = text.chars()
@@ -426,17 +426,15 @@ impl super::Run for Command {
     }
 }
 fn expand_home(word: &str) -> String {
-    if word.starts_with("~") {
+    if let Some(w) = word.strip_prefix('~') {
         if let Some(path) = home_dir() {
-            format!("{}{}", &path.to_str().expect("error: home not set"),
-                            &word[1..])
+            format!("{}{}", &path.to_str().expect("error: home not set"), w)
         } else {
             "~".into()
         }
     } else {
         word.into()
     }
-
 }
 
 // "$" => "$"
@@ -452,7 +450,7 @@ fn expand_vars(string: &str) -> String {
             if variable.is_empty() {
                 result.push(c);
             } else {
-                result += &var(&variable).unwrap_or("".into());
+                result += &var(&variable).unwrap_or_else(|_| "".into());
             }
             variable.clear();
             variable_start = -1;
@@ -463,7 +461,7 @@ fn expand_vars(string: &str) -> String {
         } else if c == ' ' {
             variable_start = -1;
         } else if c == '@' || c == ':' {
-            result += &var(&variable).unwrap_or("".into());
+            result += &var(&variable).unwrap_or_else(|_| "".into());
             variable.clear();
             variable_start = -1;
             result.push(c);
@@ -476,7 +474,7 @@ fn expand_vars(string: &str) -> String {
             result.push(c);
         }
     }
-    result += &var(&variable).unwrap_or("".into());
+    result += &var(&variable).unwrap_or_else(|_| "".into());
     result
 }
 
@@ -497,5 +495,7 @@ pub mod lex;
 //
 // The code for this module is located in `src/program/posix/mod.lalrpop`.
 lalrpop_mod!(
+    #[allow(clippy::all)]
+    #[allow(unknown_lints)]
     /// LALRPOP generated parser module.
     pub parse, "/program/posix/mod.rs");

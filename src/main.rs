@@ -28,11 +28,11 @@ use oursh::{
     process::{Jobs, IO},
 };
 
-pub const NAME: &'static str = "oursh";
-pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+pub const NAME: &str = "oursh";
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // Write the Docopt usage string.
-const USAGE: &'static str = "
+const USAGE: &str = "
 The oursh utility is a command language interpreter that shall execute commands
 read from a command line string, the standard input, or a specified file.
 
@@ -113,7 +113,7 @@ fn main() -> MainResult {
         MainResult(parse_and_run(c, &mut runtime))
     } else if let Some(Value::Plain(Some(ref filename))) = runtime.args.find("<command_file>") {
         let mut file = File::open(filename)
-            .expect(&format!("error opening file: {}", filename));
+            .unwrap_or_else(|_| panic!("error opening file: {}", filename));
 
         // Fill a string buffer from the file.
         let mut text = String::new();
@@ -149,7 +149,7 @@ fn main() -> MainResult {
 
             let code;
             loop {
-                let prompt = expand_prompt(env::var("PS1").unwrap_or("\\s-\\v\\$ ".into()));
+                let prompt = expand_prompt(env::var("PS1").unwrap_or_else(|_| "\\s-\\v\\$ ".into()));
                 let readline = runtime.rl.as_mut().unwrap().readline(&prompt);
                 match readline {
                     Ok(line) => {
@@ -229,8 +229,8 @@ fn expand_prompt(prompt: String) -> String {
                     cstr.to_str().expect("error invalid UTF-8").into()
                 }
                 'e' => (0x1b as char).into(),
-                'u' => var("USER").unwrap_or("".into()),
-                'w' => var("PWD").unwrap_or("".into()),
+                'u' => var("USER").unwrap_or_else(|_| "".into()),
+                'w' => var("PWD").unwrap_or_else(|_| "".into()),
                 's' => NAME.into(),
                 'v' => VERSION[0..(VERSION.len() - 2)].into(),
                 '0' => { octal.push(c); "".into() },

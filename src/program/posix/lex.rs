@@ -231,10 +231,8 @@ impl<'input> Lexer<'input> {
         while let Some((_, c, _)) = self.lookahead {
             if terminate(c) {
                 return (&self.input[start..end], end);
-            } else {
-                if let Some((_, _, e)) = self.advance() {
-                    end = e;
-                }
+            } else if let Some((_, _, e)) = self.advance() {
+                end = e;
             }
         }
         (&self.input[start..end], end)

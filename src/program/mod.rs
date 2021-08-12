@@ -113,7 +113,7 @@ pub trait Program: Sized + Debug + Run {
     fn parse<R: BufRead>(reader: R) -> Result<Self>;
 
     /// Return a list of all the commands in this program.
-    fn commands(&self) -> &[Box<Self::Command>];
+    fn commands(&self) -> &[Self::Command];
 }
 
 impl<P: Program> Run for P {
@@ -210,7 +210,7 @@ pub mod modern;
 pub use self::modern::Program as ModernProgram;
 
 // TODO: Replace program::Result
-pub fn parse_and_run<'a>(text: &str, runtime: &mut Runtime)
+pub fn parse_and_run(text: &str, runtime: &mut Runtime)
     -> crate::program::Result<WaitStatus>
 {
     let result = if text.is_empty() {

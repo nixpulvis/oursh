@@ -125,19 +125,16 @@ impl Process {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.children.push(child);
                 let status = child.wait();
-                match status {
-                    Ok(WaitStatus::Exited(_, 127)) => {
-                        let name = self.argv[0].to_string_lossy();
-                        eprintln!("oursh: {}: command not found", name);
-                    },
-                    _ => {}
+                if let Ok(WaitStatus::Exited(_, 127)) = status {
+                    let name = self.argv[0].to_string_lossy();
+                    eprintln!("oursh: {}: command not found", name);
                 }
                 status
             },
             Ok(ForkResult::Child) => {
                 self.pid = getpid();
                 io.dup()?;
-                if let Err(_) = self.exec() {
+                if self.exec().is_err() {
                     exit(127);
                 } else {
                     self.wait()

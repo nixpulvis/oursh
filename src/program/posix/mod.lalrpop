@@ -61,7 +61,7 @@ Jobs: ast::Program = {
     <cs: Command> "&" <j: Jobs> => {
         j.insert(&ast::Command::Background(box cs))
     },
-    Job => ast::Program(vec![box <>]),
+    Job => ast::Program(vec![<>]),
 }
 
 Job: ast::Command = {
@@ -75,11 +75,11 @@ Compound: ast::Command = {
     <cs: Command> ";" <c: Compound> => {
         match c {
             c @ ast::Command::Compound(_) => c.insert(&cs),
-            c => ast::Command::Compound(vec![box cs, box c]),
+            c => ast::Command::Compound(vec![cs, c]),
         }
     },
     <cs: Command> ";" => {
-        ast::Command::Compound(vec![box cs])
+        ast::Command::Compound(vec![cs])
     },
 }
 

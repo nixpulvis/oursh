@@ -83,7 +83,7 @@ impl Builtin for Dot {
                 let path = argv[1].to_str().unwrap();
                 if let Ok(mut file) = File::open(&path) {
                     let mut contents = String::new();
-                    if let Ok(_) = file.read_to_string(&mut contents) {
+                    if file.read_to_string(&mut contents).is_ok() {
                         parse_and_run(&contents, runtime)
                     } else {
                         Ok(WaitStatus::Exited(Pid::this(), 1))
@@ -173,7 +173,7 @@ pub struct Command;
 
 impl Builtin for Command {
     fn run(self, argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
-        let text = argv[1..].into_iter().map(|c| {
+        let text = argv[1..].iter().map(|c| {
             c.to_str().unwrap()
         }).collect::<Vec<_>>().join(" ");
         parse_and_run(&text, runtime)
