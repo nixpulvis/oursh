@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Prompt","A status prompt to be displayed in interactive sessions before each program."]]});

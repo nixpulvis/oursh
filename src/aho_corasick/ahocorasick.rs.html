@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;nixpulvis&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;aho-corasick-0.7.10&#x2F;src&#x2F;ahocorasick.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ahocorasick.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../aho_corasick/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;aho-corasick-0.7.18&#x2F;src&#x2F;ahocorasick.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ahocorasick.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../aho_corasick/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -2085,18 +2085,74 @@
 <span id="2085">2085</span>
 <span id="2086">2086</span>
 <span id="2087">2087</span>
+<span id="2088">2088</span>
+<span id="2089">2089</span>
+<span id="2090">2090</span>
+<span id="2091">2091</span>
+<span id="2092">2092</span>
+<span id="2093">2093</span>
+<span id="2094">2094</span>
+<span id="2095">2095</span>
+<span id="2096">2096</span>
+<span id="2097">2097</span>
+<span id="2098">2098</span>
+<span id="2099">2099</span>
+<span id="2100">2100</span>
+<span id="2101">2101</span>
+<span id="2102">2102</span>
+<span id="2103">2103</span>
+<span id="2104">2104</span>
+<span id="2105">2105</span>
+<span id="2106">2106</span>
+<span id="2107">2107</span>
+<span id="2108">2108</span>
+<span id="2109">2109</span>
+<span id="2110">2110</span>
+<span id="2111">2111</span>
+<span id="2112">2112</span>
+<span id="2113">2113</span>
+<span id="2114">2114</span>
+<span id="2115">2115</span>
+<span id="2116">2116</span>
+<span id="2117">2117</span>
+<span id="2118">2118</span>
+<span id="2119">2119</span>
+<span id="2120">2120</span>
+<span id="2121">2121</span>
+<span id="2122">2122</span>
+<span id="2123">2123</span>
+<span id="2124">2124</span>
+<span id="2125">2125</span>
+<span id="2126">2126</span>
+<span id="2127">2127</span>
+<span id="2128">2128</span>
+<span id="2129">2129</span>
+<span id="2130">2130</span>
+<span id="2131">2131</span>
+<span id="2132">2132</span>
+<span id="2133">2133</span>
+<span id="2134">2134</span>
+<span id="2135">2135</span>
+<span id="2136">2136</span>
+<span id="2137">2137</span>
+<span id="2138">2138</span>
+<span id="2139">2139</span>
+<span id="2140">2140</span>
+<span id="2141">2141</span>
+<span id="2142">2142</span>
+<span id="2143">2143</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::io</span>;
 
-<span class="kw">use</span> <span class="ident">automaton::Automaton</span>;
-<span class="kw">use</span> <span class="ident">buffer::Buffer</span>;
-<span class="kw">use</span> <span class="ident">dfa</span>::{<span class="self">self</span>, <span class="ident">DFA</span>};
-<span class="kw">use</span> <span class="ident">error::Result</span>;
-<span class="kw">use</span> <span class="ident">nfa</span>::{<span class="self">self</span>, <span class="ident">NFA</span>};
-<span class="kw">use</span> <span class="ident">packed</span>;
-<span class="kw">use</span> <span class="ident">prefilter::PrefilterState</span>;
-<span class="kw">use</span> <span class="ident">state_id::StateID</span>;
-<span class="kw">use</span> <span class="ident">Match</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::automaton::Automaton</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buffer::Buffer</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::dfa</span>::{<span class="self">self</span>, <span class="ident">DFA</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Result</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::nfa</span>::{<span class="self">self</span>, <span class="ident">NFA</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::packed</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prefilter</span>::{<span class="ident">Prefilter</span>, <span class="ident">PrefilterState</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::state_id::StateID</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Match</span>;
 
 <span class="doccomment">/// An automaton for searching multiple strings in linear time.</span>
 <span class="doccomment">///</span>
@@ -2590,7 +2646,7 @@
     <span class="doccomment">/// The closure accepts three parameters: the match found, the text of</span>
     <span class="doccomment">/// the match and a string buffer with which to write the replaced text</span>
     <span class="doccomment">/// (if any). If the closure returns `true`, then it continues to the next</span>
-    <span class="doccomment">/// match. If the closure returns false, then searching is stopped.</span>
+    <span class="doccomment">/// match. If the closure returns `false`, then searching is stopped.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -2612,6 +2668,24 @@
     <span class="doccomment">/// });</span>
     <span class="doccomment">/// assert_eq!(&quot;0 the 2 to the 0age&quot;, result);</span>
     <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Stopping the replacement by returning `false` (continued from the</span>
+    <span class="doccomment">/// example above):</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// # use aho_corasick::{AhoCorasickBuilder, MatchKind};</span>
+    <span class="doccomment">/// # let patterns = &amp;[&quot;append&quot;, &quot;appendage&quot;, &quot;app&quot;];</span>
+    <span class="doccomment">/// # let haystack = &quot;append the app to the appendage&quot;;</span>
+    <span class="doccomment">/// # let ac = AhoCorasickBuilder::new()</span>
+    <span class="doccomment">/// #    .match_kind(MatchKind::LeftmostFirst)</span>
+    <span class="doccomment">/// #    .build(patterns);</span>
+    <span class="doccomment">/// let mut result = String::new();</span>
+    <span class="doccomment">/// ac.replace_all_with(haystack, &amp;mut result, |mat, _, dst| {</span>
+    <span class="doccomment">///     dst.push_str(&amp;mat.pattern().to_string());</span>
+    <span class="doccomment">///     mat.pattern() != 2</span>
+    <span class="doccomment">/// });</span>
+    <span class="doccomment">/// assert_eq!(&quot;0 the 2 to the appendage&quot;, result);</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">replace_all_with</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">haystack</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
@@ -2624,7 +2698,9 @@
         <span class="kw">for</span> <span class="ident">mat</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">find_iter</span>(<span class="ident">haystack</span>) {
             <span class="ident">dst</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">haystack</span>[<span class="ident">last_match</span>..<span class="ident">mat</span>.<span class="ident">start</span>()]);
             <span class="ident">last_match</span> <span class="op">=</span> <span class="ident">mat</span>.<span class="ident">end</span>();
-            <span class="ident">replace_with</span>(<span class="kw-2">&amp;</span><span class="ident">mat</span>, <span class="kw-2">&amp;</span><span class="ident">haystack</span>[<span class="ident">mat</span>.<span class="ident">start</span>()..<span class="ident">mat</span>.<span class="ident">end</span>()], <span class="ident">dst</span>);
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">replace_with</span>(<span class="kw-2">&amp;</span><span class="ident">mat</span>, <span class="kw-2">&amp;</span><span class="ident">haystack</span>[<span class="ident">mat</span>.<span class="ident">start</span>()..<span class="ident">mat</span>.<span class="ident">end</span>()], <span class="ident">dst</span>) {
+                <span class="kw">break</span>;
+            };
         }
         <span class="ident">dst</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">haystack</span>[<span class="ident">last_match</span>..]);
     }
@@ -2636,7 +2712,7 @@
     <span class="doccomment">/// The closure accepts three parameters: the match found, the text of</span>
     <span class="doccomment">/// the match and a byte buffer with which to write the replaced text</span>
     <span class="doccomment">/// (if any). If the closure returns `true`, then it continues to the next</span>
-    <span class="doccomment">/// match. If the closure returns false, then searching is stopped.</span>
+    <span class="doccomment">/// match. If the closure returns `false`, then searching is stopped.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -2658,6 +2734,24 @@
     <span class="doccomment">/// });</span>
     <span class="doccomment">/// assert_eq!(b&quot;0 the 2 to the 0age&quot;.to_vec(), result);</span>
     <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Stopping the replacement by returning `false` (continued from the</span>
+    <span class="doccomment">/// example above):</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// # use aho_corasick::{AhoCorasickBuilder, MatchKind};</span>
+    <span class="doccomment">/// # let patterns = &amp;[&quot;append&quot;, &quot;appendage&quot;, &quot;app&quot;];</span>
+    <span class="doccomment">/// # let haystack = b&quot;append the app to the appendage&quot;;</span>
+    <span class="doccomment">/// # let ac = AhoCorasickBuilder::new()</span>
+    <span class="doccomment">/// #    .match_kind(MatchKind::LeftmostFirst)</span>
+    <span class="doccomment">/// #    .build(patterns);</span>
+    <span class="doccomment">/// let mut result = vec![];</span>
+    <span class="doccomment">/// ac.replace_all_with_bytes(haystack, &amp;mut result, |mat, _, dst| {</span>
+    <span class="doccomment">///     dst.extend(mat.pattern().to_string().bytes());</span>
+    <span class="doccomment">///     mat.pattern() != 2</span>
+    <span class="doccomment">/// });</span>
+    <span class="doccomment">/// assert_eq!(b&quot;0 the 2 to the appendage&quot;.to_vec(), result);</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">replace_all_with_bytes</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">haystack</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
@@ -2670,7 +2764,9 @@
         <span class="kw">for</span> <span class="ident">mat</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">find_iter</span>(<span class="ident">haystack</span>) {
             <span class="ident">dst</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">haystack</span>[<span class="ident">last_match</span>..<span class="ident">mat</span>.<span class="ident">start</span>()]);
             <span class="ident">last_match</span> <span class="op">=</span> <span class="ident">mat</span>.<span class="ident">end</span>();
-            <span class="ident">replace_with</span>(<span class="kw-2">&amp;</span><span class="ident">mat</span>, <span class="kw-2">&amp;</span><span class="ident">haystack</span>[<span class="ident">mat</span>.<span class="ident">start</span>()..<span class="ident">mat</span>.<span class="ident">end</span>()], <span class="ident">dst</span>);
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">replace_with</span>(<span class="kw-2">&amp;</span><span class="ident">mat</span>, <span class="kw-2">&amp;</span><span class="ident">haystack</span>[<span class="ident">mat</span>.<span class="ident">start</span>()..<span class="ident">mat</span>.<span class="ident">end</span>()], <span class="ident">dst</span>) {
+                <span class="kw">break</span>;
+            };
         }
         <span class="ident">dst</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">haystack</span>[<span class="ident">last_match</span>..]);
     }
@@ -2823,9 +2919,7 @@
     <span class="doccomment">/// [`find_iter`](struct.AhoCorasick.html#method.find_iter).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The closure accepts three parameters: the match found, the text of</span>
-    <span class="doccomment">/// the match and the writer with which to write the replaced text</span>
-    <span class="doccomment">/// (if any). If the closure returns `true`, then it continues to the next</span>
-    <span class="doccomment">/// match. If the closure returns false, then searching is stopped.</span>
+    <span class="doccomment">/// the match and the writer with which to write the replaced text (if any).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// After all matches are replaced, the writer is _not_ flushed.</span>
     <span class="doccomment">///</span>
@@ -3055,18 +3149,6 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let ac = AhoCorasickBuilder::new()</span>
     <span class="doccomment">///     .dfa(true)</span>
-    <span class="doccomment">///     .byte_classes(false)</span>
-    <span class="doccomment">///     .build(&amp;[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]);</span>
-    <span class="doccomment">/// assert_eq!(20_768, ac.heap_bytes());</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let ac = AhoCorasickBuilder::new()</span>
-    <span class="doccomment">///     .dfa(true)</span>
-    <span class="doccomment">///     .byte_classes(true) // default</span>
-    <span class="doccomment">///     .build(&amp;[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]);</span>
-    <span class="doccomment">/// assert_eq!(1_248, ac.heap_bytes());</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let ac = AhoCorasickBuilder::new()</span>
-    <span class="doccomment">///     .dfa(true)</span>
     <span class="doccomment">///     .ascii_case_insensitive(true)</span>
     <span class="doccomment">///     .build(&amp;[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]);</span>
     <span class="doccomment">/// assert_eq!(1_248, ac.heap_bytes());</span>
@@ -3123,6 +3205,24 @@
             <span class="ident">Imp::NFA</span>(<span class="kw-2">ref</span> <span class="ident">nfa</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">nfa</span>.<span class="ident">pattern_count</span>(),
             <span class="ident">Imp::DFA</span>(<span class="kw-2">ref</span> <span class="ident">dfa</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">dfa</span>.<span class="ident">pattern_count</span>(),
         }
+    }
+
+    <span class="doccomment">/// Returns the prefilter object, if one exists, for the underlying</span>
+    <span class="doccomment">/// automaton.</span>
+    <span class="kw">fn</span> <span class="ident">prefilter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Prefilter</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
+            <span class="ident">Imp::NFA</span>(<span class="kw-2">ref</span> <span class="ident">nfa</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">nfa</span>.<span class="ident">prefilter</span>(),
+            <span class="ident">Imp::DFA</span>(<span class="kw-2">ref</span> <span class="ident">dfa</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">dfa</span>.<span class="ident">prefilter</span>(),
+        }
+    }
+
+    <span class="doccomment">/// Returns true if and only if we should attempt to use a prefilter.</span>
+    <span class="kw">fn</span> <span class="ident">use_prefilter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">prefilter</span>() {
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">false</span>,
+            <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
+        };
+        <span class="op">!</span><span class="ident">p</span>.<span class="ident">looks_for_non_start_of_match</span>()
     }
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
@@ -3201,7 +3301,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The lifetime `&#39;b` refers to the lifetime of the haystack being searched.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FindIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">S</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">StateID</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FindIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">S</span>: <span class="ident">StateID</span><span class="op">&gt;</span> {
     <span class="ident">fsm</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Imp</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     <span class="ident">prestate</span>: <span class="ident">PrefilterState</span>,
     <span class="ident">haystack</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">u8</span>],
@@ -3258,7 +3358,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The lifetime `&#39;b` refers to the lifetime of the haystack being searched.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FindOverlappingIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">S</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">StateID</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FindOverlappingIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">S</span>: <span class="ident">StateID</span><span class="op">&gt;</span> {
     <span class="ident">fsm</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Imp</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     <span class="ident">prestate</span>: <span class="ident">PrefilterState</span>,
     <span class="ident">haystack</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">u8</span>],
@@ -3329,7 +3429,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The lifetime `&#39;a` refers to the lifetime of the `AhoCorasick` automaton.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StreamFindIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span>, <span class="ident">S</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">StateID</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StreamFindIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span>, <span class="ident">S</span>: <span class="ident">StateID</span><span class="op">&gt;</span> {
     <span class="ident">it</span>: <span class="ident">StreamChunkIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span>, <span class="ident">S</span><span class="op">&gt;</span>,
 }
 
@@ -3364,7 +3464,7 @@
 <span class="doccomment">/// N.B. This does not actually implement Iterator because we need to borrow</span>
 <span class="doccomment">/// from the underlying reader. But conceptually, it&#39;s still an iterator.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">struct</span> <span class="ident">StreamChunkIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span>, <span class="ident">S</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">StateID</span><span class="op">&gt;</span> {
+<span class="kw">struct</span> <span class="ident">StreamChunkIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span>, <span class="ident">S</span>: <span class="ident">StateID</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The AC automaton.</span>
     <span class="ident">fsm</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Imp</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     <span class="doccomment">/// State associated with this automaton&#39;s prefilter. It is a heuristic</span>
@@ -3413,7 +3513,11 @@
             <span class="string">&quot;stream searching is only supported for Standard match semantics&quot;</span>
         );
 
-        <span class="kw">let</span> <span class="ident">prestate</span> <span class="op">=</span> <span class="ident">PrefilterState::new</span>(<span class="ident">ac</span>.<span class="ident">max_pattern_len</span>());
+        <span class="kw">let</span> <span class="ident">prestate</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">ac</span>.<span class="ident">imp</span>.<span class="ident">use_prefilter</span>() {
+            <span class="ident">PrefilterState::new</span>(<span class="ident">ac</span>.<span class="ident">max_pattern_len</span>())
+        } <span class="kw">else</span> {
+            <span class="ident">PrefilterState::disabled</span>()
+        };
         <span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Buffer::new</span>(<span class="ident">ac</span>.<span class="ident">imp</span>.<span class="ident">max_pattern_len</span>());
         <span class="kw">let</span> <span class="ident">state_id</span> <span class="op">=</span> <span class="ident">ac</span>.<span class="ident">imp</span>.<span class="ident">start_state</span>();
         <span class="ident">StreamChunkIter</span> {
@@ -3709,7 +3813,7 @@
             <span class="comment">// N.B. Using byte classes can actually be faster by improving</span>
             <span class="comment">// locality, but this only really applies for multi-megabyte</span>
             <span class="comment">// automata (i.e., automata that don&#39;t fit in your CPU&#39;s cache).</span>
-            <span class="self">self</span>.<span class="ident">dfa</span>(<span class="bool-val">true</span>).<span class="ident">byte_classes</span>(<span class="bool-val">false</span>);
+            <span class="self">self</span>.<span class="ident">dfa</span>(<span class="bool-val">true</span>);
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">patterns</span>.<span class="ident">len</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="number">5000</span> {
             <span class="self">self</span>.<span class="ident">dfa</span>(<span class="bool-val">true</span>);
         }
@@ -3897,7 +4001,7 @@
     <span class="doccomment">/// finite automaton (NFA) is used instead.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The main benefit to a DFA is that it can execute searches more quickly</span>
-    <span class="doccomment">/// than a DFA (perhaps 2-4 times as fast). The main drawback is that the</span>
+    <span class="doccomment">/// than a NFA (perhaps 2-4 times as fast). The main drawback is that the</span>
     <span class="doccomment">/// DFA uses more space and can take much longer to build.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Enabling this option does not change the time complexity for</span>
@@ -3956,6 +4060,10 @@
     <span class="doccomment">/// overall performance.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This option is enabled by default.</span>
+    <span class="attribute">#[<span class="ident">deprecated</span>(
+        <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.7.16&quot;</span>,
+        <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;not carrying its weight, will be always enabled, see: https://github.com/BurntSushi/aho-corasick/issues/57&quot;</span>
+    )]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">byte_classes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">yes</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AhoCorasickBuilder</span> {
         <span class="self">self</span>.<span class="ident">dfa_builder</span>.<span class="ident">byte_classes</span>(<span class="ident">yes</span>);
         <span class="self">self</span>
@@ -3984,6 +4092,10 @@
     <span class="doccomment">/// non-premultiplied form only requires 8 bits.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This option is enabled by default.</span>
+    <span class="attribute">#[<span class="ident">deprecated</span>(
+        <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.7.16&quot;</span>,
+        <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;not carrying its weight, will be always enabled, see: https://github.com/BurntSushi/aho-corasick/issues/57&quot;</span>
+    )]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">premultiply</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">yes</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AhoCorasickBuilder</span> {
         <span class="self">self</span>.<span class="ident">dfa_builder</span>.<span class="ident">premultiply</span>(<span class="ident">yes</span>);
         <span class="self">self</span>

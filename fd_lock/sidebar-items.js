@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FdLock","A file descriptor lock."],["FdLockGuard","A guard that unlocks the file descriptor when it goes out of scope."]]});

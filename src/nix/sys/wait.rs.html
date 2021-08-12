@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;nixpulvis&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;nix-0.17.0&#x2F;src&#x2F;sys&#x2F;wait.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>wait.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../nix/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;nix-0.22.0&#x2F;src&#x2F;sys&#x2F;wait.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>wait.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../nix/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -238,14 +238,16 @@
 <span id="238">238</span>
 <span id="239">239</span>
 <span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
 </pre><pre class="rust">
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errno::Errno</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::sys::signal::Signal</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::unistd::Pid</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Result</span>;
+<span class="kw">use</span> <span class="ident">cfg_if::cfg_if</span>;
 <span class="kw">use</span> <span class="ident">libc</span>::{<span class="self">self</span>, <span class="ident">c_int</span>};
-<span class="kw">use</span> <span class="prelude-ty">Result</span>;
-<span class="kw">use</span> <span class="ident">errno::Errno</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">unistd::Pid</span>;
-
-<span class="kw">use</span> <span class="ident">sys::signal::Signal</span>;
 
 <span class="macro">libc_bitflags!</span>(
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WaitPidFlag</span>: <span class="ident">c_int</span> {
@@ -256,6 +258,7 @@
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;haiku&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;ios&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>))]</span>
         <span class="ident">WEXITED</span>;
@@ -265,6 +268,7 @@
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;haiku&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;ios&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>))]</span>
         <span class="ident">WSTOPPED</span>;
@@ -274,16 +278,17 @@
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;haiku&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;ios&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>))]</span>
         <span class="ident">WNOWAIT</span>;
         <span class="doccomment">/// Don&#39;t wait on children of other threads in this group</span>
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">__WNOTHREAD</span>;
         <span class="doccomment">/// Wait on all children, regardless of type</span>
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">__WALL</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">__WCLONE</span>;
     }
 );
@@ -319,14 +324,14 @@
     <span class="doccomment">/// field is the `PTRACE_EVENT_*` value of the event.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`nix::sys::ptrace`]: ../ptrace/index.html</span>
-    <span class="doccomment">/// [`ptrace`(2)]: http://man7.org/linux/man-pages/man2/ptrace.2.html</span>
+    <span class="doccomment">/// [`ptrace`(2)]: https://man7.org/linux/man-pages/man2/ptrace.2.html</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>))]</span>
     <span class="ident">PtraceEvent</span>(<span class="ident">Pid</span>, <span class="ident">Signal</span>, <span class="ident">c_int</span>),
     <span class="doccomment">/// The traced process was stopped by execution of a system call,</span>
     <span class="doccomment">/// and `PTRACE_O_TRACESYSGOOD` is in effect. See [`ptrace`(2)] for</span>
     <span class="doccomment">/// more information.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// [`ptrace`(2)]: http://man7.org/linux/man-pages/man2/ptrace.2.html</span>
+    <span class="doccomment">/// [`ptrace`(2)]: https://man7.org/linux/man-pages/man2/ptrace.2.html</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>))]</span>
     <span class="ident">PtraceSyscall</span>(<span class="ident">Pid</span>),
     <span class="doccomment">/// The process was previously stopped but has resumed execution</span>
@@ -344,10 +349,9 @@
 <span class="kw">impl</span> <span class="ident">WaitStatus</span> {
     <span class="doccomment">/// Extracts the PID from the WaitStatus unless it equals StillAlive.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pid</span><span class="op">&gt;</span> {
-        <span class="kw">use</span> <span class="self">self</span><span class="ident">::WaitStatus</span>::<span class="kw-2">*</span>;
+        <span class="kw">use</span> <span class="ident"><span class="self">self</span>::WaitStatus</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">Exited</span>(<span class="ident">p</span>, <span class="kw">_</span>)  <span class="op">|</span> <span class="ident">Signaled</span>(<span class="ident">p</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">|</span>
-                <span class="ident">Stopped</span>(<span class="ident">p</span>, <span class="kw">_</span>) <span class="op">|</span> <span class="ident">Continued</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>),
+            <span class="ident">Exited</span>(<span class="ident">p</span>, <span class="kw">_</span>) <span class="op">|</span> <span class="ident">Signaled</span>(<span class="ident">p</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">|</span> <span class="ident">Stopped</span>(<span class="ident">p</span>, <span class="kw">_</span>) <span class="op">|</span> <span class="ident">Continued</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>),
             <span class="ident">StillAlive</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
             <span class="ident">PtraceEvent</span>(<span class="ident">p</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">|</span> <span class="ident">PtraceSyscall</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>),
@@ -356,31 +360,31 @@
 }
 
 <span class="kw">fn</span> <span class="ident">exited</span>(<span class="ident">status</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">unsafe</span> { <span class="ident">libc::WIFEXITED</span>(<span class="ident">status</span>) }
+    <span class="ident">libc::WIFEXITED</span>(<span class="ident">status</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">exit_status</span>(<span class="ident">status</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
-    <span class="kw">unsafe</span> { <span class="ident">libc::WEXITSTATUS</span>(<span class="ident">status</span>) }
+    <span class="ident">libc::WEXITSTATUS</span>(<span class="ident">status</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">signaled</span>(<span class="ident">status</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">unsafe</span> { <span class="ident">libc::WIFSIGNALED</span>(<span class="ident">status</span>) }
+    <span class="ident">libc::WIFSIGNALED</span>(<span class="ident">status</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">term_signal</span>(<span class="ident">status</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Signal</span><span class="op">&gt;</span> {
-    <span class="ident">Signal::try_from</span>(<span class="kw">unsafe</span> { <span class="ident">libc::WTERMSIG</span>(<span class="ident">status</span>) })
+    <span class="ident">Signal::try_from</span>(<span class="ident">libc::WTERMSIG</span>(<span class="ident">status</span>))
 }
 
 <span class="kw">fn</span> <span class="ident">dumped_core</span>(<span class="ident">status</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">unsafe</span> { <span class="ident">libc::WCOREDUMP</span>(<span class="ident">status</span>) }
+    <span class="ident">libc::WCOREDUMP</span>(<span class="ident">status</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">stopped</span>(<span class="ident">status</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">unsafe</span> { <span class="ident">libc::WIFSTOPPED</span>(<span class="ident">status</span>) }
+    <span class="ident">libc::WIFSTOPPED</span>(<span class="ident">status</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">stop_signal</span>(<span class="ident">status</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Signal</span><span class="op">&gt;</span> {
-    <span class="ident">Signal::try_from</span>(<span class="kw">unsafe</span> { <span class="ident">libc::WSTOPSIG</span>(<span class="ident">status</span>) })
+    <span class="ident">Signal::try_from</span>(<span class="ident">libc::WSTOPSIG</span>(<span class="ident">status</span>))
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
@@ -389,7 +393,7 @@
     <span class="comment">// of delivering SIGTRAP | 0x80 as the signal number for syscall</span>
     <span class="comment">// stops. This allows easily distinguishing syscall stops from</span>
     <span class="comment">// genuine SIGTRAP signals.</span>
-    <span class="kw">unsafe</span> { <span class="ident">libc::WSTOPSIG</span>(<span class="ident">status</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">libc::SIGTRAP</span> <span class="op">|</span> <span class="number">0x80</span> }
+    <span class="ident">libc::WSTOPSIG</span>(<span class="ident">status</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">libc::SIGTRAP</span> <span class="op">|</span> <span class="number">0x80</span>
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
@@ -398,7 +402,7 @@
 }
 
 <span class="kw">fn</span> <span class="ident">continued</span>(<span class="ident">status</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">unsafe</span> { <span class="ident">libc::WIFCONTINUED</span>(<span class="ident">status</span>) }
+    <span class="ident">libc::WIFCONTINUED</span>(<span class="ident">status</span>)
 }
 
 <span class="kw">impl</span> <span class="ident">WaitStatus</span> {
@@ -453,7 +457,7 @@
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">waitpid</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pid</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">pid</span>: <span class="ident">P</span>, <span class="ident">options</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">WaitPidFlag</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitStatus</span><span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="self">self</span><span class="ident">::WaitStatus</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident"><span class="self">self</span>::WaitStatus</span>::<span class="kw-2">*</span>;
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">status</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">0</span>;
 

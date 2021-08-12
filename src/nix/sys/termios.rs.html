@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;nixpulvis&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;nix-0.17.0&#x2F;src&#x2F;sys&#x2F;termios.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>termios.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../nix/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;nix-0.22.0&#x2F;src&#x2F;sys&#x2F;termios.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>termios.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../nix/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1118,8 +1118,6 @@
 <span id="1118">1118</span>
 <span id="1119">1119</span>
 <span id="1120">1120</span>
-<span id="1121">1121</span>
-<span id="1122">1122</span>
 </pre><pre class="rust">
 <span class="doccomment">//! An interface for controlling asynchronous communication ports</span>
 <span class="doccomment">//!</span>
@@ -1128,7 +1126,7 @@
 <span class="doccomment">//! types here or exported directly.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! If you are unfamiliar with the `termios` API, you should first read the</span>
-<span class="doccomment">//! [API documentation](http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/termios.h.html) and</span>
+<span class="doccomment">//! [API documentation](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/termios.h.html) and</span>
 <span class="doccomment">//! then come back to understand how `nix` safely wraps it.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! It should be noted that this API incurs some runtime overhead above the base `libc` definitions.</span>
@@ -1148,7 +1146,7 @@
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! # use self::nix::sys::termios::SpecialCharacterIndices::VEOF;</span>
 <span class="doccomment">//! # use self::nix::sys::termios::{_POSIX_VDISABLE, Termios};</span>
-<span class="doccomment">//! # let mut termios = unsafe { Termios::default_uninit() };</span>
+<span class="doccomment">//! # let mut termios: Termios = unsafe { std::mem::zeroed() };</span>
 <span class="doccomment">//! termios.control_chars[VEOF as usize] = _POSIX_VDISABLE;</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
@@ -1161,7 +1159,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! # use self::nix::sys::termios::{ControlFlags, Termios};</span>
-<span class="doccomment">//! # let mut termios = unsafe { Termios::default_uninit() };</span>
+<span class="doccomment">//! # let mut termios: Termios = unsafe { std::mem::zeroed() };</span>
 <span class="doccomment">//! termios.control_flags &amp; ControlFlags::CSIZE == ControlFlags::CS5;</span>
 <span class="doccomment">//! termios.control_flags |= ControlFlags::CS5;</span>
 <span class="doccomment">//! ```</span>
@@ -1184,10 +1182,9 @@
 <span class="doccomment">//! platforms:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # #[macro_use] extern crate nix;</span>
 <span class="doccomment">//! # use nix::sys::termios::{BaudRate, cfsetispeed, cfsetospeed, cfsetspeed, Termios};</span>
 <span class="doccomment">//! # fn main() {</span>
-<span class="doccomment">//! # let mut t = unsafe { Termios::default_uninit() };</span>
+<span class="doccomment">//! # let mut t: Termios = unsafe { std::mem::zeroed() };</span>
 <span class="doccomment">//! cfsetispeed(&amp;mut t, BaudRate::B9600);</span>
 <span class="doccomment">//! cfsetospeed(&amp;mut t, BaudRate::B9600);</span>
 <span class="doccomment">//! cfsetspeed(&amp;mut t, BaudRate::B9600);</span>
@@ -1197,10 +1194,9 @@
 <span class="doccomment">//! Additionally round-tripping baud rates is consistent across platforms:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # extern crate nix;</span>
 <span class="doccomment">//! # use nix::sys::termios::{BaudRate, cfgetispeed, cfgetospeed, cfsetispeed, cfsetspeed, Termios};</span>
 <span class="doccomment">//! # fn main() {</span>
-<span class="doccomment">//! # let mut t = unsafe { Termios::default_uninit() };</span>
+<span class="doccomment">//! # let mut t: Termios = unsafe { std::mem::zeroed() };</span>
 <span class="doccomment">//! # cfsetspeed(&amp;mut t, BaudRate::B9600);</span>
 <span class="doccomment">//! let speed = cfgetispeed(&amp;t);</span>
 <span class="doccomment">//! assert_eq!(speed, cfgetospeed(&amp;t));</span>
@@ -1216,10 +1212,9 @@
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;ios&quot;</span>,
                     <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>)),
             <span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot; ```rust&quot;</span>)]</span>
-<span class="doccomment">//! # extern crate nix;</span>
 <span class="doccomment">//! # use nix::sys::termios::{BaudRate, cfgetispeed, cfgetospeed, cfsetspeed, Termios};</span>
 <span class="doccomment">//! # fn main() {</span>
-<span class="doccomment">//! # let mut t = unsafe { Termios::default_uninit() };</span>
+<span class="doccomment">//! # let mut t: Termios = unsafe { std::mem::zeroed() };</span>
 <span class="doccomment">//! # cfsetspeed(&amp;mut t, BaudRate::B9600);</span>
 <span class="doccomment">//! assert_eq!(cfgetispeed(&amp;t), BaudRate::B9600);</span>
 <span class="doccomment">//! assert_eq!(cfgetospeed(&amp;t), BaudRate::B9600);</span>
@@ -1234,10 +1229,9 @@
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;ios&quot;</span>,
                     <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>)),
             <span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot; ```rust,ignore&quot;</span>)]</span>
-<span class="doccomment">//! # extern crate nix;</span>
 <span class="doccomment">//! # use nix::sys::termios::{BaudRate, cfgetispeed, cfgetospeed, cfsetspeed, Termios};</span>
 <span class="doccomment">//! # fn main() {</span>
-<span class="doccomment">//! # let mut t = unsafe { Termios::default_uninit() };</span>
+<span class="doccomment">//! # let mut t: Termios = unsafe { std::mem::zeroed() };</span>
 <span class="doccomment">//! # cfsetspeed(&amp;mut t, 9600u32);</span>
 <span class="doccomment">//! assert_eq!(cfgetispeed(&amp;t), 9600u32);</span>
 <span class="doccomment">//! assert_eq!(cfgetospeed(&amp;t), 9600u32);</span>
@@ -1252,10 +1246,9 @@
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;ios&quot;</span>,
                     <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>)),
             <span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot; ```rust,ignore&quot;</span>)]</span>
-<span class="doccomment">//! # extern crate nix;</span>
 <span class="doccomment">//! # use nix::sys::termios::{BaudRate, cfgetispeed, cfsetspeed, Termios};</span>
 <span class="doccomment">//! # fn main() {</span>
-<span class="doccomment">//! # let mut t = unsafe { Termios::default_uninit() };</span>
+<span class="doccomment">//! # let mut t: Termios = unsafe { std::mem::zeroed() };</span>
 <span class="doccomment">//! # cfsetspeed(&amp;mut t, 9600u32);</span>
 <span class="doccomment">//! assert_eq!(cfgetispeed(&amp;t), BaudRate::B9600.into());</span>
 <span class="doccomment">//! assert_eq!(u32::from(BaudRate::B9600), 9600u32);</span>
@@ -1271,24 +1264,24 @@
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;ios&quot;</span>,
                     <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>)),
             <span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot; ```rust,ignore&quot;</span>)]</span>
-<span class="doccomment">//! # extern crate nix;</span>
 <span class="doccomment">//! # use nix::sys::termios::{cfsetispeed, cfsetospeed, cfsetspeed, Termios};</span>
 <span class="doccomment">//! # fn main() {</span>
-<span class="doccomment">//! # let mut t = unsafe { Termios::default_uninit() };</span>
+<span class="doccomment">//! # let mut t: Termios = unsafe { std::mem::zeroed() };</span>
 <span class="doccomment">//! cfsetispeed(&amp;mut t, 9600u32);</span>
 <span class="doccomment">//! cfsetospeed(&amp;mut t, 9600u32);</span>
 <span class="doccomment">//! cfsetspeed(&amp;mut t, 9600u32);</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
-<span class="kw">use</span> {<span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">use</span> <span class="ident">errno::Errno</span>;
+<span class="kw">use</span> <span class="ident">cfg_if::cfg_if</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errno::Errno</span>;
 <span class="kw">use</span> <span class="ident">libc</span>::{<span class="self">self</span>, <span class="ident">c_int</span>, <span class="ident">tcflag_t</span>};
 <span class="kw">use</span> <span class="ident">std::cell</span>::{<span class="ident">Ref</span>, <span class="ident">RefCell</span>};
 <span class="kw">use</span> <span class="ident">std::convert</span>::{<span class="ident">From</span>, <span class="ident">TryFrom</span>};
 <span class="kw">use</span> <span class="ident">std::mem</span>;
 <span class="kw">use</span> <span class="ident">std::os::unix::io::RawFd</span>;
 
-<span class="kw">use</span> <span class="ident">::unistd::Pid</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::unistd::Pid</span>;
 
 <span class="doccomment">/// Stores settings for the termios API</span>
 <span class="doccomment">///</span>
@@ -1313,24 +1306,9 @@
 <span class="kw">impl</span> <span class="ident">Termios</span> {
     <span class="doccomment">/// Exposes an immutable reference to the underlying `libc::termios` data structure.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This can be used for interfacing with other FFI functions like:</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # extern crate libc;</span>
-    <span class="doccomment">/// # extern crate nix;</span>
-    <span class="doccomment">/// # fn main() {</span>
-    <span class="doccomment">/// # use nix::sys::termios::Termios;</span>
-    <span class="doccomment">/// # let mut termios = unsafe { Termios::default_uninit() };</span>
-    <span class="doccomment">/// let inner_termios = termios.get_libc_termios();</span>
-    <span class="doccomment">/// unsafe { libc::cfgetispeed(&amp;*inner_termios) };</span>
-    <span class="doccomment">/// # }</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// There is no public API exposed for functions that modify the underlying `libc::termios`</span>
-    <span class="doccomment">/// data because it requires additional work to maintain type safety.</span>
-    <span class="comment">// FIXME: Switch this over to use pub(crate)</span>
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_libc_termios</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ref</span><span class="op">&lt;</span><span class="ident">libc::termios</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// This is not part of `nix`&#39;s public API because it requires additional work to maintain type</span>
+    <span class="doccomment">/// safety.</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_libc_termios</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ref</span><span class="op">&lt;</span><span class="ident">libc::termios</span><span class="op">&gt;</span> {
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">termios</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">borrow_mut</span>();
             <span class="ident">termios</span>.<span class="ident">c_iflag</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">input_flags</span>.<span class="ident">bits</span>();
@@ -1344,12 +1322,11 @@
 
     <span class="doccomment">/// Exposes the inner `libc::termios` datastore within `Termios`.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This is unsafe because if this is used to modify the inner libc::termios struct, it will not</span>
-    <span class="doccomment">/// automatically update the safe wrapper type around it. Therefore we disable docs to</span>
-    <span class="doccomment">/// effectively limit its use to nix internals. In this case it should also be paired with a</span>
-    <span class="doccomment">/// call to `update_wrapper()` so that the wrapper-type and internal representation stay</span>
-    <span class="doccomment">/// consistent.</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_libc_termios_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">libc::termios</span> {
+    <span class="doccomment">/// This is unsafe because if this is used to modify the inner `libc::termios` struct, it will</span>
+    <span class="doccomment">/// not automatically update the safe wrapper type around it. In this case it should also be</span>
+    <span class="doccomment">/// paired with a call to `update_wrapper()` so that the wrapper-type and internal</span>
+    <span class="doccomment">/// representation stay consistent.</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_libc_termios_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">libc::termios</span> {
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">termios</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">borrow_mut</span>();
             <span class="ident">termios</span>.<span class="ident">c_iflag</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">input_flags</span>.<span class="ident">bits</span>();
@@ -1361,26 +1338,8 @@
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">as_ptr</span>()
     }
 
-    <span class="doccomment">/// Allows for easily creating new `Termios` structs that will be overwritten with real data.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This should only be used when the inner libc::termios struct will be overwritten before it&#39;s</span>
-    <span class="doccomment">/// read.</span>
-    <span class="comment">// FIXME: Switch this over to use pub(crate)</span>
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">default_uninit</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Termios</span> {
-            <span class="ident">inner</span>: <span class="ident">RefCell::new</span>(<span class="ident">mem::zeroed</span>()),
-            <span class="ident">input_flags</span>: <span class="ident">InputFlags::empty</span>(),
-            <span class="ident">output_flags</span>: <span class="ident">OutputFlags::empty</span>(),
-            <span class="ident">control_flags</span>: <span class="ident">ControlFlags::empty</span>(),
-            <span class="ident">local_flags</span>: <span class="ident">LocalFlags::empty</span>(),
-            <span class="ident">control_chars</span>: [<span class="number">0</span> <span class="kw">as</span> <span class="ident">libc::cc_t</span>; <span class="ident">NCCS</span>],
-        }
-    }
-
     <span class="doccomment">/// Updates the wrapper values from the internal `libc::termios` data structure.</span>
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_wrapper</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">update_wrapper</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="kw">let</span> <span class="ident">termios</span> <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">borrow_mut</span>();
         <span class="self">self</span>.<span class="ident">input_flags</span> <span class="op">=</span> <span class="ident">InputFlags::from_bits_truncate</span>(<span class="ident">termios</span>.<span class="ident">c_iflag</span>);
         <span class="self">self</span>.<span class="ident">output_flags</span> <span class="op">=</span> <span class="ident">OutputFlags::from_bits_truncate</span>(<span class="ident">termios</span>.<span class="ident">c_oflag</span>);
@@ -1461,11 +1420,17 @@
                 <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>))]</span>
         <span class="ident">B76800</span>,
         <span class="ident">B115200</span>,
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
+        <span class="ident">B153600</span>,
         <span class="ident">B230400</span>,
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
+        <span class="ident">B307200</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>,
-                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>))]</span>
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
         <span class="ident">B460800</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
         <span class="ident">B500000</span>,
@@ -1473,8 +1438,10 @@
         <span class="ident">B576000</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>,
-                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>))]</span>
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
         <span class="ident">B921600</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
         <span class="ident">B1000000</span>,
@@ -1516,6 +1483,8 @@
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>))]</span>
         <span class="kw">use</span> <span class="ident">libc</span>::{<span class="ident">B460800</span>, <span class="ident">B921600</span>};
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
+        <span class="kw">use</span> <span class="ident">libc</span>::{<span class="ident">B153600</span>, <span class="ident">B307200</span>, <span class="ident">B460800</span>, <span class="ident">B921600</span>};
 
         <span class="kw">match</span> <span class="ident">s</span> {
             <span class="ident">B0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B0</span>),
@@ -1560,11 +1529,19 @@
                       <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>))]</span>
             <span class="ident">B76800</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B76800</span>),
             <span class="ident">B115200</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B115200</span>),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>,
+                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
+            <span class="ident">B153600</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B153600</span>),
             <span class="ident">B230400</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B230400</span>),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>,
+                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
+            <span class="ident">B307200</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B307200</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>,
                       <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>,
+                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>,
                       <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>,
-                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>))]</span>
+                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>,
+                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
             <span class="ident">B460800</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B460800</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
             <span class="ident">B500000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B500000</span>),
@@ -1572,8 +1549,10 @@
             <span class="ident">B576000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B576000</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>,
                       <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>,
+                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>,
                       <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>,
-                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>))]</span>
+                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>,
+                      <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
             <span class="ident">B921600</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B921600</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
             <span class="ident">B1000000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B1000000</span>),
@@ -1591,7 +1570,7 @@
             <span class="ident">B3500000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B3500000</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">all</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">not</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;sparc64&quot;</span>))))]</span>
             <span class="ident">B4000000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BaudRate::B4000000</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::invalid_argument</span>())
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::from</span>(<span class="ident">Errno::EINVAL</span>))
         }
     }
 }
@@ -1664,37 +1643,46 @@
         <span class="ident">VDISCARD</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>,
                 <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>,
+                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>,
                 <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>,
                 <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>,
-                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>))]</span>
+                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>,
+                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
         <span class="ident">VDSUSP</span>,
         <span class="ident">VEOF</span>,
         <span class="ident">VEOL</span>,
         <span class="ident">VEOL2</span>,
         <span class="ident">VERASE</span>,
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>))]</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>,
+                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
         <span class="ident">VERASE2</span>,
         <span class="ident">VINTR</span>,
         <span class="ident">VKILL</span>,
         <span class="ident">VLNEXT</span>,
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">all</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;sparc64&quot;</span>)))]</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">all</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;sparc64&quot;</span>),
+                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>)))]</span>
         <span class="ident">VMIN</span>,
         <span class="ident">VQUIT</span>,
         <span class="ident">VREPRINT</span>,
         <span class="ident">VSTART</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>,
                 <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>,
+                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>,
                 <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>,
                 <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>,
-                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>))]</span>
+                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>,
+                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
         <span class="ident">VSTATUS</span>,
         <span class="ident">VSTOP</span>,
         <span class="ident">VSUSP</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>)]</span>
         <span class="ident">VSWTC</span>,
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;haiku&quot;</span>)]</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;haiku&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
         <span class="ident">VSWTCH</span>,
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">all</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;sparc64&quot;</span>)))]</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">all</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;sparc64&quot;</span>),
+                <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>)))]</span>
         <span class="ident">VTIME</span>,
         <span class="ident">VWERASE</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>)]</span>
@@ -1702,7 +1690,8 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;sparc64&quot;</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">all</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;sparc64&quot;</span>),
+        <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;illumos&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;solaris&quot;</span>))]</span>
 <span class="kw">impl</span> <span class="ident">SpecialCharacterIndices</span> {
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VMIN</span>: <span class="ident">SpecialCharacterIndices</span> <span class="op">=</span> <span class="ident">SpecialCharacterIndices::VEOF</span>;
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VTIME</span>: <span class="ident">SpecialCharacterIndices</span> <span class="op">=</span> <span class="ident">SpecialCharacterIndices::VEOL</span>;
@@ -1941,6 +1930,7 @@
         <span class="ident">PARODD</span>;
         <span class="ident">HUPCL</span>;
         <span class="ident">CLOCAL</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">CRTSCTS</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
         <span class="ident">CBAUD</span>;
@@ -1991,12 +1981,15 @@
 <span class="macro">libc_bitflags!</span> {
     <span class="doccomment">/// Flags for setting any local modes</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LocalFlags</span>: <span class="ident">tcflag_t</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">ECHOKE</span>;
         <span class="ident">ECHOE</span>;
         <span class="ident">ECHOK</span>;
         <span class="ident">ECHO</span>;
         <span class="ident">ECHONL</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">ECHOPRT</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">ECHOCTL</span>;
         <span class="ident">ISIG</span>;
         <span class="ident">ICANON</span>;
@@ -2008,8 +2001,10 @@
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>))]</span>
         <span class="ident">ALTWERASE</span>;
         <span class="ident">IEXTEN</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">EXTPROC</span>;
         <span class="ident">TOSTOP</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">FLUSHO</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;freebsd&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;dragonfly&quot;</span>,
@@ -2018,6 +2013,7 @@
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>,
                   <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>))]</span>
         <span class="ident">NOKERNINFO</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;redox&quot;</span>))]</span>
         <span class="ident">PENDIN</span>;
         <span class="ident">NOFLSH</span>;
     }
@@ -2031,7 +2027,7 @@
                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;netbsd&quot;</span>,
                  <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;openbsd&quot;</span>))]</span> {
         <span class="doccomment">/// Get input baud rate (see</span>
-        <span class="doccomment">/// [cfgetispeed(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/cfgetispeed.html)).</span>
+        <span class="doccomment">/// [cfgetispeed(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/cfgetispeed.html)).</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// `cfgetispeed()` extracts the input baud rate from the given `Termios` structure.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cfgetispeed</span>(<span class="ident">termios</span>: <span class="kw-2">&amp;</span><span class="ident">Termios</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
@@ -2040,7 +2036,7 @@
         }
 
         <span class="doccomment">/// Get output baud rate (see</span>
-        <span class="doccomment">/// [cfgetospeed(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/cfgetospeed.html)).</span>
+        <span class="doccomment">/// [cfgetospeed(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/cfgetospeed.html)).</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// `cfgetospeed()` extracts the output baud rate from the given `Termios` structure.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cfgetospeed</span>(<span class="ident">termios</span>: <span class="kw-2">&amp;</span><span class="ident">Termios</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
@@ -2049,7 +2045,7 @@
         }
 
         <span class="doccomment">/// Set input baud rate (see</span>
-        <span class="doccomment">/// [cfsetispeed(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/cfsetispeed.html)).</span>
+        <span class="doccomment">/// [cfsetispeed(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/cfsetispeed.html)).</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// `cfsetispeed()` sets the intput baud rate in the given `Termios` structure.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cfsetispeed</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">termios</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Termios</span>, <span class="ident">baud</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -2060,7 +2056,7 @@
         }
 
         <span class="doccomment">/// Set output baud rate (see</span>
-        <span class="doccomment">/// [cfsetospeed(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/cfsetospeed.html)).</span>
+        <span class="doccomment">/// [cfsetospeed(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/cfsetospeed.html)).</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// `cfsetospeed()` sets the output baud rate in the given termios structure.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cfsetospeed</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">termios</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Termios</span>, <span class="ident">baud</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -2085,7 +2081,7 @@
         <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
 
         <span class="doccomment">/// Get input baud rate (see</span>
-        <span class="doccomment">/// [cfgetispeed(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/cfgetispeed.html)).</span>
+        <span class="doccomment">/// [cfgetispeed(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/cfgetispeed.html)).</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// `cfgetispeed()` extracts the input baud rate from the given `Termios` structure.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cfgetispeed</span>(<span class="ident">termios</span>: <span class="kw-2">&amp;</span><span class="ident">Termios</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BaudRate</span> {
@@ -2094,7 +2090,7 @@
         }
 
         <span class="doccomment">/// Get output baud rate (see</span>
-        <span class="doccomment">/// [cfgetospeed(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/cfgetospeed.html)).</span>
+        <span class="doccomment">/// [cfgetospeed(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/cfgetospeed.html)).</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// `cfgetospeed()` extracts the output baud rate from the given `Termios` structure.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cfgetospeed</span>(<span class="ident">termios</span>: <span class="kw-2">&amp;</span><span class="ident">Termios</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BaudRate</span> {
@@ -2103,7 +2099,7 @@
         }
 
         <span class="doccomment">/// Set input baud rate (see</span>
-        <span class="doccomment">/// [cfsetispeed(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/cfsetispeed.html)).</span>
+        <span class="doccomment">/// [cfsetispeed(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/cfsetispeed.html)).</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// `cfsetispeed()` sets the intput baud rate in the given `Termios` structure.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cfsetispeed</span>(<span class="ident">termios</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Termios</span>, <span class="ident">baud</span>: <span class="ident">BaudRate</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -2114,7 +2110,7 @@
         }
 
         <span class="doccomment">/// Set output baud rate (see</span>
-        <span class="doccomment">/// [cfsetospeed(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/cfsetospeed.html)).</span>
+        <span class="doccomment">/// [cfsetospeed(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/cfsetospeed.html)).</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// `cfsetospeed()` sets the output baud rate in the given `Termios` structure.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cfsetospeed</span>(<span class="ident">termios</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Termios</span>, <span class="ident">baud</span>: <span class="ident">BaudRate</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -2139,7 +2135,7 @@
 }
 
 <span class="doccomment">/// Configures the port to something like the &quot;raw&quot; mode of the old Version 7 terminal driver (see</span>
-<span class="doccomment">/// [termios(3)](http://man7.org/linux/man-pages/man3/termios.3.html)).</span>
+<span class="doccomment">/// [termios(3)](https://man7.org/linux/man-pages/man3/termios.3.html)).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// `cfmakeraw()` configures the termios structure such that input is available character-by-</span>
 <span class="doccomment">/// character, echoing is disabled, and all special input and output processing is disabled. Note</span>
@@ -2166,7 +2162,7 @@
 }
 
 <span class="doccomment">/// Return the configuration of a port</span>
-<span class="doccomment">/// [tcgetattr(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/tcgetattr.html)).</span>
+<span class="doccomment">/// [tcgetattr(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcgetattr.html)).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// `tcgetattr()` returns a `Termios` structure with the current configuration for a port. Modifying</span>
 <span class="doccomment">/// this structure *will not* reconfigure the port, instead the modifications should be done to</span>
@@ -2182,7 +2178,7 @@
 }
 
 <span class="doccomment">/// Set the configuration for a terminal (see</span>
-<span class="doccomment">/// [tcsetattr(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/tcsetattr.html)).</span>
+<span class="doccomment">/// [tcsetattr(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcsetattr.html)).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// `tcsetattr()` reconfigures the given port based on a given `Termios` structure. This change</span>
 <span class="doccomment">/// takes affect at a time specified by `actions`. Note that this function may return success if</span>
@@ -2193,13 +2189,13 @@
 }
 
 <span class="doccomment">/// Block until all output data is written (see</span>
-<span class="doccomment">/// [tcdrain(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/tcdrain.html)).</span>
+<span class="doccomment">/// [tcdrain(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcdrain.html)).</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tcdrain</span>(<span class="ident">fd</span>: <span class="ident">RawFd</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="ident">Errno::result</span>(<span class="kw">unsafe</span> { <span class="ident">libc::tcdrain</span>(<span class="ident">fd</span>) }).<span class="ident">map</span>(<span class="ident">drop</span>)
 }
 
 <span class="doccomment">/// Suspend or resume the transmission or reception of data (see</span>
-<span class="doccomment">/// [tcflow(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/tcflow.html)).</span>
+<span class="doccomment">/// [tcflow(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcflow.html)).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// `tcflow()` suspends of resumes the transmission or reception of data for the given port</span>
 <span class="doccomment">/// depending on the value of `action`.</span>
@@ -2208,7 +2204,7 @@
 }
 
 <span class="doccomment">/// Discard data in the output or input queue (see</span>
-<span class="doccomment">/// [tcflush(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/tcflush.html)).</span>
+<span class="doccomment">/// [tcflush(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcflush.html)).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// `tcflush()` will discard data for a terminal port in the input queue, output queue, or both</span>
 <span class="doccomment">/// depending on the value of `action`.</span>
@@ -2217,7 +2213,7 @@
 }
 
 <span class="doccomment">/// Send a break for a specific duration (see</span>
-<span class="doccomment">/// [tcsendbreak(3p)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/tcsendbreak.html)).</span>
+<span class="doccomment">/// [tcsendbreak(3p)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcsendbreak.html)).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// When using asynchronous data transmission `tcsendbreak()` will transmit a continuous stream</span>
 <span class="doccomment">/// of zero-valued bits for an implementation-defined duration.</span>
@@ -2226,7 +2222,7 @@
 }
 
 <span class="doccomment">/// Get the session controlled by the given terminal (see</span>
-<span class="doccomment">/// [tcgetsid(3)](http://pubs.opengroup.org/onlinepubs/9699919799/functions/tcgetsid.html)).</span>
+<span class="doccomment">/// [tcgetsid(3)](https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcgetsid.html)).</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tcgetsid</span>(<span class="ident">fd</span>: <span class="ident">RawFd</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Pid</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">libc::tcgetsid</span>(<span class="ident">fd</span>) };
 

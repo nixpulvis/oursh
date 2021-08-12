@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["start","Start a REPL over the strings the user provides."]],"mod":[["action","Actions to be bound to input methods."],["completion","User text completion for REPL interations."],["history","Keeps a record of previous commands, used for completion and archeology."],["prompt",""]]});
