@@ -7,7 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: Swatinem/rust-cache@v1
+      - uses: actions/cache@v2
+        with:
+          path: target/
+          key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -23,10 +26,14 @@ jobs:
 
   bench:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - run: sudo apt-get install gnuplot zsh fish
       - uses: actions/checkout@v2
-      - uses: Swatinem/rust-cache@v1
+      - uses: actions/cache@v2
+        with:
+          path: target/
+          key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -41,16 +48,20 @@ jobs:
 
   doc:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - uses: actions/checkout@v2
-      - uses: Swatinem/rust-cache@v1
+      - uses: actions/cache@v2
+        with:
+          path: target/
+          key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
       - uses: actions-rs/cargo@v1
         with:
-          command: doc
+          command: doc --release
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
