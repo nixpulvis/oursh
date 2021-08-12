@@ -1,1 +1,1 @@
-initSidebarItems({"macro":[["debug","Print debug information to stderr."]],"mod":[["config","WTF!"],["process","Subprocess execution management."],["program","Parsing and handling program syntax(es) of the shell."]]});
+initSidebarItems({"macro":[["debug","Print debug information to stderr."]],"mod":[["invocation","WTF!"],["process","Subprocess execution management."],["program","Parsing and handling program syntax(es) of the shell."]]});
