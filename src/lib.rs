@@ -1,5 +1,4 @@
 //! [![Documentation](https://docs.rs/oursh/badge.svg)](https://docs.rs/oursh)
-//! [![CV](https://github.com/nixpulvis/oursh/actions/workflows/cv.yml/badge.svg?branch=master&event=push)](https://github.com/nixpulvis/oursh/actions/workflows/cv.yml)
 //! [![CI](https://github.com/nixpulvis/oursh/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/nixpulvis/oursh/actions/workflows/ci.yml)
 //! [![Dependencies](https://deps.rs/repo/github/nixpulvis/oursh/status.svg)](https://deps.rs/repo/github/nixpulvis/oursh)
 //!
