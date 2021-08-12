@@ -33,6 +33,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+          components: clippy
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
