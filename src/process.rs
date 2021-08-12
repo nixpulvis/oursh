@@ -94,7 +94,7 @@ impl Process {
 
     /// Run a shell job in the background.
     pub fn fork(&mut self, io: IO) -> nix::Result<WaitStatus> {
-        match unistd::fork() {
+        match unsafe { unistd::fork() } {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.children.push(child);
                 child.status()
@@ -123,7 +123,7 @@ impl Process {
 
                 if let Err(e) = self.exec() {
                     match e {
-                        nix::Error::Sys(Errno::ENOENT) => {
+                        Errno::ENOENT => {
                             let name = self.argv[0].to_string_lossy();
                             eprintln!("oursh: {}: command not found", name);
                             exit(127);
@@ -140,7 +140,7 @@ impl Process {
 
     /// Run a shell job, waiting for the command to finish.
     pub fn fork_and_wait(&mut self, io: IO) -> nix::Result<WaitStatus> {
-        match unistd::fork() {
+        match unsafe { unistd::fork() } {
             Ok(ForkResult::Parent { child, .. }) => {
                 self.children.push(child);
                 let status = child.wait();
