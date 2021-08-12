@@ -65,10 +65,6 @@ assert_matches = "1"
 criterion = { version = "0.3", features = ["html_reports"] }
 
 [[bench]]
-name = "shebang_block"
-harness = false
-
-[[bench]]
 name = "compare"
 harness = false
 

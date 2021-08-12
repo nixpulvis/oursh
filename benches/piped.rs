@@ -7,70 +7,106 @@ use criterion::Criterion;
 mod common;
 
 fn piped_benchmark(c: &mut Criterion) {
-    c.bench_function("empty", |b| {
+    let mut group = c.benchmark_group("oursh");
+
+    group.bench_function("empty", |b| {
         b.iter(|| {
-            oursh_release!("");
+            oursh_release!("")
         })
     });
-    c.bench_function("parse_error", |b| {
+
+    group.bench_function("parse_error", |b| {
         b.iter(|| {
             oursh_release!("%!");
         })
     });
 
-    c.bench_function("simple", |b| {
+    group.bench_function("simple", |b| {
         b.iter(|| {
             oursh_release!("echo 1");
         })
     });
 
-    c.bench_function("builtin", |b| {
+    group.bench_function("builtin", |b| {
         b.iter(|| {
             oursh_release!(":");
         })
     });
 
-    c.bench_function("chained", |b| {
+    group.bench_function("chained", |b| {
         b.iter(|| {
             oursh_release!("false; true; echo 1");
         })
     });
 
-    c.bench_function("compound", |b| {
+    group.bench_function("compound", |b| {
         b.iter(|| {
             oursh_release!("{echo 1; echo 2;}");
         })
     });
 
-    c.bench_function("boolean", |b| {
+    group.bench_function("boolean", |b| {
         b.iter(|| {
             oursh_release!("! true || true && false");
         })
     });
 
-    c.bench_function("conditional", |b| {
+    group.bench_function("conditional", |b| {
         b.iter(|| {
             oursh_release!("if true; then echo 1; else echo 2; fi");
         })
     });
 
-    c.bench_function("subshell", |b| {
+    group.bench_function("subshell", |b| {
         b.iter(|| {
             oursh_release!("(true)");
         })
     });
 
-    c.bench_function("pipeline", |b| {
+    group.bench_function("pipeline", |b| {
         b.iter(|| {
             oursh_release!("echo 12345 | wc -c");
         })
     });
 
-    c.bench_function("background", |b| {
+    group.bench_function("background", |b| {
         b.iter(|| {
             oursh_release!("echo 1 &");
         })
     });
+
+    group.finish();
+
+    #[cfg(feature = "shebang-block")]
+    {
+        let mut group = c.benchmark_group("oursh shebang-block");
+
+        group.bench_function("ruby", |b| {
+            b.iter(|| {
+                oursh_release!("{#!ruby; puts 1}");
+            })
+        });
+
+        group.bench_function("node", |b| {
+            b.iter(|| {
+                oursh_release!("{#!node; console.log(1)}");
+            })
+        });
+
+        group.bench_function("python", |b| {
+            b.iter(|| {
+                oursh_release!("{#!python; print(1)}");
+            })
+        });
+
+        group.bench_function("sh", |b| {
+            b.iter(|| {
+                oursh_release!("{#!/bin/sh; echo 1}");
+            })
+        });
+
+        group.finish();
+    }
 }
 
 criterion_group!(benches, piped_benchmark);
