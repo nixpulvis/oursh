@@ -498,4 +498,4 @@ pub mod lex;
 // The code for this module is located in `src/program/posix/mod.lalrpop`.
 lalrpop_mod!(
     /// LALRPOP generated parser module.
-    pub parse, "/program/posix.rs");
+    pub parse, "/program/posix/mod.rs");
