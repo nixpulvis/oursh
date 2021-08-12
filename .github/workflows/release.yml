@@ -34,6 +34,10 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: bench
+      - uses: actions/upload-artifact@v2
+        with:
+          name: oursh
+          path: target/criterion/**/*.{html,svg}
 
   doc:
     runs-on: ubuntu-latest

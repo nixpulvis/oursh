@@ -62,7 +62,7 @@ lalrpop = "0.19"
 [dev-dependencies]
 chrono = "0.4"
 assert_matches = "1"
-criterion = "0.3"
+criterion = { version = "0.3", features = ["html_reports"] }
 
 [[bench]]
 name = "shebang_block"
