@@ -1,4 +1,12 @@
-on: [push]
+on:
+  push:
+    branches:
+      - master
+    pull_request:
+      - master
+    tags:
+      - "v*"
+      - "*prerelease"
 
 name: Release
 
