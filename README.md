@@ -136,7 +136,7 @@ We will want to create a few internal modules for the shell.
         - `zsh` - zsh completion support.
         - `parse` - dynamic completion generation, from `man` for example.
     - `sync` - remote session and DB synchronization.
-- `config` - loading for `.ourshrc` and others.
+- `invocation` - loading for `.ourshrc` and others.
 - `package` - simplistic package manager support (builtin function).
 
 ---

@@ -93,7 +93,7 @@
 //!         - `zsh` - zsh completion support.
 //!         - `parse` - dynamic completion generation, from `man` for example.
 //!     - `sync` - remote session and DB synchronization.
-//! - `config` - loading for `.ourshrc` and others.
+//! - `invocation` - loading for `.ourshrc` and others.
 //! - `package` - simplistic package manager support (builtin function).
 //!
 //!
@@ -135,7 +135,7 @@ macro_rules! debug {
     };
 }
 
-pub mod config;
+pub mod invocation;
 pub mod process;
 pub mod program;
 

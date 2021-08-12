@@ -23,7 +23,7 @@ use rustyline::{
     error::ReadlineError,
 };
 use oursh::{
-    config::source_profile,
+    invocation::source_profile,
     program::{parse_and_run, Runtime, Result, Error},
     process::{Jobs, IO},
 };
