@@ -52,7 +52,9 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: oursh
-          path: target/criterion/**/*.{html,svg}
+          path: |
+            target/criterion/**/*.html
+            target/criterion/**/*.svg
 
   doc:
     runs-on: ubuntu-latest
