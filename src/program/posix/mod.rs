@@ -127,6 +127,7 @@ use nix::{
     sys::wait::WaitStatus,
     unistd::Pid,
 };
+use uuid::Uuid;
 use dirs::home_dir;
 use crate::{
     process::{ProcessGroup, Process},
@@ -368,8 +369,7 @@ impl super::Run for Command {
                 fn bridge(interpreter: &str, text: &str) -> io::Result<ExitStatus> {
                     // TODO: Even for the Shebang interpretor, we shouldn't
                     // create files like this.
-                    // XXX: Length is the worlds worst hash function.
-                    let bridgefile = format!("/tmp/.oursh_bridge-{}", text.len());
+                    let bridgefile = format!("/tmp/.oursh_bridge-{}", Uuid::new_v4());
                     {
                         // TODO: Use our job interface without creating any
                         // fucking files... The shebang isn't even a real

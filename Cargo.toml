@@ -43,6 +43,7 @@ shebang-block = []
 
 [dependencies]
 docopt = "1.1"
+uuid = { version = "0.8", features = ["v4"] }
 dirs = "3.0"
 lalrpop-util = "0.19"
 nix = "0.22"
