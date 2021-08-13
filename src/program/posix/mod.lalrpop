@@ -20,6 +20,7 @@ extern {
         "`"         => lex::Token::Backtick,
         "!"         => lex::Token::Bang,
         "|"         => lex::Token::Pipe,
+        "$"         => lex::Token::Dollar,
         "="         => lex::Token::Equals,
         "\\"        => lex::Token::Backslash,
         "\""        => lex::Token::DoubleQuote,
@@ -98,9 +99,8 @@ pub Command: ast::Command = {
         };
         ast::Command::Lang(i, t.into())
     },
-    "(" <p: Program> ")" => {
-        ast::Command::Subshell(box p)
-    },
+    "$" "(" <p: Program> ")" => ast::Command::Subshell(box p),
+    "$" "(" ")"              => ast::Command::Subshell(box ast::Program(vec![])),
     "{" <c: Compound> "}" => c,
     "if" <cond: Compound> "then" <then: Compound> <els: Else> "fi" => {
         let left = ast::Command::And(box cond, box then);

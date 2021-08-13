@@ -35,6 +35,7 @@ pub enum Token<'input> {
     Backtick,
     Bang,
     Pipe,
+    Dollar,
     Equals,
     Backslash,
     DoubleQuote,
@@ -191,6 +192,14 @@ impl<'input> Iterator for Lexer<'input> {
                         Some(Ok((s, Token::Or, e)))
                     } else {
                         Some(Ok((s, Token::Pipe, e)))
+                    }
+                },
+                '$' => {
+                    match self.lookahead {
+                        Some((_, '{', e)) |
+                        Some((_, '(', e)) => Some(Ok((s, Token::Dollar, e))),
+                        Some((s, _, e)) => Some(self.word(s-1, e)),
+                        None => None,
                     }
                 },
                 '{' => Some(self.block(s, s+e)),

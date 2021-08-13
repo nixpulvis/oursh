@@ -14,16 +14,16 @@
 //!
 //! ## Features
 //!
-//! - [ ] POSIX compatibility
+//! - [ ] [POSIX compatibility](https://github.com/nixpulvis/oursh/milestone/1)
 //!     - [x] Simple commands `ls`
-//!     - [ ] Quotes `echo "foo"; echo 'bar'`
+//!     - [ ] Quotes (#28) `echo "foo"; echo 'bar'`
 //!     - [x] Assignment `LOG=trace cargo run`
 //!     - [x] Variables `echo $foo`
-//!     - [ ] Special variables `echo $?; echo $1`
+//!     - [ ] Special variables ($54) `echo $?; echo $1`
 //!     - [x] Boolean status syntax `! true && false || true`
 //!     - [x] Conditionals `if ; then ; elif ; then ; else ; fi`
-//!     - [ ] Compound commands `{ ls; date; }`
-//!     - [ ] Subshells `(sleep 1; date)`
+//!     - [x] Compound commands `{ ls; date; }`
+//!     - [ ] Subshells `\$(sleep 1; date)`
 //!     - [x] Background jobs `{ sleep 1; date; }& date`
 //!     - [x] Redirection `date > now.txt`
 //!     - [ ] Pipes `ls | wc -l`
@@ -32,7 +32,7 @@
 //!     - [ ] Hashlang syntax `{#lang; ...}`, i.e. `{#posix ls}`
 //!     - [x] Shebang syntax `{#!/usr/bin/env ruby; puts :sym}`
 //! - [ ] bash/zsh autocomplete compatibility
-//!     - [x] Command completion
+//!     - [ ] Command completion
 //!     - [ ] Path completion
 //!     - [ ] Variable completion
 //!     - [ ] Job completion

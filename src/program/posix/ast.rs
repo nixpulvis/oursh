@@ -298,17 +298,18 @@ mod tests {
     #[test]
     fn subshell_command() {
         assert!(parse_command("()").is_err());
+        assert!(parse_command("$()").is_ok());
 
-        let command = parse_command("(ls)").unwrap();
+        let command = parse_command("$(ls)").unwrap();
         assert_matches!(command, Command::Subshell(_));
 
-        let command = parse_command("(date;)").unwrap();
+        let command = parse_command("$(date;)").unwrap();
         assert_matches!(command, Command::Subshell(_));
 
-        let command = parse_command("(date; ls)").unwrap();
+        let command = parse_command("$(date; ls)").unwrap();
         assert_matches!(command, Command::Subshell(_));
 
-        let command = parse_command("(date; ls -la;)").unwrap();
+        let command = parse_command("$(date; ls -la;)").unwrap();
         assert_matches!(command, Command::Subshell(_));
     }
 }
