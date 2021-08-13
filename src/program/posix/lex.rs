@@ -198,8 +198,7 @@ impl<'input> Iterator for Lexer<'input> {
                     match self.lookahead {
                         Some((_, '{', e)) |
                         Some((_, '(', e)) => Some(Ok((s, Token::Dollar, e))),
-                        Some((s, _, e)) => Some(self.word(s-1, e)),
-                        None => None,
+                        _ => Some(self.word(s, e)),
                     }
                 },
                 '{' => Some(self.block(s, s+e)),
