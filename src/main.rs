@@ -37,6 +37,9 @@ The oursh utility is a command language interpreter that shall execute commands
 read from a command line string, the standard input, or a specified file.
 
 Usage:
+    oursh [options] [<command> [<arguments>...]]
+
+True Usage:
     oursh    [options] [<command_file> [<arguments>...]]
     oursh -s [options] [<arguments>...]
     oursh -c [options] <command_string> [<command_name> [<arguments>...]]
@@ -109,19 +112,28 @@ fn main() -> MainResult {
     }
 
     let args = runtime.args.clone();
-    if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
-        MainResult(parse_and_run(c, &mut runtime))
-    } else if let Some(Value::Plain(Some(ref filename))) = runtime.args.find("<command_file>") {
-        let mut file = File::open(filename)
-            .unwrap_or_else(|_| panic!("error opening file: {}", filename));
+    dbg!(&args);
+    if args.get_bool("-c") {
+        if let Some(Value::Plain(Some(text))) = args.find("<command>") {
+            MainResult(parse_and_run(&text, &mut runtime))
+        } else {
+            unimplemented!()
+        }
+    } else if args.get_bool("-s") {
+        if let Some(Value::Plain(Some(ref filename))) = args.find("<command>") {
+            let mut file = File::open(filename)
+                .unwrap_or_else(|_| panic!("error opening file: {}", filename));
 
-        // Fill a string buffer from the file.
-        let mut text = String::new();
-        file.read_to_string(&mut text)
-            .expect("error reading file");
+            // Fill a string buffer from the file.
+            let mut text = String::new();
+            file.read_to_string(&mut text)
+                .expect("error reading file");
 
-        // Run the program.
-        MainResult(parse_and_run(&text, &mut runtime))
+            // Run the program.
+            MainResult(parse_and_run(&text, &mut runtime))
+        } else {
+            unimplemented!()
+        }
     } else {
         // Standard input file descriptor (0), used for user input from the
         // user of the shell.
