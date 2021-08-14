@@ -27,34 +27,14 @@ use nix::{
 };
 use retain_mut::RetainMut;
 
-/// File descriptors for use in processes and threads
-#[derive(Debug, Copy, Clone)]
-pub struct IO(pub [RawFd; 3]);
+mod io;
+pub use self::io::IO;
+pub mod jobs;
+pub use self::jobs::Jobs;
+mod session;
+mod signal;
+mod thread;
 
-impl IO {
-    fn dup(&self) -> Result<(), nix::Error> {
-        if self.0[0] != 0 {
-            dup2(self.0[0], 0)?;
-            close(self.0[0])?;
-        }
-        if self.0[1] != 1 {
-            dup2(self.0[1], 1)?;
-            close(self.0[1])?;
-        }
-        if self.0[2] != 2 {
-            dup2(self.0[2], 2)?;
-            close(self.0[2])?;
-        }
-        Ok(())
-    }
-}
-
-impl Default for IO {
-    fn default() -> Self {
-        // [stdin, stdout, stderr]
-        IO([0, 1, 2])
-    }
-}
 
 /// A process to be executed by various means
 ///
@@ -176,16 +156,6 @@ impl Wait for Process {
     }
 }
 
-/// Threads are distinguished by a thread ID (TID)
-///
-/// An ordinary process has a single thread with TID equal to PID.
-///
-/// TODO: Syntax for this?
-/// TODO: Differences between &?
-pub struct Thread;
-
-/// TODO: What signal handling can we put here?
-pub struct Signal;
 
 /// Processes groups are used for things like pipelines and background jobs
 ///
@@ -209,57 +179,3 @@ impl ProcessGroup {
         &mut self.0
     }
 }
-
-
-/// Shared job handling structure
-///
-/// Maintains a collection of process groups.
-// TODO: Make into slightly better struct.
-pub type Jobs = Rc<RefCell<Vec<(String, ProcessGroup)>>>;
-
-/// Enumerate the given jobs, pruning exited, signaled or otherwise errored process groups
-pub fn retain_alive_jobs(jobs: &mut Jobs) {
-    jobs.borrow_mut().retain_mut(|job| {
-        let children = &mut job.1.leader_mut().children;
-        let id = job.0.clone();
-
-        children.retain_mut(|child| {
-            match child.status() {
-                Ok(WaitStatus::StillAlive) => {
-                    true
-                },
-                Ok(WaitStatus::Exited(pid, code)) => {
-                    println!("[{}]+\tExit({})\t{}", id, code, pid);
-                    false
-                },
-                Ok(WaitStatus::Signaled(pid, signal, _)) => {
-                    println!("[{}]+\t{}\t{}", id, signal, pid);
-                    false
-                },
-                Ok(_) => {
-                    println!("unhandled");
-                    true
-                },
-                Err(e) => {
-                    println!("err: {:?}", e);
-                    false
-                }
-            }
-        });
-
-        !children.is_empty()
-    });
-}
-
-
-/// Every process group is in a unique session.
-///
-/// (When the process is created, it becomes a member of the session of its parent.) By convention,
-/// the session ID of a session equals the process ID of the first member of the session, called
-/// the session leader. A process finds the ID of its session using the system call getsid().
-///
-/// Every session may have a controlling tty, that then also is called the controlling tty of each
-/// of its member processes. A file descriptor for the controlling tty is obtained by opening
-/// /dev/tty. (And when that fails, there was no controlling tty.) Given a file descriptor for the
-/// controlling tty, one may obtain the SID using tcgetsid(fd).
-pub struct Session;

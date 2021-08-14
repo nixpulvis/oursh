@@ -68,9 +68,7 @@ use nix::{
     unistd::Pid,
     sys::wait::WaitStatus,
 };
-use crate::{
-    process::retain_alive_jobs,
-};
+use crate::process::jobs;
 
 /// Convenience type for results with program errors.
 pub type Result<T> = result::Result<T, Error>;
@@ -236,6 +234,6 @@ pub fn parse_and_run(text: &str, runtime: &mut Runtime)
         program.run(runtime)
     };
 
-    retain_alive_jobs(runtime.jobs);
+    jobs::retain_alive(runtime.jobs);
     result
 }
