@@ -16,6 +16,7 @@ use nix::{
 };
 use crate::{
     program::{Result, Error, Runtime, parse_and_run},
+    process::Wait as WaitTrait,
 };
 
 /// A builtin is a custom shell command, often changing the state of the
@@ -94,6 +95,35 @@ impl Builtin for Dot {
             },
             _ => unreachable!(),
 
+        }
+    }
+}
+
+/// Wait builtin, used to block for all background jobs.
+pub struct Wait;
+
+impl Builtin for Wait {
+    fn run(self, argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
+        match argv.len() {
+            0 => unreachable!(),
+            1 => {
+                for job in runtime.jobs.borrow().iter() {
+                    job.1.leader().wait();
+                }
+                Ok(WaitStatus::Exited(Pid::this(), 0))
+            }
+            n => {
+                let pid: i32 = argv[1].to_string_lossy().parse().unwrap();
+                dbg!(pid);
+                dbg!(&runtime.jobs);
+                if let Some((id, pg)) = runtime.jobs.borrow().iter().find(|(id, pg)| {
+                    pid == pg.leader().pid().as_raw()
+                }) {
+                    pg.leader().wait().map_err(|_| Error::Runtime)
+                } else {
+                    Ok(WaitStatus::Exited(Pid::this(), 1337))
+                }
+            },
         }
     }
 }

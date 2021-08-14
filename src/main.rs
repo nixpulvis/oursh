@@ -156,9 +156,8 @@ fn main() -> MainResult {
                         match parse_and_run(&line, &mut runtime) {
                             Ok(status) => {
                                 match status {
-                                    WaitStatus::Exited(_pid, _code) =>
-                                        runtime.rl.as_mut().unwrap().save_history(&runtime.history_path).unwrap(),
-                                    WaitStatus::Signaled(_pid, _signal, _coredump) =>
+                                    WaitStatus::Exited(_,_) |
+                                    WaitStatus::Signaled(_,_,_) =>
                                         runtime.rl.as_mut().unwrap().save_history(&runtime.history_path).unwrap(),
                                     _ => {},
                                 }

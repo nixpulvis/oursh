@@ -48,7 +48,6 @@ mod thread;
 pub struct Process {
     argv: Vec<CString>,
     pid: Pid,
-    children: Vec<Pid>,
 }
 
 impl Process {
@@ -58,7 +57,6 @@ impl Process {
         Process {
             argv,
             pid: getpid(),
-            children: Vec::new(),
         }
     }
 
@@ -73,51 +71,31 @@ impl Process {
     }
 
     /// Run a shell job in the background.
-    pub fn fork(&mut self, io: IO) -> nix::Result<WaitStatus> {
+    pub fn fork(argv: Vec<CString>, io: IO) -> Result<Self, nix::Error> {
         match unsafe { unistd::fork() } {
-            Ok(ForkResult::Parent { child, .. }) => {
-                self.children.push(child);
-                child.status()
+            Ok(ForkResult::Parent { child }) => {
+                Ok(Process {
+                    argv,
+                    pid: child,
+                })
             },
             Ok(ForkResult::Child) => {
-                self.pid = getpid();
+                let process = Process {
+                    argv,
+                    pid: getpid(),
+                };
                 io.dup()?;
-                if let Err(e) = self.exec() {
+                if let Err(e) = process.exec() {
                     match e {
                         Errno::ENOENT => {
-                            let name = self.argv[0].to_string_lossy();
+                            let name = process.argv[0].to_string_lossy();
                             eprintln!("oursh: {}: command not found", name);
                             exit(127);
                         },
                         _ => exit(128),
                     }
                 } else {
-                    self.status()
-                }
-            },
-            Err(e) => Err(e),
-        }
-    }
-
-    /// Run a shell job, waiting for the command to finish.
-    pub fn fork_and_wait(&mut self, io: IO) -> nix::Result<WaitStatus> {
-        match unsafe { unistd::fork() } {
-            Ok(ForkResult::Parent { child, .. }) => {
-                self.children.push(child);
-                let status = child.wait();
-                if let Ok(WaitStatus::Exited(_, 127)) = status {
-                    let name = self.argv[0].to_string_lossy();
-                    eprintln!("oursh: {}: command not found", name);
-                }
-                status
-            },
-            Ok(ForkResult::Child) => {
-                self.pid = getpid();
-                io.dup()?;
-                if self.exec().is_err() {
-                    exit(127);
-                } else {
-                    self.wait()
+                    unreachable!()
                 }
             },
             Err(e) => Err(e),
