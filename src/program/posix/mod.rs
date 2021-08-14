@@ -280,12 +280,9 @@ impl super::Run for Command {
                                 status.map_err(|_| Error::Runtime)
                             } else {
                                 let status = process.wait().map_err(|_| Error::Runtime);
-                                match status {
-                                    Ok(WaitStatus::Exited(_, 127)) => {
-                                        eprintln!("oursh: {}: command not found", name);
-                                    },
-                                    _ => {}
-                                };
+                                if let Ok(WaitStatus::Exited(_, 127)) = status {
+                                    eprintln!("oursh: {}: command not found", name);
+                                }
                                 status
                             }
                         },
