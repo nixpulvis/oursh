@@ -130,7 +130,7 @@ use nix::{
 use uuid::Uuid;
 use dirs::home_dir;
 use crate::{
-    process::{ProcessGroup, Process},
+    process::{ProcessGroup, Process, Wait},
     program::{Runtime, Result, Error},
 };
 use self::ast::{Assignment, Redirect};
@@ -268,17 +268,22 @@ impl super::Run for Command {
                         "false"   => builtin::Return(1).run(argv, runtime),
                         "jobs"    => builtin::Jobs.run(argv, runtime),
                         "true"    => builtin::Return(0).run(argv, runtime),
+                        "wait"    => builtin::Wait.run(argv, runtime),
                         _ => {
                             let id = (runtime.jobs.borrow().len() + 1).to_string();
-                            let mut job = Process::new(argv);
+                            let name = argv[0].to_string_lossy().to_string();
+                            let process = Process::fork(argv, runtime.io).map_err(|_| Error::Runtime)?;
                             if runtime.background {
-                                let status = job.fork(runtime.io).map_err(|_| Error::Runtime);
-                                eprintln!("[{}]\t{}", id, job.pid());
-                                runtime.jobs.borrow_mut().push((id, ProcessGroup(job)));
-                                status
+                                let status = process.status();
+                                eprintln!("[{}]\t{}", id, process.pid());
+                                runtime.jobs.borrow_mut().push((id, ProcessGroup(process)));
+                                status.map_err(|_| Error::Runtime)
                             } else {
-                                job.fork_and_wait(runtime.io)
-                                   .map_err(|_| Error::Runtime)
+                                let status = process.wait().map_err(|_| Error::Runtime);
+                                if let Ok(WaitStatus::Exited(_, 127)) = status {
+                                    eprintln!("oursh: {}: command not found", name);
+                                }
+                                status
                             }
                         },
                     }

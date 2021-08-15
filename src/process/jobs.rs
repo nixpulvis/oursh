@@ -15,33 +15,31 @@ pub type Jobs = Rc<RefCell<Vec<(String, ProcessGroup)>>>;
 /// Enumerate the given jobs, pruning exited, signaled or otherwise errored process groups
 pub fn retain_alive(jobs: &mut Jobs) {
     jobs.borrow_mut().retain_mut(|job| {
-        let children = &mut job.1.leader_mut().children;
         let id = job.0.clone();
-
-        children.retain_mut(|child| {
-            match child.status() {
-                Ok(WaitStatus::StillAlive) => {
-                    true
-                },
-                Ok(WaitStatus::Exited(pid, code)) => {
-                    println!("[{}]+\tExit({})\t{}", id, code, pid);
-                    false
-                },
-                Ok(WaitStatus::Signaled(pid, signal, _)) => {
-                    println!("[{}]+\t{}\t{}", id, signal, pid);
-                    false
-                },
-                Ok(_) => {
-                    println!("unhandled");
-                    true
-                },
-                Err(e) => {
+        let body = job.1.leader().body();
+        match job.1.leader().status() {
+            Ok(WaitStatus::StillAlive) => {
+                true
+            },
+            Ok(WaitStatus::Exited(pid, code)) => {
+                println!("[{}]+\tExit({})\t{}\t{}", id, code, pid, body);
+                false
+            },
+            Ok(WaitStatus::Signaled(pid, signal, _)) => {
+                println!("[{}]+\t{}\t{}\t{}", id, signal, pid, body);
+                false
+            },
+            Ok(_) => {
+                println!("unhandled");
+                true
+            },
+            Err(e) => {
+                if nix::errno::Errno::ECHILD != e {
                     println!("err: {:?}", e);
-                    false
                 }
-            }
-        });
 
-        !children.is_empty()
+                false
+            }
+        }
     });
 }
