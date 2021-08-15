@@ -131,6 +131,15 @@ impl<'input> Iterator for Lexer<'input> {
             let tok = match c {
                 '\n' => Some(Ok((s, Token::Linefeed, e))),
                 ';'  => Some(Ok((s, Token::Semi, e))),
+                '#'  => {
+                    while let Some((s, c, e)) = self.advance() {
+                        match c {
+                            '\n' => break,
+                            _ => {},
+                        }
+                    }
+                    self.next()
+                }
                 ')'  => Some(Ok((s, Token::RParen, e))),
                 '('  => Some(Ok((s, Token::LParen, e))),
                 '`'  => Some(Ok((s, Token::Backtick, e))),
