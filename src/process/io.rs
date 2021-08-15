@@ -1,8 +1,6 @@
 use std::os::unix::io::RawFd;
 use nix::{
-    errno::Errno,
-    unistd::{self, execvp, dup2, close, getpid, Pid, ForkResult},
-    sys::wait::{waitpid, WaitStatus, WaitPidFlag},
+    unistd::{dup2, close},
 };
 
 /// File descriptors for use in processes and threads

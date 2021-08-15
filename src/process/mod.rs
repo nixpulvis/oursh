@@ -16,16 +16,12 @@ use std::{
     borrow::Cow,
     process::exit,
     ffi::CString,
-    cell::RefCell,
-    rc::Rc,
-    os::unix::io::RawFd,
 };
 use nix::{
     errno::Errno,
-    unistd::{self, execvp, dup2, close, getpid, Pid, ForkResult},
+    unistd::{self, execvp, getpid, Pid, ForkResult},
     sys::wait::{waitpid, WaitStatus, WaitPidFlag},
 };
-use retain_mut::RetainMut;
 
 mod io;
 pub use self::io::IO;
