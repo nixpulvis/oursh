@@ -119,7 +119,7 @@ fn main() -> MainResult {
         } else {
             unimplemented!()
         }
-    } else if args.get_bool("-s") {
+    } else if args.get_bool("-s") || args.get_bool("<command>") {
         if let Some(Value::Plain(Some(ref filename))) = args.find("<command>") {
             let mut file = File::open(filename)
                 .unwrap_or_else(|_| panic!("error opening file: {}", filename));
