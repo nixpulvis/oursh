@@ -211,29 +211,27 @@ pub use self::modern::Program as ModernProgram;
 pub fn parse_and_run(text: &str, runtime: &mut Runtime)
     -> crate::program::Result<WaitStatus>
 {
-    let result = if text.is_empty() {
-        Ok(WaitStatus::Exited(Pid::this(), 0))
-    } else {
-        // Parse with the primary grammar and run each command in order.
-        let program = match parse_primary(text.as_bytes()) {
-            Ok(program) => program,
-            Err(e) => {
-                eprintln!("{:?}: {:#?}", e, text);
-                return Err(e);
-            }
-        };
-
-        if let Some(editor) = &mut runtime.rl { editor.add_history_entry(text); }
-
-        // Print the program if the flag is given.
-        if runtime.args.get_bool("--ast") {
-            eprintln!("{:#?}", program);
+    // Parse with the primary grammar and run each command in order.
+    let program = match parse_primary(text.as_bytes()) {
+        Ok(program) => program,
+        Err(e) => {
+            eprintln!("{:?}: {:#?}", e, text);
+            return Err(e);
         }
-
-        // Run it!
-        program.run(runtime)
     };
 
+    if let Some(editor) = &mut runtime.rl {
+        editor.add_history_entry(text);
+    }
+
+    // Print the program if the flag is given.
+    if runtime.args.get_bool("--ast") {
+        eprintln!("{:#?}", program);
+    }
+
+    // Run it!
+    let result = program.run(runtime);
+    // Check up on the background jobs.
     jobs::retain_alive(runtime.jobs);
     result
 }

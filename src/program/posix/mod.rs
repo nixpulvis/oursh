@@ -181,9 +181,13 @@ impl super::Program for Program {
                         eprintln!("unexpected token {:?} found at {}-{}, expecting one of: {}",
                                   t, s, e, expected.join(", "));
                     },
-                    ParseError::UnrecognizedEOF { location, expected }=> {
-                        eprintln!("unexpected EOF found at {}, expecting one of: {}",
-                                  location, expected.join(", "));
+                    ParseError::UnrecognizedEOF { location, expected } => {
+                        if location == 0 {
+                            return Ok(Program(vec![]))
+                        } else {
+                            eprintln!("unexpected EOF found at {}, expecting one of: {}",
+                                      location, expected.join(", "));
+                        }
                     }
                     ParseError::ExtraToken { token: (i, t, _) } => {
                         eprintln!("extra token {:?} found at {}", t, i);
@@ -504,3 +508,16 @@ lalrpop_mod!(
     #[allow(unknown_lints)]
     /// LALRPOP generated parser module.
     pub parse, "/program/posix/mod.rs");
+
+#[cfg(test)]
+mod tests {
+    use crate::program::Program as ProgramTrait;
+    use super::*;
+
+    #[test]
+    fn program_parse_empty() {
+        let result: Result<Program> = Program::parse(b"" as &[u8]);
+        assert!(result.is_ok());
+        assert!(result.unwrap().0.is_empty());
+    }
+}

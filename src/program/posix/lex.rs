@@ -131,6 +131,15 @@ impl<'input> Iterator for Lexer<'input> {
             let tok = match c {
                 '\n' => Some(Ok((s, Token::Linefeed, e))),
                 ';'  => Some(Ok((s, Token::Semi, e))),
+                '#'  => {
+                    while let Some((_, c, _)) = self.lookahead {
+                        match c {
+                            '\n' => break,
+                            _ => self.advance(),
+                        };
+                    }
+                    self.next()
+                }
                 ')'  => Some(Ok((s, Token::RParen, e))),
                 '('  => Some(Ok((s, Token::LParen, e))),
                 '`'  => Some(Ok((s, Token::Backtick, e))),
@@ -490,5 +499,36 @@ mod tests {
                         Some(Ok((_, Token::Word("ls"), _))));
         assert_matches!(lexer.next(),
                         Some(Ok((_, Token::Done, _))));
+    }
+
+    #[test]
+    fn comments() {
+        let mut lexer = Lexer::new("word # comment");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("word"), _))));
+        assert!(lexer.next().is_none());
+
+        let mut lexer = Lexer::new("word1 # comment1\nword2 # comment2");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("word1"), _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Linefeed, _))));
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("word2"), _))));
+        assert!(lexer.next().is_none());
+
+        let mut lexer = Lexer::new("#word");
+        assert!(lexer.next().is_none());
+        let mut lexer = Lexer::new("word#word");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("word#word"), _))));
+        assert!(lexer.next().is_none());
+    }
+
+    #[test]
+    #[ignore]
+    fn backtick_comment_undefined_behaviour() {
+        let mut lexer = Lexer::new("\"`echo #`\"");
+        // TODO: Read section 6: Word expansion, we need new AST types.
     }
 }
