@@ -132,7 +132,7 @@ impl<'input> Iterator for Lexer<'input> {
                 '\n' => Some(Ok((s, Token::Linefeed, e))),
                 ';'  => Some(Ok((s, Token::Semi, e))),
                 '#'  => {
-                    while let Some((s, c, e)) = self.lookahead {
+                    while let Some((_, c, _)) = self.lookahead {
                         match c {
                             '\n' => break,
                             _ => self.advance(),
@@ -515,6 +515,13 @@ mod tests {
                         Some(Ok((_, Token::Linefeed, _))));
         assert_matches!(lexer.next(),
                         Some(Ok((_, Token::Word("word2"), _))));
+        assert!(lexer.next().is_none());
+
+        let mut lexer = Lexer::new("#word");
+        assert!(lexer.next().is_none());
+        let mut lexer = Lexer::new("word#word");
+        assert_matches!(lexer.next(),
+                        Some(Ok((_, Token::Word("word#word"), _))));
         assert!(lexer.next().is_none());
     }
 }
