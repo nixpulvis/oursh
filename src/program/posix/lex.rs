@@ -524,4 +524,11 @@ mod tests {
                         Some(Ok((_, Token::Word("word#word"), _))));
         assert!(lexer.next().is_none());
     }
+
+    #[test]
+    #[ignore]
+    fn backtick_comment_undefined_behaviour() {
+        let mut lexer = Lexer::new("\"`echo #`\"");
+        // TODO: Read section 6: Word expansion, we need new AST types.
+    }
 }
