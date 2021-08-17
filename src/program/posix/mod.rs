@@ -508,3 +508,16 @@ lalrpop_mod!(
     #[allow(unknown_lints)]
     /// LALRPOP generated parser module.
     pub parse, "/program/posix/mod.rs");
+
+#[cfg(test)]
+mod tests {
+    use crate::program::Program as ProgramTrait;
+    use super::*;
+
+    #[test]
+    fn program_parse_empty() {
+        let result: Result<Program> = Program::parse(b"" as &[u8]);
+        assert!(result.is_ok());
+        assert!(result.unwrap().0.is_empty());
+    }
+}
