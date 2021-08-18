@@ -50,11 +50,22 @@ extern {
     }
 }
 
+Sep = {
+    ";",
+    "\n",
+};
+
 pub Program: ast::Program = {
-    <p: Program> "\n" <l: Jobs> => p.append(&l),
-    <p: Program> "\n" => p,
-    <p: Program> ";" <g: Jobs> => p.append(&g),
-    <p: Program> ";" => p,
+    <p: Program?> Sep <l: Jobs> => if let Some(p) = p {
+        p.append(&l)
+    } else {
+        ast::Program(vec![])
+    },
+    <p: Program?> Sep => if let Some(p) = p {
+        p
+    } else {
+        ast::Program(vec![])
+    },
     Jobs => <>,
 }
 
