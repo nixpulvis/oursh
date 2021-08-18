@@ -130,8 +130,8 @@ use nix::{
 use uuid::Uuid;
 use dirs::home_dir;
 use crate::{
-    process::{ProcessGroup, Process, Wait},
-    program::{Runtime, Result, Error},
+    process::{jobs, ProcessGroup, Process, Wait},
+    program::{Run, Runtime, Result, Error, Program as ProgramTrait},
 };
 use self::ast::{Assignment, Redirect};
 
@@ -144,10 +144,30 @@ use {
     self::ast::Interpreter,
 };
 
-// Re-exports.
-pub use self::ast::Program;
-pub use self::ast::Command;
+// Builtin functions for the POSIX language, like `exit` and `cd`.
+pub mod builtin;
 pub use self::builtin::Builtin;
+
+// The POSIX AST data structures and helper functions.
+pub mod ast;
+pub use self::ast::{Program, Command};
+
+// The custom LALRPOP lexer.
+pub mod lex;
+
+// Following with the skiing analogy, the code inside here is black level.
+// Many of the issues in a grammar rule cause conflicts in seemingly unrelated
+// rules. Some issues are known to be harder to solve, and while LALRPOP does
+// a fantasic job of helping, it's not perfect. Avoid the rocks, trees, and
+// enjoy.
+//.
+// The code for this module is located in `src/program/posix/mod.lalrpop`.
+lalrpop_mod!(
+    #[allow(clippy::all)]
+    #[allow(unknown_lints)]
+    /// LALRPOP generated parser module.
+    pub parse, "/program/posix/mod.rs");
+
 
 /// The syntax and semantics of a single POSIX command.
 ///
@@ -487,31 +507,50 @@ fn expand_vars(string: &str) -> String {
     result
 }
 
-// Builtin functions for the POSIX language, like `exit` and `cd`.
-pub mod builtin;
+// TODO: Replace program::Result
+// TODO: Callbacks instead of `rl` in `Runtime` and to call `jobs::retain_alive`
+pub fn parse_and_run(text: &str, runtime: &mut Runtime)
+    -> crate::program::Result<WaitStatus>
+{
+    // Parse with the primary grammar and run each command in order.
+    let program = match Program::parse(text.as_bytes()) {
+        Ok(program) => program,
+        Err(e) => {
+            eprintln!("{:?}: {:#?}", e, text);
+            return Err(e);
+        }
+    };
 
-// The POSIX AST data structures and helper functions.
-pub mod ast;
+    if let Some(editor) = &mut runtime.rl {
+        editor.add_history_entry(text);
+    }
 
-// The custom LALRPOP lexer.
-pub mod lex;
+    // Print the program if the flag is given.
+    if runtime.args.get_bool("--ast") {
+        eprintln!("{:#?}", program);
+    }
 
-// Following with the skiing analogy, the code inside here is black level.
-// Many of the issues in a grammar rule cause conflicts in seemingly unrelated
-// rules. Some issues are known to be harder to solve, and while LALRPOP does
-// a fantasic job of helping, it's not perfect. Avoid the rocks, trees, and
-// enjoy.
-//
-// The code for this module is located in `src/program/posix/mod.lalrpop`.
-lalrpop_mod!(
-    #[allow(clippy::all)]
-    #[allow(unknown_lints)]
-    /// LALRPOP generated parser module.
-    pub parse, "/program/posix/mod.rs");
+    // Run it!
+    let result = program.run(runtime);
+    // Check up on the background jobs.
+    jobs::retain_alive(runtime.jobs);
+
+    result
+}
+
 
 #[cfg(test)]
 mod tests {
-    use crate::program::Program as ProgramTrait;
+    use super::*;
+
+    // TODO: Test pre/post callbacks
+    // #[test]
+    // fn parse_and_run_hooks() {}
+}
+
+#[cfg(test)]
+mod tests {
+    // use crate::program::Program as ProgramTrait;
     use super::*;
 
     #[test]

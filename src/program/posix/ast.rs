@@ -230,15 +230,24 @@ mod tests {
 
     #[test]
     fn program() {
-        assert!(parse_program("").is_err());
-        assert!(parse_program("\n").is_ok());
-        assert!(parse_program(";").is_ok());
-        assert!(parse_program("; \n").is_ok());
-        assert!(parse_program("\n;ls").is_ok());
         assert_eq!(1, parse_program("cat README.md").unwrap().0.len());
         assert_eq!(1, parse_program("ls;").unwrap().0.len());
         assert_eq!(2, parse_program("ls; date").unwrap().0.len());
         assert_eq!(3, parse_program("git s; ls -la; true;").unwrap().0.len());
+    }
+
+    #[test]
+    fn program_seperators() {
+        assert!(parse_program("").is_ok());
+        assert!(parse_program("\n").is_ok());
+        assert!(parse_program(";").is_err());
+        assert!(parse_program("; \n").is_err());
+        assert!(parse_program("\n;ls").is_err());
+        assert!(parse_program("ls;date").is_ok());
+        assert!(parse_program("ls;date;").is_ok());
+        assert!(parse_program("ls;\ndate;").is_ok());
+        assert!(parse_program("ls\n;date;").is_err());
+        assert!(parse_program("ls;\n\ndate;").is_ok());
     }
 
     fn parse_command<'a>(text: &'a str)

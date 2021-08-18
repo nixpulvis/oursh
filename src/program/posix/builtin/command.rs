@@ -1,8 +1,11 @@
 use std::ffi::CString;
 use nix::sys::wait::WaitStatus;
 use crate::{
-    program::posix::builtin::Builtin,
-    program::{Result, Runtime, parse_and_run},
+    program::{Result, Runtime},
+    program::posix::{
+        parse_and_run,
+        builtin::Builtin,
+    },
 };
 
 /// Command builtin, I have no idea why you'd want this honestly.

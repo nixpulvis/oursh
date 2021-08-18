@@ -68,7 +68,6 @@ use nix::{
     unistd::Pid,
     sys::wait::WaitStatus,
 };
-use crate::process::jobs;
 
 /// Convenience type for results with program errors.
 pub type Result<T> = result::Result<T, Error>;
@@ -144,40 +143,6 @@ pub trait Command: Sized + Debug + Run {
 }
 
 
-/// The primary program type, used for unannotated blocks.
-// TODO: This should be `ModernProgram`.
-pub type PrimaryProgram = PosixProgram;
-
-/// TODO: alt explain
-// TODO: This should be `PosixProgram`.
-pub type AlternateProgram = BasicProgram;
-
-/// Parse a program of the primary type.
-///
-/// # Examples
-///
-/// ```
-/// use oursh::program::parse_primary;
-///
-/// parse_primary(b"ls | wc" as &[u8]);
-/// ```
-pub fn parse_primary<R: BufRead>(reader: R) -> Result<PrimaryProgram> {
-    PrimaryProgram::parse(reader)
-}
-
-/// Parse a program of the alternate type.
-///
-/// # Examples
-///
-/// ```
-/// use oursh::program::parse_alternate;
-///
-/// parse_alternate(b"ls" as &[u8]);
-/// ```
-pub fn parse_alternate<R: BufRead>(reader: R) -> Result<AlternateProgram> {
-    AlternateProgram::parse(reader)
-}
-
 /// Parse a program of the given type.
 ///
 /// # Examples
@@ -206,32 +171,3 @@ pub mod posix;
 pub use self::posix::Program as PosixProgram;
 pub mod modern;
 pub use self::modern::Program as ModernProgram;
-
-// TODO: Replace program::Result
-pub fn parse_and_run(text: &str, runtime: &mut Runtime)
-    -> crate::program::Result<WaitStatus>
-{
-    // Parse with the primary grammar and run each command in order.
-    let program = match parse_primary(text.as_bytes()) {
-        Ok(program) => program,
-        Err(e) => {
-            eprintln!("{:?}: {:#?}", e, text);
-            return Err(e);
-        }
-    };
-
-    if let Some(editor) = &mut runtime.rl {
-        editor.add_history_entry(text);
-    }
-
-    // Print the program if the flag is given.
-    if runtime.args.get_bool("--ast") {
-        eprintln!("{:#?}", program);
-    }
-
-    // Run it!
-    let result = program.run(runtime);
-    // Check up on the background jobs.
-    jobs::retain_alive(runtime.jobs);
-    result
-}

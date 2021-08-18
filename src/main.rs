@@ -24,7 +24,7 @@ use rustyline::{
 };
 use oursh::{
     invocation::source_profile,
-    program::{parse_and_run, Runtime, Result, Error},
+    program::{posix::parse_and_run, Runtime, Result, Error},
     process::{Jobs, IO},
 };
 

@@ -8,8 +8,11 @@ use nix::{
     sys::wait::WaitStatus,
 };
 use crate::{
-    program::posix::builtin::Builtin,
-    program::{Result, Runtime, parse_and_run},
+    program::{Result, Runtime},
+    program::posix::{
+        parse_and_run,
+        builtin::Builtin,
+    },
 };
 
 /// Execute commands from `file` in the current environment
