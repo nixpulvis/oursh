@@ -231,7 +231,10 @@ mod tests {
     #[test]
     fn program() {
         assert!(parse_program("").is_err());
-        // TODO: Should this be Ok? len 0.
+        assert!(parse_program("\n").is_ok());
+        assert!(parse_program(";").is_ok());
+        assert!(parse_program("; \n").is_ok());
+        assert!(parse_program("\n;ls").is_ok());
         assert_eq!(1, parse_program("cat README.md").unwrap().0.len());
         assert_eq!(1, parse_program("ls;").unwrap().0.len());
         assert_eq!(2, parse_program("ls; date").unwrap().0.len());
