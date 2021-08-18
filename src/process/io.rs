@@ -31,3 +31,19 @@ impl Default for IO {
         IO([0, 1, 2])
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[ignore]
+    fn io_default() {}
+    #[test]
+    #[ignore]
+    fn io_pipe() {}
+    #[test]
+    #[ignore]
+    fn io_dup() {}
+}

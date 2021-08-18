@@ -153,3 +153,31 @@ impl ProcessGroup {
         &mut self.0
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[ignore]
+    fn process_new() {}
+    #[test]
+    #[ignore]
+    fn process_body() {}
+    #[test]
+    #[ignore]
+    fn process_pid() {}
+    #[test]
+    #[ignore]
+    fn process_fork() {}
+    #[test]
+    #[ignore]
+    fn wait() {}
+    #[test]
+    #[ignore]
+    fn status() {}
+    #[test]
+    #[ignore]
+    fn pg_leader() {}
+}

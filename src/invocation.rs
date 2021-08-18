@@ -24,3 +24,21 @@ pub fn source_profile(runtime: &mut Runtime) {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[ignore]
+    fn source_profile_login() {}
+    #[test]
+    #[ignore]
+    fn source_profile_interactive() {}
+    #[test]
+    #[ignore]
+    fn source_profile_noprofile() {}
+    #[test]
+    #[ignore]
+    fn source_profile_nologin() {}
+}

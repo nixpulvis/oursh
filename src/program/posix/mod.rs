@@ -541,15 +541,6 @@ pub fn parse_and_run(text: &str, runtime: &mut Runtime)
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
-    // TODO: Test pre/post callbacks
-    // #[test]
-    // fn parse_and_run_hooks() {}
-}
-
-#[cfg(test)]
-mod tests {
     // use crate::program::Program as ProgramTrait;
     use super::*;
 
@@ -559,4 +550,8 @@ mod tests {
         assert!(result.is_ok());
         assert!(result.unwrap().0.is_empty());
     }
+
+    // TODO: Test pre/post callbacks
+    // #[test]
+    // fn parse_and_run_hooks() {}
 }

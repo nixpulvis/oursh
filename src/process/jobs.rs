@@ -43,3 +43,16 @@ pub fn retain_alive(jobs: &mut Jobs) {
         }
     });
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[ignore]
+    fn retain_alive_removes_jobs() {}
+    #[test]
+    #[ignore]
+    fn retain_alive_prints_job_status() {}
+}
