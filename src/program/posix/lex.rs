@@ -528,7 +528,7 @@ mod tests {
     #[test]
     #[ignore]
     fn backtick_comment_undefined_behaviour() {
-        let mut lexer = Lexer::new("\"`echo #`\"");
+        let mut _lexer = Lexer::new("\"`echo #`\"");
         // TODO: Read section 6: Word expansion, we need new AST types.
     }
 }
