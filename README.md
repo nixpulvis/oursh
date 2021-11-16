@@ -4,7 +4,7 @@
 [![Dependencies](https://deps.rs/repo/github/nixpulvis/oursh/status.svg)](https://deps.rs/repo/github/nixpulvis/oursh)
 
 This shell should be both POSIX compatible and yet modern and exciting. Fancy
-features should not be prevented by POSIX compatibility. This will effect the
+features should not be prevented by POSIX compatibility. This will affect the
 design of the shell.
 
 The name of the shell is `oursh` which is both somewhat unique, and memorable.
