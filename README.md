@@ -45,6 +45,7 @@ programs, the language this will be written in.
     - [ ] Higher-order functions
     - [ ] Threading?
 - [ ] Obfuscated strings (`!'password'!`)
+- [ ] Time every command
 - [ ] mosh like remote session support
 - [ ] Smart history, sync'd across devices
 - [ ] Pipe old commands without rerunning
