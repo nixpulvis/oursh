@@ -222,7 +222,7 @@ impl super::Run for Command {
                 for r in redirects {
                     match r {
                         Redirect::RW { n, filename, .. } => {
-                            let file = File::with_options()
+                            let file = File::options()
                                             .create(true)
                                             .read(true)
                                             .write(true)
@@ -231,7 +231,7 @@ impl super::Run for Command {
                             runtime.io.0[*n as usize] = fd;
                         },
                         Redirect::Read { n, filename, .. } => {
-                            let file = File::with_options()
+                            let file = File::options()
                                             .read(true)
                                             .write(false)
                                             .open(filename).unwrap();
@@ -240,7 +240,7 @@ impl super::Run for Command {
                         },
                         Redirect::Write { n, filename, append, .. } => {
                             // TODO: Clobber
-                            let file = File::with_options()
+                            let file = File::options()
                                             .create(true)
                                             .read(false)
                                             .write(true)

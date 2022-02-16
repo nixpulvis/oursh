@@ -55,8 +55,6 @@ ctrlc = "3.1"
 termion = "1.5"
 rustyline = "8"
 
-retain_mut = "0.1"
-
 [build-dependencies]
 lalrpop = "0.19"
 

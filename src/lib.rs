@@ -99,7 +99,7 @@
 //! [documentation]: https://nixpulvis.com/oursh/oursh
 //! [rustup]: https://github.com/rust-lang-nursery/rustup.rs
 //! [posix-ref]: http://pubs.opengroup.org/onlinepubs/9699919799/
-#![feature(box_syntax, box_patterns, with_options)]
+#![feature(box_syntax, box_patterns, vec_retain_mut)]
 
 extern crate nix;
 extern crate pwd;
