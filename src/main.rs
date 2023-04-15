@@ -1,4 +1,4 @@
-#![feature(exclusive_range_pattern, termination_trait_lib)]
+#![feature(exclusive_range_pattern)]
 
 extern crate docopt;
 extern crate nix;
@@ -8,7 +8,7 @@ extern crate dirs;
 
 use std::{
     env::{self, var},
-    process::Termination,
+    process::{Termination, ExitCode},
     fs::File,
     io::{self, Read},
     cell::RefCell,
@@ -249,14 +249,14 @@ fn expand_prompt(prompt: String) -> String {
 #[derive(Debug)]
 struct MainResult(Result<WaitStatus>);
 impl Termination for MainResult {
-    fn report(self) -> i32 {
+    fn report(self) -> ExitCode {
         match self.0 {
-            Ok(WaitStatus::Exited(_pid, exit_code)) => exit_code,
-            Ok(WaitStatus::Signaled(_pid, _signal, _coredump)) => 128,
-            Ok(_) => 0,  // TODO: Is this even remotely correct?
-            Err(Error::Read) => 1,
-            Err(Error::Parse) => 2,
-            Err(Error::Runtime) => 127,
+            Ok(WaitStatus::Exited(_pid, code)) => ExitCode::from(code as u8),
+            Ok(WaitStatus::Signaled(_pid, _signal, _coredump)) => ExitCode::from(128),
+            Ok(_) => ExitCode::from(0),  // TODO: Is this even remotely correct?
+            Err(Error::Read) => ExitCode::from(1),
+            Err(Error::Parse) => ExitCode::from(2),
+            Err(Error::Runtime) => ExitCode::from(127),
         }
     }
 }

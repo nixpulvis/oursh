@@ -60,14 +60,14 @@ pub Program: ast::Program = {
 
 Jobs: ast::Program = {
     <cs: Command> "&" <j: Jobs> => {
-        j.insert(&ast::Command::Background(box cs))
+        j.insert(&ast::Command::Background(Box::new(cs)))
     },
     Job => ast::Program(vec![<>]),
 }
 
 Job: ast::Command = {
     <cs: Command> "&" => {
-        ast::Command::Background(box cs)
+        ast::Command::Background(Box::new(cs))
     },
     Command => <>,
 }
@@ -99,46 +99,46 @@ pub Command: ast::Command = {
         };
         ast::Command::Lang(i, t.into())
     },
-    "$" "(" <p: Program> ")" => ast::Command::Subshell(box p),
-    "$" "(" ")"              => ast::Command::Subshell(box ast::Program(vec![])),
+    "$" "(" <p: Program> ")" => ast::Command::Subshell(Box::new(p)),
+    "$" "(" ")"              => ast::Command::Subshell(Box::new(ast::Program(vec![]))),
     "{" <c: Compound> "}" => c,
     "if" <cond: Compound> "then" <then: Compound> <els: Else> "fi" => {
-        let left = ast::Command::And(box cond, box then);
-        ast::Command::Or(box left, box els)
+        let left = ast::Command::And(Box::new(cond), Box::new(then));
+        ast::Command::Or(Box::new(left), Box::new(els))
     },
     "if" <cond: Compound> "then" <then: Compound> "fi" => {
-        ast::Command::And(box cond, box then)
+        ast::Command::And(Box::new(cond), Box::new(then))
     },
     <cs: Command> "&&" <p: Pipeline> => {
-        ast::Command::And(box cs, box p)
+        ast::Command::And(Box::new(cs), Box::new(p))
     },
     <cs: Command> "||" <p: Pipeline> => {
-        ast::Command::Or(box cs, box p)
+        ast::Command::Or(Box::new(cs), Box::new(p))
     },
     Pipeline => <>,
 }
 
 Else: ast::Command = {
     "elif" <elif: Compound> "then" <then: Compound> => {
-        ast::Command::And(box elif, box then)
+        ast::Command::And(Box::new(elif), Box::new(then))
     },
     "elif" <elif: Compound> "then" <then: Compound> <els: Else> => {
-        let left = ast::Command::And(box elif, box then);
-        ast::Command::Or(box left, box els)
+        let left = ast::Command::And(Box::new(elif), Box::new(then));
+        ast::Command::Or(Box::new(left), Box::new(els))
     },
     "else" <els: Compound> => els,
 }
 
 Pipeline: ast::Command = {
     "!" <ps: PipelineSeq> => {
-        ast::Command::Not(box ps)
+        ast::Command::Not(Box::new(ps))
     },
     <ps: PipelineSeq> => ps,
 }
 
 PipelineSeq: ast::Command = {
     <ps: PipelineSeq> "|" "\n"* <c: Simple> => {
-        ast::Command::Pipeline(box ps, box c)
+        ast::Command::Pipeline(Box::new(ps), Box::new(c))
     },
     <c: Simple> => c,
 }

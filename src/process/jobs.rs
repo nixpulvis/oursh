@@ -3,7 +3,6 @@ use std::{
     cell::RefCell,
 };
 use nix::sys::wait::WaitStatus;
-use retain_mut::RetainMut;
 use crate::process::{Wait, ProcessGroup};
 
 /// Shared job handling structure
