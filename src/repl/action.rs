@@ -9,9 +9,6 @@ use termion::{
 use crate::program::{Runtime, parse_and_run};
 use crate::repl::prompt;
 
-#[cfg(feature = "history")]
-use super::history::History;
-
 #[cfg(feature = "completion")]
 use super::completion::*;
 
@@ -40,7 +37,7 @@ impl Action {
         prompt::ps0(&mut context.stdout);
         if parse_and_run(context.text, &mut context.runtime).is_ok() {
             #[cfg(feature = "history")]
-            context.runtime.history.add(&context.runtime.text, 1);
+            context.runtime.history.add(&context.text, 1);
         }
         context.stdout.activate_raw_mode().unwrap();
 
@@ -95,7 +92,7 @@ impl Action {
 
             // Save history to file in $HOME.
             #[cfg(feature = "history")]
-            context.runtime.history.save();
+            context.runtime.history.save().unwrap();
 
             // Manually drop the raw terminal.
             // TODO: Needed?
@@ -151,9 +148,9 @@ impl Action {
         print!("{}{}",
                termion::cursor::Left(1000),  // XXX
                termion::clear::CurrentLine);
-        context.runtime.prompt.display(&mut context.stdout);
+        prompt::ps1(&mut context.stdout);
 
-        if let Some(history_text) = context.history.get_up() {
+        if let Some(history_text) = context.runtime.history.get_up() {
             *context.text = history_text;
             print!("{}", context.text);
         }
@@ -165,9 +162,9 @@ impl Action {
         print!("{}{}",
                termion::cursor::Left(1000),  // XXX
                termion::clear::CurrentLine);
-        context.prompt.display(&mut context.stdout);
+        prompt::ps1(&mut context.stdout);
 
-        if let Some(history_text) = context.history.get_down() {
+        if let Some(history_text) = context.runtime.history.get_down() {
             *context.text = history_text;
             print!("{}", context.text);
             context.stdout.flush().unwrap();

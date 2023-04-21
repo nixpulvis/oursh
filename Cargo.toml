@@ -33,10 +33,10 @@ shebang-block = []
 # things like arrow keys for history, and cursor editing.
 raw = []
 
-# # Save the history of commands (entered) for quick recall.
-# # TODO: Stop depending on raw if this ever interacts with anything beside the
-# # RELP input.
-# history = ["raw"]
+# Save the history of commands (entered) for quick recall.
+# TODO: Stop depending on raw if this ever interacts with anything beside the
+# RELP input.
+history = ["raw"]
 
 # # REPL tab completion.
 # completion = ["raw"]

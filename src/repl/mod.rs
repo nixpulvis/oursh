@@ -23,9 +23,6 @@ use {
     crate::program::parse_and_run,
 };
 
-#[cfg(feature = "history")]
-use self::history::History;
-
 /// Start a REPL over the strings the user provides.
 ///
 /// ## Examples
