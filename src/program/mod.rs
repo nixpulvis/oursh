@@ -220,9 +220,8 @@ pub fn parse_and_run(text: &str, runtime: &mut Runtime)
         }
     };
 
-    if let Some(editor) = &mut runtime.rl {
-        editor.add_history_entry(text);
-    }
+    #[cfg(feature = "history")]
+    runtime.history.add(text, 1);
 
     // Print the program if the flag is given.
     if runtime.args.get_bool("--ast") {

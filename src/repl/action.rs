@@ -8,7 +8,7 @@ use termion::{
     raw::RawTerminal,
 };
 use docopt::ArgvMap;
-use crate::program::parse_and_run;
+use crate::program::{Runtime, parse_and_run};
 use crate::process::{IO, Jobs};
 
 #[cfg(feature = "history")]
@@ -37,6 +37,36 @@ pub struct ActionContext<'a> {
 
 #[cfg(feature = "raw")]
 impl Action {
+    pub fn enter(context: &mut ActionContext) {
+        // Perform a raw mode line break.
+        print!("\n\r");
+        context.stdout.flush().unwrap();
+
+        // Run the command.
+        context.stdout.suspend_raw_mode().unwrap();
+        let mut runtime = Runtime {
+            background: false,
+            io: context.io.clone(),
+            jobs: context.jobs,
+            args: context.args,
+            #[cfg(feature = "history")]
+            history: context.history,
+        };
+        if parse_and_run(context.text, &mut runtime).is_ok() {
+            #[cfg(feature = "history")]
+            context.history.add(&context.text, 1);
+        }
+        context.stdout.activate_raw_mode().unwrap();
+
+        // Reset for the next program.
+        context.text.clear();
+        #[cfg(feature = "history")]
+        context.history.reset_index();
+
+        // Print a boring static prompt.
+        context.prompt.display(&mut context.stdout);
+    }
+
     pub fn insert(context: &mut ActionContext, c: char) {
         if let Ok((x, y)) = context.stdout.cursor_pos() {
             let i = (x - context.prompt_length) as usize;
@@ -64,28 +94,6 @@ impl Action {
                 context.stdout.flush().unwrap();
             }
         }
-    }
-
-    pub fn enter(context: &mut ActionContext) {
-        // Perform a raw mode line break.
-        print!("\n\r");
-        context.stdout.flush().unwrap();
-
-        // Run the command.
-        context.stdout.suspend_raw_mode().unwrap();
-        if parse_and_run(context.text, *context.io, context.jobs, context.args).is_ok() {
-            #[cfg(feature = "history")]
-            context.history.add(&context.text, 1);
-        }
-        context.stdout.activate_raw_mode().unwrap();
-
-        // Reset for the next program.
-        context.text.clear();
-        #[cfg(feature = "history")]
-        context.history.reset_index();
-
-        // Print a boring static prompt.
-        context.prompt.display(&mut context.stdout);
     }
 
     pub fn interrupt(context: &mut ActionContext) {
