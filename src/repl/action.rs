@@ -7,7 +7,6 @@ use termion::{
     raw::RawTerminal,
 };
 use crate::program::{Runtime, parse_and_run};
-use crate::process::IO;
 use crate::repl::prompt;
 
 #[cfg(feature = "history")]
@@ -38,16 +37,8 @@ impl Action {
 
         // Run the command.
         context.stdout.suspend_raw_mode().unwrap();
-        let mut runtime = Runtime {
-            background: false,
-            io: IO::default(),
-            jobs: context.runtime.jobs,
-            args: context.runtime.args,
-            #[cfg(feature = "history")]
-            history: context.runtime.history,
-        };
         prompt::ps0(&mut context.stdout);
-        if parse_and_run(context.text, &mut runtime).is_ok() {
+        if parse_and_run(context.text, &mut context.runtime).is_ok() {
             #[cfg(feature = "history")]
             context.runtime.history.add(&context.runtime.text, 1);
         }

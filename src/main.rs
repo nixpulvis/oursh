@@ -82,11 +82,10 @@ fn main() -> MainResult {
         .parse())
         .unwrap_or_else(|e| e.exit());
 
+    // Default inputs and outputs for the processes.
+    let io = IO::default();
     // Elementary job management.
     let mut jobs: Jobs = Rc::new(RefCell::new(vec![]));
-
-    // Default inputs and outputs.
-    let io = IO::default();
 
     #[cfg(feature = "history")]
     let mut history = History::load();
