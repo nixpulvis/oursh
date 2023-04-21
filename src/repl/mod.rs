@@ -5,6 +5,8 @@
 
 use std::io::{Stdin, Stdout};
 use docopt::ArgvMap;
+use nix::sys::wait::WaitStatus;
+use nix::unistd::Pid;
 use crate::process::{Jobs, IO};
 pub use self::prompt::{ps1, Prompt};
 
@@ -43,6 +45,7 @@ use self::history::History;
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
 pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap)
+    -> crate::program::Result<WaitStatus>
 {
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
@@ -52,6 +55,8 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
     raw_loop(prompt, stdin, stdout, io, jobs, args);
     #[cfg(not(feature = "raw"))]
     buffered_loop(prompt, stdin, stdout, io, jobs, args);
+
+    Ok(WaitStatus::Exited(Pid::this(), 0))
 }
 
 #[cfg(feature = "raw")]

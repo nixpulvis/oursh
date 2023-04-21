@@ -15,7 +15,6 @@ use std::{
     rc::Rc,
 };
 use nix::sys::wait::WaitStatus;
-use nix::unistd::Pid;
 use docopt::{Docopt, Value};
 use termion::is_tty;
 use oursh::{
@@ -141,9 +140,8 @@ fn main() -> MainResult {
             let prompt = Prompt::sh_style();
 
             // TODO: Return results for failures during repl run
-            repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &mut args);
-
-            MainResult(Ok(WaitStatus::Exited(Pid::this(), 0)))
+            let result = repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &mut args);
+            MainResult(result)
         } else {
             // Fill a string buffer from STDIN.
             let mut text = String::new();
