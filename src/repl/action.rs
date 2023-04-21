@@ -24,7 +24,7 @@ pub struct ActionContext<'a> {
     pub stdout: &'a mut RawTerminal<Stdout>,
     pub io: &'a mut IO,
     pub jobs: &'a mut Jobs,
-    pub args: &'a mut ArgvMap,
+    pub args: &'a ArgvMap,
     // TODO: Remove this field.
     #[cfg(feature = "raw")]
     pub prompt_length: u16,
