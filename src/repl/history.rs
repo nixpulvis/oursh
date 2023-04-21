@@ -8,7 +8,7 @@ use std::{
 
 /// The history of a user's provided commands.
 #[derive(Debug)]
-pub struct History(Option<usize>, Vec<(String, usize)>);
+pub struct History(pub Option<usize>, pub Vec<(String, usize)>);
 
 impl History {
     pub fn reset_index(&mut self) {
@@ -102,7 +102,7 @@ impl History {
         history
     }
 
-    pub fn save(&self) {
+    pub fn save(&self) -> Result<(), ()> {
         let home = env::var("HOME").expect("HOME variable not set.");
         let history_path = format!("{}/.oursh_history", home);
         let mut f = File::create(&history_path)
@@ -113,5 +113,7 @@ impl History {
             f.write_all(b"\n")
                 .expect("error writing history");
         }
+
+        Ok(())
     }
 }

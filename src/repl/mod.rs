@@ -6,7 +6,9 @@
 use std::io::{Stdin, Stdout};
 use docopt::ArgvMap;
 use crate::process::{Jobs, IO};
+use crate::program::{Runtime, parse_and_run};
 pub use self::prompt::Prompt;
+
 
 #[cfg(feature = "raw")]
 use {
@@ -15,8 +17,6 @@ use {
     termion::input::TermRead,
     termion::raw::IntoRawMode,
 };
-#[cfg(feature = "raw")]
-use self::action::{Action, ActionContext};
 
 #[cfg(not(feature = "raw"))]
 use std::io::BufRead;
@@ -28,7 +28,7 @@ use self::history::History;
 ///
 /// ## Examples
 ///
-/// ```ignore
+/// ```
 /// use std::io;
 /// use oursh::program::Result;
 /// use oursh::repl;
@@ -73,14 +73,11 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
             jobs: jobs,
             args: args,
             prompt: &mut prompt,
-            #[cfg(feature = "raw")]
             prompt_length: prompt_length,
-            #[cfg(feature = "raw")]
             text: &mut text,
             #[cfg(feature = "history")]
             history: &mut history,
         };
-
         // Iterate the keys as a user presses them.
         // TODO #5: Mouse?
         for c in stdin.keys() {
@@ -108,20 +105,23 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
 
     #[cfg(not(feature = "raw"))]
     for line in stdin.lock().lines() {
-        // XXX: Blindly read a full line.
-        let text = line.unwrap();
-
-        // XXX: Blindly run the text.
-        if runner(&text).is_ok() {
+        let line = line.unwrap();
+        let mut runtime = Runtime {
+            background: false,
+            io: io.clone(),
+            jobs: jobs,
+            args: args,
             #[cfg(feature = "history")]
-            {
-                history.add(&text, 1);
-                history.reset_index();
-            }
+            history: history,
+        };
+        if parse_and_run(&line, &mut runtime).is_ok() {
+            #[cfg(feature = "history")]
+            history.add(&line, 1);
         }
-
-        // Display a brand spanking new prompt.
-        prompt.display(&mut stdout);
+        #[cfg(feature = "history")]
+        history.add(&line, 1);
+        #[cfg(feature = "history")]
+        history.reset_index();
     }
 }
 

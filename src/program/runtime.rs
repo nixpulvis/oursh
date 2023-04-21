@@ -1,7 +1,7 @@
-use std::path::PathBuf;
-use rustyline::Editor;
 use docopt::ArgvMap;
 use crate::process::{Jobs, IO};
+#[cfg(feature = "history")]
+use crate::repl::history::History;
 
 #[derive(Debug)]
 pub struct Runtime<'a> {
@@ -9,6 +9,6 @@ pub struct Runtime<'a> {
     pub io: IO,
     pub jobs: &'a mut Jobs,
     pub args: &'a mut ArgvMap,
-    pub rl: Option<&'a mut Editor<()>>,
-    pub history_path: PathBuf,
+    #[cfg(feature = "history")]
+    pub history: &'a mut History,
 }

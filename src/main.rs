@@ -10,7 +10,7 @@ use std::{
     env::{self, var},
     process::{Termination, ExitCode},
     fs::File,
-    io::{self, Read},
+    io::{self, Read, Write},
     cell::RefCell,
     rc::Rc,
 };
@@ -18,15 +18,15 @@ use nix::sys::wait::WaitStatus;
 use nix::unistd::{gethostname, Pid};
 use docopt::{Docopt, Value};
 use termion::is_tty;
-use rustyline::{
-    Editor,
-    error::ReadlineError,
-};
 use oursh::{
     invocation::source_profile,
     program::{parse_and_run, Runtime, Result, Error},
     process::{Jobs, IO},
+    // repl::{self, Prompt},
 };
+
+#[cfg(feature = "history")]
+use oursh::repl::history::History;
 
 pub const NAME: &str = "oursh";
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -91,12 +91,15 @@ fn main() -> MainResult {
 
     let home = dirs::home_dir().expect("HOME variable not set.");
 
-    let mut runtime = Runtime { io,
+    #[cfg(feature = "history")]
+    let mut history = History::load();
+    let mut runtime = Runtime {
+        io,
         jobs: &mut jobs,
         args: &mut args,
         background: false,
-        rl: None,
-        history_path: home.join(".oursh_history"),
+        #[cfg(feature = "history")]
+        history: &mut history,
     };
 
     // Run the profile before anything else.
@@ -134,58 +137,69 @@ fn main() -> MainResult {
 
         // Process text in raw mode style if we're attached to a tty.
         if is_tty(&stdin) {
-            // // Standard output file descriptor (1), used to display program output
-            // // to the user of the shell.
-            // let stdout = io::stdout();
-
-            let mut rl = Editor::<()>::new();
-            runtime.rl = Some(&mut rl);
-            if runtime.rl.as_mut().unwrap().load_history(&runtime.history_path).is_err() {
-                println!("No previous history.");
-            }
+            // Standard output file descriptor (1), used to display program output
+            // to the user of the shell.
+            let mut stdout = io::stdout();
 
             // Trap SIGINT.
             ctrlc::set_handler(move || println!()).unwrap();
 
-            let code;
+            let mut lines = stdin.lines();
             loop {
                 let prompt = expand_prompt(env::var("PS1").unwrap_or_else(|_| "\\s-\\v\\$ ".into()));
-                let readline = runtime.rl.as_mut().unwrap().readline(&prompt);
-                match readline {
-                    Ok(line) => {
-                        match parse_and_run(&line, &mut runtime) {
-                            Ok(status) => {
-                                match status {
-                                    WaitStatus::Exited(_,_) |
-                                    WaitStatus::Signaled(_,_,_) =>
-                                        runtime.rl.as_mut().unwrap().save_history(&runtime.history_path).unwrap(),
-                                    _ => {},
-                                }
-                            }
-                            Err(e) => {
-                                dbg!(e);
+                write!(stdout, "{}", prompt).unwrap();
+                stdout.flush().unwrap();
+
+                if let Some(Ok(line)) = lines.next() {
+                    let result = parse_and_run(&line, &mut runtime);
+                    #[cfg(feature = "history")]
+                    match result {
+                        Ok(status) => {
+                            match status {
+                                WaitStatus::Exited(_,_) |
+                                WaitStatus::Signaled(_,_,_) =>
+                                    runtime.history.save().unwrap(),
+                                _ => {},
                             }
                         }
-                    },
-                    Err(ReadlineError::Interrupted) => {
-                        println!("^C");
-                        continue;
-                    },
-                    Err(ReadlineError::Eof) => {
-                        println!("exit");
-                        code = 0;
-                        break;
-                    },
-                    Err(err) => {
-                        println!("error: {:?}", err);
-                        code = 130;
-                        break;
+                        Err(e) => {
+                            dbg!(e);
+                        }
                     }
+                } else {
+                    break
                 }
             }
+            return MainResult(Ok(WaitStatus::Exited(Pid::this(), 0)));
 
-            runtime.rl.unwrap().save_history(&runtime.history_path).unwrap();
-            MainResult(Ok(WaitStatus::Exited(Pid::this(), code)))
+            // let code;
+            // loop {
+            //     let prompt = expand_prompt(env::var("PS1").unwrap_or_else(|_| "\\s-\\v\\$ ".into()));
+            //     let readline = runtime.rl.as_mut().unwrap().readline(&prompt);
+            //     match readline {
+            //         Ok(line) => {
+            //         },
+            //         // Err(ReadlineError::Interrupted) => {
+            //         //     println!("^C");
+            //         //     continue;
+            //         // },
+            //         // Err(ReadlineError::Eof) => {
+            //         //     println!("exit");
+            //         //     code = 0;
+            //         //     break;
+            //         // },
+            //         Err(err) => {
+            //             println!("error: {:?}", err);
+            //             code = 130;
+            //             break;
+            //         }
+            //     }
+            // }
+
+            // // #[cfg(feature = "history")]
+            // // runtime.rl.unwrap().save_history(&runtime.history_path).unwrap();
+
+            // MainResult(Ok(WaitStatus::Exited(Pid::this(), code)))
         } else {
             // Fill a string buffer from STDIN.
             let mut text = String::new();

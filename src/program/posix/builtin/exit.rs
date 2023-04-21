@@ -16,10 +16,9 @@ pub struct Exit;
 
 impl Builtin for Exit {
     fn run(self, argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
+        #[cfg(feature = "history")]
         if argv.len() == 1 || argv.len() == 2 {
-            if let Some(rl) = runtime.rl.as_mut() {
-                rl.save_history(&runtime.history_path).unwrap();
-            }
+            runtime.history.save().unwrap();
         }
 
         match argv.len() {
