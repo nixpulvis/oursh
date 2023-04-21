@@ -76,7 +76,7 @@ fn main() -> MainResult {
     // TODO: From sh docs:
     //     "with an extension for support of a
     //      leading  <plus-sign> ('+') as noted below."
-    let args = Docopt::new(USAGE)
+    let mut args = Docopt::new(USAGE)
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
                       .unwrap_or_else(|e| e.exit());
 
@@ -141,7 +141,7 @@ fn main() -> MainResult {
             let prompt = Prompt::sh_style();
 
             // TODO: Return results for failures during repl run
-            repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &args);
+            repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &mut args);
 
             MainResult(Ok(WaitStatus::Exited(Pid::this(), 0)))
         } else {
