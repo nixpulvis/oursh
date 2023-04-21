@@ -9,7 +9,6 @@ use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
 use crate::process::{Jobs, IO};
 
-
 #[cfg(feature = "raw")]
 use {
     termion::cursor::DetectCursorPos,
@@ -20,7 +19,10 @@ use {
 };
 
 #[cfg(not(feature = "raw"))]
-use std::io::BufRead;
+use {
+    std::io::BufRead,
+    crate::program::{parse_and_run, Runtime},
+};
 
 #[cfg(feature = "history")]
 use self::history::History;
@@ -151,7 +153,7 @@ fn buffered_loop(stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs,
         #[cfg(feature = "history")]
         history.reset_index();
 
-        prompt.display(&mut stdout);
+        prompt::ps1(&mut stdout);
     }
 }
 
