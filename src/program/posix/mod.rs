@@ -127,6 +127,7 @@ use nix::{
     sys::wait::WaitStatus,
     unistd::Pid,
 };
+#[cfg(feature = "raw")]
 use uuid::Uuid;
 use dirs::home_dir;
 use crate::{

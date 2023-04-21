@@ -15,14 +15,13 @@ use std::{
     rc::Rc,
 };
 use nix::sys::wait::WaitStatus;
-use nix::unistd::Pid;
 use docopt::{Docopt, Value};
 use termion::is_tty;
 use oursh::{
+    repl,
     invocation::source_profile,
     program::{parse_and_run, Runtime, Result, Error},
     process::{Jobs, IO},
-    repl::{self, Prompt},
 };
 
 #[cfg(feature = "history")]
@@ -76,7 +75,7 @@ fn main() -> MainResult {
     // TODO: From sh docs:
     //     "with an extension for support of a
     //      leading  <plus-sign> ('+') as noted below."
-    let args = Docopt::new(USAGE)
+    let mut args = Docopt::new(USAGE)
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
                       .unwrap_or_else(|e| e.exit());
 
@@ -138,12 +137,8 @@ fn main() -> MainResult {
             // Trap SIGINT.
             ctrlc::set_handler(move || println!()).unwrap();
 
-            let prompt = Prompt::sh_style();
-
-            // TODO: Return results for failures during repl run
-            repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &args);
-
-            MainResult(Ok(WaitStatus::Exited(Pid::this(), 0)))
+            let result = repl::start(stdin, stdout, &mut io, &mut jobs, &mut args);
+            MainResult(result)
         } else {
             // Fill a string buffer from STDIN.
             let mut text = String::new();
