@@ -8,7 +8,7 @@ pub struct Runtime<'a> {
     pub background: bool,
     pub io: IO,
     pub jobs: &'a mut Jobs,
-    pub args: &'a mut ArgvMap,
+    pub args: &'a ArgvMap,
     #[cfg(feature = "history")]
     pub history: &'a mut History,
 }

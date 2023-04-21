@@ -7,7 +7,7 @@ use std::io::{Stdin, Stdout};
 use docopt::ArgvMap;
 use crate::process::{Jobs, IO};
 use crate::program::{Runtime, parse_and_run};
-pub use self::prompt::Prompt;
+pub use self::prompt::{ps1, Prompt};
 
 
 #[cfg(feature = "raw")]
@@ -42,7 +42,7 @@ use self::history::History;
 /// ```
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
-pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap)
+pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &ArgvMap)
 {
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
@@ -54,7 +54,9 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
         .expect("error opening raw mode");
 
     // Display the inital prompt.
-    prompt.display(&mut stdout);
+    // TODO: Right abstraction for envless prompts?
+    // prompt.display(&mut stdout);
+    ps1(&mut stdout);
 
     // XXX: Hack to get the prompt length.
     #[cfg(feature = "raw")]
@@ -105,7 +107,25 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
 
     #[cfg(not(feature = "raw"))]
     for line in stdin.lock().lines() {
-        let line = line.unwrap();
+        let line = line.unwrap();  // TODO: Exit codes
+        //     let readline = runtime.rl.as_mut().unwrap().readline(&prompt);
+        //     match readline {
+        //         Ok(line) => {
+        //         },
+        //         // Err(ReadlineError::Interrupted) => {
+        //         //     println!("^C");
+        //         //     continue;
+        //         // },
+        //         // Err(ReadlineError::Eof) => {
+        //         //     println!("exit");
+        //         //     code = 0;
+        //         //     break;
+        //         // },
+        //         Err(err) => {
+        //             println!("error: {:?}", err);
+        //             code = 130;
+        //             break;
+        //         }
         let mut runtime = Runtime {
             background: false,
             io: io.clone(),
@@ -122,9 +142,10 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
         history.add(&line, 1);
         #[cfg(feature = "history")]
         history.reset_index();
+
+        prompt.display(&mut stdout);
     }
 }
-
 
 // pub mod display;
 pub mod prompt;

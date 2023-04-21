@@ -7,29 +7,26 @@ extern crate termion;
 extern crate dirs;
 
 use std::{
-    env::{self, var},
+    env,
     process::{Termination, ExitCode},
     fs::File,
-    io::{self, Read, Write},
+    io::{self, Read},
     cell::RefCell,
     rc::Rc,
 };
 use nix::sys::wait::WaitStatus;
-use nix::unistd::{gethostname, Pid};
+use nix::unistd::Pid;
 use docopt::{Docopt, Value};
 use termion::is_tty;
 use oursh::{
     invocation::source_profile,
     program::{parse_and_run, Runtime, Result, Error},
     process::{Jobs, IO},
-    // repl::{self, Prompt},
+    repl::{self, Prompt},
 };
 
 #[cfg(feature = "history")]
 use oursh::repl::history::History;
-
-pub const NAME: &str = "oursh";
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // Write the Docopt usage string.
 const USAGE: &str = "
@@ -79,7 +76,7 @@ fn main() -> MainResult {
     // TODO: From sh docs:
     //     "with an extension for support of a
     //      leading  <plus-sign> ('+') as noted below."
-    let mut args = Docopt::new(USAGE)
+    let args = Docopt::new(USAGE)
                       .and_then(|d| d.argv(env::args().into_iter()).parse())
                       .unwrap_or_else(|e| e.exit());
 
@@ -87,16 +84,14 @@ fn main() -> MainResult {
     let mut jobs: Jobs = Rc::new(RefCell::new(vec![]));
 
     // Default inputs and outputs.
-    let io = IO::default();
-
-    let home = dirs::home_dir().expect("HOME variable not set.");
+    let mut io = IO::default();
 
     #[cfg(feature = "history")]
     let mut history = History::load();
     let mut runtime = Runtime {
         io,
         jobs: &mut jobs,
-        args: &mut args,
+        args: &args,
         background: false,
         #[cfg(feature = "history")]
         history: &mut history,
@@ -107,14 +102,13 @@ fn main() -> MainResult {
     // - ourshrc
     // - oursh_logout
     // - Others?
-    if !runtime.args.get_bool("--noprofile") {
+    if !args.get_bool("--noprofile") {
         source_profile(&mut runtime);
     }
 
-    let args = runtime.args.clone();
     if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
         MainResult(parse_and_run(c, &mut runtime))
-    } else if let Some(Value::Plain(Some(ref filename))) = runtime.args.find("<command_file>") {
+    } else if let Some(Value::Plain(Some(ref filename))) = args.find("<command_file>") {
         let mut file = File::open(filename)
             .unwrap_or_else(|_| panic!("error opening file: {}", filename));
 
@@ -139,67 +133,17 @@ fn main() -> MainResult {
         if is_tty(&stdin) {
             // Standard output file descriptor (1), used to display program output
             // to the user of the shell.
-            let mut stdout = io::stdout();
+            let stdout = io::stdout();
 
             // Trap SIGINT.
             ctrlc::set_handler(move || println!()).unwrap();
 
-            let mut lines = stdin.lines();
-            loop {
-                let prompt = expand_prompt(env::var("PS1").unwrap_or_else(|_| "\\s-\\v\\$ ".into()));
-                write!(stdout, "{}", prompt).unwrap();
-                stdout.flush().unwrap();
+            let prompt = Prompt::sh_style();
 
-                if let Some(Ok(line)) = lines.next() {
-                    let result = parse_and_run(&line, &mut runtime);
-                    #[cfg(feature = "history")]
-                    match result {
-                        Ok(status) => {
-                            match status {
-                                WaitStatus::Exited(_,_) |
-                                WaitStatus::Signaled(_,_,_) =>
-                                    runtime.history.save().unwrap(),
-                                _ => {},
-                            }
-                        }
-                        Err(e) => {
-                            dbg!(e);
-                        }
-                    }
-                } else {
-                    break
-                }
-            }
-            return MainResult(Ok(WaitStatus::Exited(Pid::this(), 0)));
+            // TODO: Return results for failures during repl run
+            repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &args);
 
-            // let code;
-            // loop {
-            //     let prompt = expand_prompt(env::var("PS1").unwrap_or_else(|_| "\\s-\\v\\$ ".into()));
-            //     let readline = runtime.rl.as_mut().unwrap().readline(&prompt);
-            //     match readline {
-            //         Ok(line) => {
-            //         },
-            //         // Err(ReadlineError::Interrupted) => {
-            //         //     println!("^C");
-            //         //     continue;
-            //         // },
-            //         // Err(ReadlineError::Eof) => {
-            //         //     println!("exit");
-            //         //     code = 0;
-            //         //     break;
-            //         // },
-            //         Err(err) => {
-            //             println!("error: {:?}", err);
-            //             code = 130;
-            //             break;
-            //         }
-            //     }
-            // }
-
-            // // #[cfg(feature = "history")]
-            // // runtime.rl.unwrap().save_history(&runtime.history_path).unwrap();
-
-            // MainResult(Ok(WaitStatus::Exited(Pid::this(), code)))
+            MainResult(Ok(WaitStatus::Exited(Pid::this(), 0)))
         } else {
             // Fill a string buffer from STDIN.
             let mut text = String::new();
@@ -209,55 +153,6 @@ fn main() -> MainResult {
             MainResult(parse_and_run(&text, &mut runtime))
         }
     }
-}
-
-fn expand_prompt(prompt: String) -> String {
-    let mut result = String::new();
-    let mut command = false;
-    let mut octal = vec![];
-    for c in prompt.chars() {
-        let o = octal.iter().map(|c: &char| c.to_string())
-                     .collect::<Vec<_>>()
-                     .join("");
-        if !octal.is_empty() && octal.len() < 3 {
-            if ('0'..'8').contains(&c) {
-                octal.push(c);
-            } else {
-                result += &o;
-                octal.clear();
-            }
-        } else if octal.len() == 3 {
-            if let Ok(n) = u8::from_str_radix(&o, 8) {
-                result.push(n as char);
-            }
-            octal.clear();
-        }
-
-        if command {
-            // TODO: https://ss64.com/bash/syntax-prompt.html
-            result += &match c {
-                'h' => {
-                    let mut buf = [0u8; 64];
-                    let cstr = gethostname(&mut buf).expect("error getting hostname");
-                    cstr.to_str().expect("error invalid UTF-8").into()
-                }
-                'e' => (0x1b as char).into(),
-                'u' => var("USER").unwrap_or_else(|_| "".into()),
-                'w' => var("PWD").unwrap_or_else(|_| "".into()),
-                's' => NAME.into(),
-                'v' => VERSION[0..(VERSION.len() - 2)].into(),
-                '0' => { octal.push(c); "".into() },
-                '\\' => "".into(),
-                c => c.into(),
-            };
-            command = false;
-        } else if c == '\\' {
-            command = true;
-        } else if octal.is_empty() {
-            result.push(c);
-        }
-    }
-    result
 }
 
 #[derive(Debug)]

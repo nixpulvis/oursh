@@ -15,6 +15,7 @@ use crate::{
 pub struct Exit;
 
 impl Builtin for Exit {
+    #[allow(unused_variables)]
     fn run(self, argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
         #[cfg(feature = "history")]
         if argv.len() == 1 || argv.len() == 2 {
