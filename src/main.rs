@@ -141,7 +141,7 @@ fn main() -> MainResult {
             // Trap SIGINT.
             ctrlc::set_handler(move || println!()).unwrap();
 
-            let result = repl::start(stdin, stdout, runtime);
+            let result = repl::start(stdin, stdout, &mut runtime);
             MainResult(result)
         } else {
             // Fill a string buffer from STDIN.

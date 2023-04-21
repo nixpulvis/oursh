@@ -6,9 +6,8 @@ use termion::{
     cursor::DetectCursorPos,
     raw::RawTerminal,
 };
-use docopt::ArgvMap;
 use crate::program::{Runtime, parse_and_run};
-use crate::process::{IO, Jobs};
+use crate::process::IO;
 use crate::repl::prompt;
 
 #[cfg(feature = "history")]
@@ -20,18 +19,14 @@ use super::completion::*;
 
 pub struct Action;
 
-pub struct ActionContext<'a> {
+pub struct ActionContext<'a, 'b> {
     pub stdout: &'a mut RawTerminal<Stdout>,
-    pub io: &'a mut IO,
-    pub jobs: &'a mut Jobs,
-    pub args: &'a ArgvMap,
+    pub runtime: &'a mut Runtime<'b>,
     // TODO: Remove this field.
     #[cfg(feature = "raw")]
     pub prompt_length: u16,
     #[cfg(feature = "raw")]
     pub text: &'a mut String,
-    #[cfg(feature = "history")]
-    pub history: &'a mut History,
 }
 
 #[cfg(feature = "raw")]
@@ -45,23 +40,23 @@ impl Action {
         context.stdout.suspend_raw_mode().unwrap();
         let mut runtime = Runtime {
             background: false,
-            io: context.io.clone(),
-            jobs: context.jobs,
-            args: context.args,
+            io: IO::default(),
+            jobs: context.runtime.jobs,
+            args: context.runtime.args,
             #[cfg(feature = "history")]
-            history: context.history,
+            history: context.runtime.history,
         };
         prompt::ps0(&mut context.stdout);
         if parse_and_run(context.text, &mut runtime).is_ok() {
             #[cfg(feature = "history")]
-            context.history.add(&context.text, 1);
+            context.runtime.history.add(&context.runtime.text, 1);
         }
         context.stdout.activate_raw_mode().unwrap();
 
         // Reset for the next program.
         context.text.clear();
         #[cfg(feature = "history")]
-        context.history.reset_index();
+        context.runtime.history.reset_index();
 
         prompt::ps1(&mut context.stdout);
     }
@@ -109,7 +104,7 @@ impl Action {
 
             // Save history to file in $HOME.
             #[cfg(feature = "history")]
-            context.history.save();
+            context.runtime.history.save();
 
             // Manually drop the raw terminal.
             // TODO: Needed?
@@ -165,7 +160,7 @@ impl Action {
         print!("{}{}",
                termion::cursor::Left(1000),  // XXX
                termion::clear::CurrentLine);
-        context.prompt.display(&mut context.stdout);
+        context.runtime.prompt.display(&mut context.stdout);
 
         if let Some(history_text) = context.history.get_up() {
             *context.text = history_text;

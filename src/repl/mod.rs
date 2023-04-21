@@ -44,7 +44,7 @@ use self::history::History;
 /// ```
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
-pub fn start(mut stdin: Stdin, mut stdout: Stdout, mut runtime: Runtime)
+pub fn start(mut stdin: Stdin, mut stdout: Stdout, runtime: &mut Runtime)
     -> crate::program::Result<WaitStatus>
 {
     #[cfg(feature = "raw")]
@@ -56,7 +56,7 @@ pub fn start(mut stdin: Stdin, mut stdout: Stdout, mut runtime: Runtime)
 }
 
 #[cfg(feature = "raw")]
-fn raw_loop(stdin: Stdin, stdout: Stdout, mut runtime: Runtime) {
+fn raw_loop(stdin: Stdin, stdout: Stdout, runtime: &mut Runtime) {
     // Convert the tty's stdout into raw mode.
     let mut stdout = stdout.into_raw_mode()
         .expect("error opening raw mode");
@@ -73,13 +73,9 @@ fn raw_loop(stdin: Stdin, stdout: Stdout, mut runtime: Runtime) {
     // Create an context to pass to the actions.
     let mut context = ActionContext {
         stdout: &mut stdout,
-        io: &mut runtime.io,
-        jobs: runtime.jobs,
-        args: runtime.args,
+        runtime: runtime,
         prompt_length: prompt_length,
         text: &mut text,
-        #[cfg(feature = "history")]
-        history: &mut runtime.history,
     };
     // Iterate the keys as a user presses them.
     // TODO #5: Mouse?
@@ -107,7 +103,7 @@ fn raw_loop(stdin: Stdin, stdout: Stdout, mut runtime: Runtime) {
 }
 
 #[cfg(not(feature = "raw"))]
-fn buffered_loop(stdin: Stdin, mut stdout: Stdout, mut runtime: Runtime) {
+fn buffered_loop(stdin: Stdin, mut stdout: Stdout, runtime: &mut Runtime) {
     // Display the inital prompt.
     prompt::ps1(&mut stdout);
 
@@ -132,7 +128,7 @@ fn buffered_loop(stdin: Stdin, mut stdout: Stdout, mut runtime: Runtime) {
         //             break;
         //         }
         prompt::ps0(&mut stdout);
-        if parse_and_run(&line, &mut runtime).is_ok() {
+        if parse_and_run(&line, runtime).is_ok() {
             #[cfg(feature = "history")]
             history.add(&line, 1);
         }
