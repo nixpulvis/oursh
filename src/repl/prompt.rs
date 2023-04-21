@@ -4,8 +4,30 @@ use nix::unistd;
 use crate::{NAME, VERSION};
 
 /// TODO: docs
+pub fn ps0(stdout: &mut impl Write) {
+    if let Ok(prompt) = env::var("PS0") {
+        write!(stdout, "{}", expand_prompt(prompt)).unwrap();
+        stdout.flush().unwrap();
+    }
+}
+
+/// TODO: docs
 pub fn ps1(stdout: &mut impl Write) {
-    let prompt = expand_prompt(env::var("PS1").unwrap_or_else(|_| "\\s-\\v\\$ ".into()));
+    ps(stdout, 1, "\\s-\\v\\$ ".into());
+}
+
+/// TODO: docs
+pub fn ps2(stdout: &mut impl Write) {
+    ps(stdout, 1, "> ".into());
+}
+
+/// TODO: docs
+pub fn ps4(stdout: &mut impl Write) {
+    ps(stdout, 1, "+ ".into());
+}
+
+fn ps(stdout: &mut impl Write, n: usize, default: String) {
+    let prompt = expand_prompt(env::var(format!("PS{}", n)).unwrap_or_else(|_| default));
     write!(stdout, "{}", prompt).unwrap();
     stdout.flush().unwrap();
 }

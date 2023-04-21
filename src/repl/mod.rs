@@ -144,6 +144,7 @@ fn buffered_loop(stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs,
             #[cfg(feature = "history")]
             history: history,
         };
+        prompt::ps0(&mut stdout);
         if parse_and_run(&line, &mut runtime).is_ok() {
             #[cfg(feature = "history")]
             history.add(&line, 1);

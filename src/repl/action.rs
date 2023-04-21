@@ -51,6 +51,7 @@ impl Action {
             #[cfg(feature = "history")]
             history: context.history,
         };
+        prompt::ps0(&mut context.stdout);
         if parse_and_run(context.text, &mut runtime).is_ok() {
             #[cfg(feature = "history")]
             context.history.add(&context.text, 1);
