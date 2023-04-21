@@ -20,7 +20,7 @@ maintenance = { status = "experimental" }
 travis-ci = { repository = "https://github.com/nixpulvis/oursh" }
 
 [features]
-default = ["raw", "shebang-block"]
+default = ["raw", "history", "completion", "shebang-block"]
 
 # TODO: Justify and explain features.
 
@@ -38,8 +38,8 @@ raw = []
 # RELP input.
 history = ["raw"]
 
-# # REPL tab completion.
-# completion = ["raw"]
+# REPL tab completion.
+completion = ["raw"]
 
 [dependencies]
 docopt = "1.1"
