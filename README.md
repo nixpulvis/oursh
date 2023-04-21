@@ -1,6 +1,6 @@
 # oursh
 [![Documentation](https://docs.rs/oursh/badge.svg)](https://docs.rs/oursh)
-[![CI](https://github.com/nixpulvis/oursh/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/nixpulvis/oursh/actions/workflows/ci.yml)
+[![CI](https://github.com/nixpulvis/oursh/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/nixpulvis/oursh/actions/workflows/ci.yml)
 [![Dependencies](https://deps.rs/repo/github/nixpulvis/oursh/status.svg)](https://deps.rs/repo/github/nixpulvis/oursh)
 
 This shell should be both POSIX compatible and yet modern and exciting. Fancy
