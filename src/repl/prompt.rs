@@ -1,9 +1,7 @@
 use std::env;
 use std::io::Write;
 use nix::unistd;
-
-pub const NAME: &str = "oursh";
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+use crate::{NAME, VERSION};
 
 /// TODO: docs
 pub fn ps1(stdout: &mut impl Write) {

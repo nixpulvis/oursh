@@ -18,6 +18,7 @@ use nix::sys::wait::WaitStatus;
 use docopt::{Docopt, Value};
 use termion::is_tty;
 use oursh::{
+    VERSION,
     repl,
     invocation::source_profile,
     program::{parse_and_run, Runtime, Result, Error},
@@ -76,7 +77,10 @@ fn main() -> MainResult {
     //     "with an extension for support of a
     //      leading  <plus-sign> ('+') as noted below."
     let mut args = Docopt::new(USAGE)
-                      .and_then(|d| d.argv(env::args().into_iter()).parse())
+                      .and_then(|d|
+                          d.version(Some(VERSION.into()))
+                           .argv(env::args().into_iter())
+                           .parse())
                       .unwrap_or_else(|e| e.exit());
 
     // Elementary job management.

@@ -108,6 +108,9 @@ extern crate termion;
 #[macro_use]
 extern crate lalrpop_util;
 
+pub const NAME: &str = "oursh";
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 /// Print debug information to stderr.
 ///
 /// ### Examples
