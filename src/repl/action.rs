@@ -1,6 +1,5 @@
 //! Actions to be bound to input methods.
 use std::io::{Write, Stdout};
-use super::prompt::Prompt;
 
 use std::process::exit;
 use termion::{
@@ -10,6 +9,7 @@ use termion::{
 use docopt::ArgvMap;
 use crate::program::{Runtime, parse_and_run};
 use crate::process::{IO, Jobs};
+use crate::repl::prompt;
 
 #[cfg(feature = "history")]
 use super::history::History;
@@ -25,7 +25,6 @@ pub struct ActionContext<'a> {
     pub io: &'a mut IO,
     pub jobs: &'a mut Jobs,
     pub args: &'a mut ArgvMap,
-    pub prompt: &'a mut Prompt,
     // TODO: Remove this field.
     #[cfg(feature = "raw")]
     pub prompt_length: u16,
@@ -63,8 +62,7 @@ impl Action {
         #[cfg(feature = "history")]
         context.history.reset_index();
 
-        // Print a boring static prompt.
-        context.prompt.display(&mut context.stdout);
+        prompt::ps1(&mut context.stdout);
     }
 
     pub fn insert(context: &mut ActionContext, c: char) {
@@ -100,7 +98,7 @@ impl Action {
         // TODO: Send signal if we're running a program.
         context.text.clear();
         print!("^C\n\r");
-        context.prompt.display(&mut context.stdout);
+        prompt::ps1(&mut context.stdout);
     }
 
     pub fn eof(context: &mut ActionContext) {
@@ -158,7 +156,7 @@ impl Action {
         print!("{}{}",
                termion::clear::All,
                termion::cursor::Goto(1, 1));
-        context.prompt.display(&mut context.stdout);
+        prompt::ps1(&mut context.stdout);
     }
 
     #[cfg(feature = "history")]
@@ -204,7 +202,7 @@ impl Action {
                 } else {
                     print!("\n\r{}\n\r", possibilities.join("\t"));
                 }
-                context.prompt.display(&mut context.stdout);
+                prompt::ps1(&mut context.stdout);
                 print!("{}", context.text);
                 context.stdout.flush().unwrap();
             },
@@ -214,7 +212,7 @@ impl Action {
                        termion::cursor::Left(1000),  // XXX
                        termion::clear::CurrentLine);
                 context.stdout.flush().unwrap();
-                context.prompt.display(&mut context.stdout);
+                prompt::ps1(&mut context.stdout);
                 print!("{}", context.text);
                 context.stdout.flush().unwrap();
             },

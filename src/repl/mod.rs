@@ -8,7 +8,6 @@ use docopt::ArgvMap;
 use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
 use crate::process::{Jobs, IO};
-pub use self::prompt::{ps1, Prompt};
 
 
 #[cfg(feature = "raw")]
@@ -44,7 +43,7 @@ use self::history::History;
 /// ```
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
-pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap)
+pub fn start(mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap)
     -> crate::program::Result<WaitStatus>
 {
     // Load history from file in $HOME.
@@ -52,23 +51,21 @@ pub fn start(mut prompt: Prompt, mut stdin: Stdin, mut stdout: Stdout, io: &mut 
     let mut history = History::load();
 
     #[cfg(feature = "raw")]
-    raw_loop(prompt, stdin, stdout, io, jobs, args);
+    raw_loop(stdin, stdout, io, jobs, args);
     #[cfg(not(feature = "raw"))]
-    buffered_loop(prompt, stdin, stdout, io, jobs, args);
+    buffered_loop(stdin, stdout, io, jobs, args);
 
     Ok(WaitStatus::Exited(Pid::this(), 0))
 }
 
 #[cfg(feature = "raw")]
-fn raw_loop(mut prompt: Prompt, stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
+fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
     // Convert the tty's stdout into raw mode.
     let mut stdout = stdout.into_raw_mode()
         .expect("error opening raw mode");
 
     // Display the inital prompt.
-    // TODO: Right abstraction for envless prompts?
-    // prompt.display(&mut stdout);
-    ps1(&mut stdout);
+    prompt::ps1(&mut stdout);
 
     // XXX: Hack to get the prompt length.
     let prompt_length = stdout.cursor_pos().unwrap().0;
@@ -82,7 +79,6 @@ fn raw_loop(mut prompt: Prompt, stdin: Stdin, stdout: Stdout, io: &mut IO, jobs:
         io: io,
         jobs: jobs,
         args: args,
-        prompt: &mut prompt,
         prompt_length: prompt_length,
         text: &mut text,
         #[cfg(feature = "history")]
@@ -114,11 +110,9 @@ fn raw_loop(mut prompt: Prompt, stdin: Stdin, stdout: Stdout, io: &mut IO, jobs:
 }
 
 #[cfg(not(feature = "raw"))]
-fn buffered_loop(prompt: Prompt, stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
+fn buffered_loop(stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
     // Display the inital prompt.
-    // TODO: Right abstraction for envless prompts?
-    // prompt.display(&mut stdout);
-    ps1(&mut stdout);
+    prompt::ps1(&mut stdout);
 
     for line in stdin.lock().lines() {
         let line = line.unwrap();  // TODO: Exit codes

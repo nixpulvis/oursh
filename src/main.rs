@@ -18,10 +18,10 @@ use nix::sys::wait::WaitStatus;
 use docopt::{Docopt, Value};
 use termion::is_tty;
 use oursh::{
+    repl,
     invocation::source_profile,
     program::{parse_and_run, Runtime, Result, Error},
     process::{Jobs, IO},
-    repl::{self, Prompt},
 };
 
 #[cfg(feature = "history")]
@@ -137,10 +137,7 @@ fn main() -> MainResult {
             // Trap SIGINT.
             ctrlc::set_handler(move || println!()).unwrap();
 
-            let prompt = Prompt::sh_style();
-
-            // TODO: Return results for failures during repl run
-            let result = repl::start(prompt, stdin, stdout, &mut io, &mut jobs, &mut args);
+            let result = repl::start(stdin, stdout, &mut io, &mut jobs, &mut args);
             MainResult(result)
         } else {
             // Fill a string buffer from STDIN.
