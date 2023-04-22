@@ -182,17 +182,23 @@ pub fn write_table(writer: impl Write, words: &[String]) {
     // TODO: Determine table width/height and calculate iteration better
     let mut _row = 0;
     let mut col = 0;
+    let mut needs_newline = false;
     for word in words {
         tw.write(word.as_bytes()).unwrap();
-        tw.write(b"\t").unwrap();
 
         if col == columns-1 {
             col = 0;
             _row += 1;
             tw.write(b"\n").unwrap();
+            needs_newline = false;
         } else {
             col += 1;
+            tw.write(b"\t").unwrap();
+            needs_newline = true;
         }
+    }
+    if needs_newline {
+        tw.write(b"\n").unwrap();
     }
     tw.flush().unwrap();
 }
