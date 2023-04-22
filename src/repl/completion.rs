@@ -136,6 +136,7 @@ pub fn executable_completions(text: &str) -> Completion {
                 0 => Completion::None,
                 1 => Completion::Complete(matches.remove(0)),
                 _ => {
+                    // TODO: Support POSIX style lexicographical order?
                     matches.sort_by(|a, b| {
                         match a.len().cmp(&b.len()) {
                             Equal => b.cmp(&a),
@@ -171,22 +172,29 @@ pub fn path_complete(text: &str) -> Completion {
 }
 
 pub fn write_table(writer: impl Write, words: &[String]) {
-    let mut tw = TabWriter::new(writer);
+    // TODO: Handle empty case better.
+    let max_length = words.iter().max_by(|a,b| a.len().cmp(&b.len())).unwrap().len() as u16;
+    // TODO: Can this function be called from outside a terminal environment?
+    let (width, _height) = termion::terminal_size().unwrap();
+    let padding = 5;
+    let columns = width / (max_length + padding);
+    let mut tw = TabWriter::new(writer).padding(padding as usize);
     // TODO: Determine table width/height and calculate iteration better
-    let mut row = 0;
+    let mut _row = 0;
     let mut col = 0;
     for word in words {
-        tw.write(word.as_bytes());
-        tw.write(b"\t");
+        tw.write(word.as_bytes()).unwrap();
+        tw.write(b"\t").unwrap();
 
-        if col == 4 {
+        if col == columns {
             col = 0;
-            row += 1;
-            tw.write(b"\n");
+            _row += 1;
+            tw.write(b"\n").unwrap();
         } else {
             col += 1;
         }
     }
+    tw.write(b"\n").unwrap();
     tw.flush().unwrap();
 }
 
