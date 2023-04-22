@@ -194,7 +194,6 @@ pub fn write_table(writer: impl Write, words: &[String]) {
             col += 1;
         }
     }
-    tw.write(b"\n").unwrap();
     tw.flush().unwrap();
 }
 
