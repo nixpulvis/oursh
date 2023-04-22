@@ -186,7 +186,7 @@ pub fn write_table(writer: impl Write, words: &[String]) {
         tw.write(word.as_bytes()).unwrap();
         tw.write(b"\t").unwrap();
 
-        if col == columns {
+        if col == columns-1 {
             col = 0;
             _row += 1;
             tw.write(b"\n").unwrap();
