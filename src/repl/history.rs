@@ -20,12 +20,12 @@ impl History {
             return;
         }
 
-        // HACK: There's got to be a cleaner way.
         let mut index = 0;
-        if self.1.iter().enumerate().find(|(i, (t, _))| {
-            index = *i;
-            text == t
-        }).is_some() {
+        if self.1.iter().enumerate()
+                        .any(|(_,(t, i))| {
+                            index = *i;
+                            text == t })
+        {
             self.1[index].1 += count;
             let text = self.1.remove(index);
             self.1.insert(0, text);
