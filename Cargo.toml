@@ -39,7 +39,7 @@ raw = []
 history = ["raw"]
 
 # REPL tab completion.
-completion = ["raw"]
+completion = ["raw", "tabwriter"]
 
 [dependencies]
 docopt = "1.1"
@@ -54,6 +54,8 @@ ctrlc = "3.1"
 # Option 2: http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/
 termion = "1.5"
 rustyline = "8"
+tabwriter = { version = "1.2", optional = true }
+
 
 [build-dependencies]
 lalrpop = "0.19"

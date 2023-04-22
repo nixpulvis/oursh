@@ -21,7 +21,9 @@ use std::{
     fs,
     cmp::Ordering::Equal,
     os::unix::fs::PermissionsExt,
+    io::Write,
 };
+use tabwriter::TabWriter;
 
 /// The result of a query for text completion.
 ///
@@ -166,6 +168,26 @@ pub fn path_complete(text: &str) -> Completion {
         "ls /hom" => Completion::Complete("ls /home/".into()),
         _ => Completion::None,
     }
+}
+
+pub fn write_table(writer: impl Write, words: &[String]) {
+    let mut tw = TabWriter::new(writer);
+    // TODO: Determine table width/height and calculate iteration better
+    let mut row = 0;
+    let mut col = 0;
+    for word in words {
+        tw.write(word.as_bytes());
+        tw.write(b"\t");
+
+        if col == 4 {
+            col = 0;
+            row += 1;
+            tw.write(b"\n");
+        } else {
+            col += 1;
+        }
+    }
+    tw.flush().unwrap();
 }
 
 #[cfg(test)]

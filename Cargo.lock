@@ -782,6 +782,7 @@ dependencies = [
  "nix 0.22.3",
  "pwd",
  "rustyline",
+ "tabwriter",
  "termion",
  "uuid",
 ]
@@ -1155,6 +1156,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "tabwriter"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "36205cfc997faadcc4b0b87aaef3fbedafe20d38d4959a7ca6ff803564051111"
+dependencies = [
+ "unicode-width",
 ]
 
 [[package]]

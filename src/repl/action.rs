@@ -10,7 +10,7 @@ use crate::program::{Runtime, parse_and_run};
 use crate::repl::prompt;
 
 #[cfg(feature = "completion")]
-use super::completion::*;
+use super::completion::{self, *};
 
 
 pub struct Action;
@@ -178,18 +178,21 @@ impl Action {
     pub fn complete(context: &mut ActionContext) {
         match complete(&context.text) {
             Completion::Partial(possibilities) => {
-                if possibilities.len() > 25 {
-                    print!("\n\r");
-                    for possibility in possibilities {
-                        print!("{}\n\r", possibility);
-                    }
-                    print!("\n\r");
-                } else {
-                    print!("\n\r{}\n\r", possibilities.join("\t"));
-                }
+                println!();
+                print!("{}{}",
+                       termion::cursor::Left(1000),  // XXX
+                       termion::clear::CurrentLine);
+                context.stdout.flush().unwrap();
+                context.stdout.suspend_raw_mode().unwrap();
+                completion::write_table(&mut context.stdout, &possibilities);
+                context.stdout.activate_raw_mode().unwrap();
+                print!("{}{}",
+                       termion::cursor::Left(1000),  // XXX
+                       termion::clear::CurrentLine);
                 prompt::ps1(&mut context.stdout);
                 print!("{}", context.text);
                 context.stdout.flush().unwrap();
+
             },
             Completion::Complete(t) => {
                 *context.text = t;
