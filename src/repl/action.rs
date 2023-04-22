@@ -51,6 +51,7 @@ impl Action {
 
     pub fn insert(context: &mut ActionContext, c: char) {
         if let Ok((x, y)) = context.stdout.cursor_pos() {
+            // XXX: Why did this panic?
             let i = (x - context.prompt_length) as usize;
             context.text.insert(i, c);
             print!("{}{}",
