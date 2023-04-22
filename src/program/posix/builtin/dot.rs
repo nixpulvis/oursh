@@ -33,7 +33,7 @@ impl Builtin for Dot {
             }
             2 => {
                 let path = argv[1].to_str().unwrap();
-                if let Ok(mut file) = File::open(&path) {
+                if let Ok(mut file) = File::open(path) {
                     let mut contents = String::new();
                     if file.read_to_string(&mut contents).is_ok() {
                         parse_and_run(&contents, runtime)

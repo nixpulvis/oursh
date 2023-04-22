@@ -27,7 +27,7 @@ impl Builtin for Cd {
                 };
                 let dst = home.as_str();
                 chdir(dst).map(|_| {
-                    set_var("PWD", &dst);
+                    set_var("PWD", dst);
                     WaitStatus::Exited(Pid::this(), 0)
                 })
                           .map_err(|_| Error::Runtime)

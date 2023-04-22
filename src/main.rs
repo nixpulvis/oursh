@@ -78,8 +78,8 @@ fn main() -> MainResult {
     //      leading  <plus-sign> ('+') as noted below."
     let args = Docopt::new(USAGE).and_then(|d|
         d.version(Some(VERSION.into()))
-         .argv(env::args().into_iter())
-        .parse())
+            .argv(env::args())
+            .parse())
         .unwrap_or_else(|e| e.exit());
 
     // Default inputs and outputs for the processes.

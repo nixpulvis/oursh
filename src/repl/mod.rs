@@ -69,9 +69,9 @@ fn raw_loop(stdin: Stdin, stdout: Stdout, runtime: &mut Runtime) {
 
     // Create an context to pass to the actions.
     let mut context = ActionContext {
+        runtime,
+        prompt_length,
         stdout: &mut stdout,
-        runtime: runtime,
-        prompt_length: prompt_length,
         text: &mut text,
     };
     // Iterate the keys as a user presses them.

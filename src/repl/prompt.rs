@@ -27,7 +27,7 @@ pub fn ps4(stdout: &mut impl Write) {
 }
 
 fn ps(stdout: &mut impl Write, n: usize, default: String) {
-    let prompt = expand_prompt(env::var(format!("PS{}", n)).unwrap_or_else(|_| default));
+    let prompt = expand_prompt(env::var(format!("PS{}", n)).unwrap_or(default));
     write!(stdout, "{}", prompt).unwrap();
     stdout.flush().unwrap();
 }

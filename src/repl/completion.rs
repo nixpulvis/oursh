@@ -139,7 +139,7 @@ pub fn executable_completions(text: &str) -> Completion {
                     // TODO: Support POSIX style lexicographical order?
                     matches.sort_by(|a, b| {
                         match a.len().cmp(&b.len()) {
-                            Equal => b.cmp(&a),
+                            Equal => b.cmp(a),
                             o => o
                         }
                     });
@@ -189,7 +189,7 @@ pub fn write_table(writer: impl Write, words: &[String]) {
         if col == columns-1 {
             col = 0;
             _row += 1;
-            tw.write(b"\n").unwrap();
+            let _r = tw.write(b"\n").unwrap();
             needs_newline = false;
         } else {
             col += 1;

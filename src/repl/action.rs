@@ -35,9 +35,9 @@ impl Action {
         // Run the command.
         context.stdout.suspend_raw_mode().unwrap();
         prompt::ps0(&mut context.stdout);
-        if parse_and_run(context.text, &mut context.runtime).is_ok() {
+        if parse_and_run(context.text, context.runtime).is_ok() {
             #[cfg(feature = "history")]
-            context.runtime.history.add(&context.text, 1);
+            context.runtime.history.add(context.text, 1);
         }
         context.stdout.activate_raw_mode().unwrap();
 
@@ -176,7 +176,7 @@ impl Action {
 
     #[cfg(feature = "completion")]
     pub fn complete(context: &mut ActionContext) {
-        match complete(&context.text) {
+        match complete(context.text) {
             Completion::Partial(possibilities) => {
                 println!();
                 print!("{}{}",

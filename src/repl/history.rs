@@ -86,7 +86,7 @@ impl History {
             //         println!("{:?}", s);
             //     })
             // }).collect::<Vec<String, usize>>();
-            let hist = contents.split("\n").map(|s| {
+            let hist = contents.split('\n').map(|s| {
                 (String::from(s), 0)
             });
 
