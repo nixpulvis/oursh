@@ -184,7 +184,7 @@ pub fn write_table(writer: impl Write, words: &[String]) {
     let mut col = 0;
     let mut needs_newline = false;
     for word in words {
-        tw.write(word.as_bytes()).unwrap();
+        let _r = tw.write(word.as_bytes()).unwrap();
 
         if col == columns-1 {
             col = 0;
@@ -193,12 +193,12 @@ pub fn write_table(writer: impl Write, words: &[String]) {
             needs_newline = false;
         } else {
             col += 1;
-            tw.write(b"\t").unwrap();
+            let _r = tw.write(b"\t").unwrap();
             needs_newline = true;
         }
     }
     if needs_newline {
-        tw.write(b"\n").unwrap();
+        let _r = tw.write(b"\n").unwrap();
     }
     tw.flush().unwrap();
 }
