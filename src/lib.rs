@@ -12,43 +12,6 @@
 //! right comrade?  It's short (ish) and sneakily fits `rs` in it, which is the
 //! extension of Rust programs, the language this will be written in.
 //!
-//! ## Features
-//!
-//! - [ ] [POSIX compatibility](https://github.com/nixpulvis/oursh/milestone/1)
-//!     - [x] Simple commands `ls`
-//!     - [ ] Quotes (#28) `echo "foo"; echo 'bar'`
-//!     - [x] Assignment `LOG=trace cargo run`
-//!     - [x] Variables `echo $foo`
-//!     - [ ] Special variables ($54) `echo $?; echo $1`
-//!     - [x] Boolean status syntax `! true && false || true`
-//!     - [x] Conditionals `if ; then ; elif ; then ; else ; fi`
-//!     - [x] Compound commands `{ ls; date; }`
-//!     - [ ] Subshells `\$(sleep 1; date)`
-//!     - [x] Background jobs `{ sleep 1; date; }& date`
-//!     - [x] Redirection `date > now.txt`
-//!     - [ ] Pipes `ls | wc -l`
-//! - [ ] Shebang block programs
-//!     - [ ] Alternate syntax `{# ...}`
-//!     - [ ] Hashlang syntax `{#lang; ...}`, i.e. `{#posix ls}`
-//!     - [x] Shebang syntax `{#!/usr/bin/env ruby; puts :sym}`
-//! - [ ] bash/zsh autocomplete compatibility
-//!     - [ ] Command completion
-//!     - [ ] Path completion
-//!     - [ ] Variable completion
-//!     - [ ] Job completion
-//!     - [ ] Syntax completion
-//!     - [ ] `man` / `-h` / `--help` parsing
-//! - [ ] Multi-line input
-//! - [ ] Modern scripting language
-//!     - [ ] Macros
-//!     - [ ] Types
-//!     - [ ] Higher-order functions
-//!     - [ ] Threading?
-//! - [ ] Obfuscated strings (`!'password'!`)
-//! - [ ] mosh like remote session support
-//! - [ ] Smart history, sync'd across devices
-//! - [ ] Pipe old commands without rerunning
-//! - [ ] Package manager
 //! - Sane defaults
 //! - Fast
 //!
