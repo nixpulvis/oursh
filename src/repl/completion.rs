@@ -21,7 +21,9 @@ use std::{
     fs,
     cmp::Ordering::Equal,
     os::unix::fs::PermissionsExt,
+    io::Write,
 };
+use tabwriter::TabWriter;
 
 /// The result of a query for text completion.
 ///
@@ -134,9 +136,10 @@ pub fn executable_completions(text: &str) -> Completion {
                 0 => Completion::None,
                 1 => Completion::Complete(matches.remove(0)),
                 _ => {
+                    // TODO: Support POSIX style lexicographical order?
                     matches.sort_by(|a, b| {
                         match a.len().cmp(&b.len()) {
-                            Equal => b.cmp(&a),
+                            Equal => b.cmp(a),
                             o => o
                         }
                     });
@@ -166,6 +169,38 @@ pub fn path_complete(text: &str) -> Completion {
         "ls /hom" => Completion::Complete("ls /home/".into()),
         _ => Completion::None,
     }
+}
+
+pub fn write_table(writer: impl Write, words: &[String]) {
+    // TODO: Handle empty case better.
+    let max_length = words.iter().max_by(|a,b| a.len().cmp(&b.len())).unwrap().len() as u16;
+    // TODO: Can this function be called from outside a terminal environment?
+    let (width, _height) = termion::terminal_size().unwrap();
+    let padding = 5;
+    let columns = width / (max_length + padding);
+    let mut tw = TabWriter::new(writer).padding(padding as usize);
+    // TODO: Determine table width/height and calculate iteration better
+    let mut _row = 0;
+    let mut col = 0;
+    let mut needs_newline = false;
+    for word in words {
+        let _r = tw.write(word.as_bytes()).unwrap();
+
+        if col == columns-1 {
+            col = 0;
+            _row += 1;
+            let _r = tw.write(b"\n").unwrap();
+            needs_newline = false;
+        } else {
+            col += 1;
+            let _r = tw.write(b"\t").unwrap();
+            needs_newline = true;
+        }
+    }
+    if needs_newline {
+        let _r = tw.write(b"\n").unwrap();
+    }
+    tw.flush().unwrap();
 }
 
 #[cfg(test)]

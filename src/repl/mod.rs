@@ -4,10 +4,9 @@
 //! completion or other potentially slow, or user defined behavior.
 
 use std::io::{Stdin, Stdout};
-use docopt::ArgvMap;
 use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
-use crate::process::{Jobs, IO};
+use crate::program::Runtime;
 
 #[cfg(feature = "raw")]
 use {
@@ -21,11 +20,8 @@ use {
 #[cfg(not(feature = "raw"))]
 use {
     std::io::BufRead,
-    crate::program::{parse_and_run, Runtime},
+    crate::program::parse_and_run,
 };
-
-#[cfg(feature = "history")]
-use self::history::History;
 
 /// Start a REPL over the strings the user provides.
 ///
@@ -45,23 +41,19 @@ use self::history::History;
 /// ```
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
-pub fn start(mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap)
+pub fn start(mut stdin: Stdin, mut stdout: Stdout, runtime: &mut Runtime)
     -> crate::program::Result<WaitStatus>
 {
-    // Load history from file in $HOME.
-    #[cfg(feature = "history")]
-    let mut history = History::load();
-
     #[cfg(feature = "raw")]
-    raw_loop(stdin, stdout, io, jobs, args);
+    raw_loop(stdin, stdout, runtime);
     #[cfg(not(feature = "raw"))]
-    buffered_loop(stdin, stdout, io, jobs, args);
+    buffered_loop(stdin, stdout, runtime);
 
     Ok(WaitStatus::Exited(Pid::this(), 0))
 }
 
 #[cfg(feature = "raw")]
-fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
+fn raw_loop(stdin: Stdin, stdout: Stdout, runtime: &mut Runtime) {
     // Convert the tty's stdout into raw mode.
     let mut stdout = stdout.into_raw_mode()
         .expect("error opening raw mode");
@@ -77,14 +69,10 @@ fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &m
 
     // Create an context to pass to the actions.
     let mut context = ActionContext {
+        runtime,
+        prompt_length,
         stdout: &mut stdout,
-        io: io,
-        jobs: jobs,
-        args: args,
-        prompt_length: prompt_length,
         text: &mut text,
-        #[cfg(feature = "history")]
-        history: &mut history,
     };
     // Iterate the keys as a user presses them.
     // TODO #5: Mouse?
@@ -112,7 +100,7 @@ fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &m
 }
 
 #[cfg(not(feature = "raw"))]
-fn buffered_loop(stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
+fn buffered_loop(stdin: Stdin, mut stdout: Stdout, runtime: &mut Runtime) {
     // Display the inital prompt.
     prompt::ps1(&mut stdout);
 
@@ -136,15 +124,8 @@ fn buffered_loop(stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs,
         //             code = 130;
         //             break;
         //         }
-        let mut runtime = Runtime {
-            background: false,
-            io: io.clone(),
-            jobs: jobs,
-            args: args,
-            #[cfg(feature = "history")]
-            history: history,
-        };
-        if parse_and_run(&line, &mut runtime).is_ok() {
+        prompt::ps0(&mut stdout);
+        if parse_and_run(&line, runtime).is_ok() {
             #[cfg(feature = "history")]
             history.add(&line, 1);
         }

@@ -6,32 +6,23 @@ use termion::{
     cursor::DetectCursorPos,
     raw::RawTerminal,
 };
-use docopt::ArgvMap;
 use crate::program::{Runtime, parse_and_run};
-use crate::process::{IO, Jobs};
 use crate::repl::prompt;
 
-#[cfg(feature = "history")]
-use super::history::History;
-
 #[cfg(feature = "completion")]
-use super::completion::*;
+use super::completion::{self, *};
 
 
 pub struct Action;
 
-pub struct ActionContext<'a> {
+pub struct ActionContext<'a, 'b> {
     pub stdout: &'a mut RawTerminal<Stdout>,
-    pub io: &'a mut IO,
-    pub jobs: &'a mut Jobs,
-    pub args: &'a mut ArgvMap,
+    pub runtime: &'a mut Runtime<'b>,
     // TODO: Remove this field.
     #[cfg(feature = "raw")]
     pub prompt_length: u16,
     #[cfg(feature = "raw")]
     pub text: &'a mut String,
-    #[cfg(feature = "history")]
-    pub history: &'a mut History,
 }
 
 #[cfg(feature = "raw")]
@@ -43,30 +34,24 @@ impl Action {
 
         // Run the command.
         context.stdout.suspend_raw_mode().unwrap();
-        let mut runtime = Runtime {
-            background: false,
-            io: context.io.clone(),
-            jobs: context.jobs,
-            args: context.args,
+        prompt::ps0(&mut context.stdout);
+        if parse_and_run(context.text, context.runtime).is_ok() {
             #[cfg(feature = "history")]
-            history: context.history,
-        };
-        if parse_and_run(context.text, &mut runtime).is_ok() {
-            #[cfg(feature = "history")]
-            context.history.add(&context.text, 1);
+            context.runtime.history.add(context.text, 1);
         }
         context.stdout.activate_raw_mode().unwrap();
 
         // Reset for the next program.
         context.text.clear();
         #[cfg(feature = "history")]
-        context.history.reset_index();
+        context.runtime.history.reset_index();
 
         prompt::ps1(&mut context.stdout);
     }
 
     pub fn insert(context: &mut ActionContext, c: char) {
         if let Ok((x, y)) = context.stdout.cursor_pos() {
+            // XXX: Why did this panic?
             let i = (x - context.prompt_length) as usize;
             context.text.insert(i, c);
             print!("{}{}",
@@ -108,7 +93,7 @@ impl Action {
 
             // Save history to file in $HOME.
             #[cfg(feature = "history")]
-            context.history.save();
+            context.runtime.history.save().unwrap();
 
             // Manually drop the raw terminal.
             // TODO: Needed?
@@ -164,9 +149,9 @@ impl Action {
         print!("{}{}",
                termion::cursor::Left(1000),  // XXX
                termion::clear::CurrentLine);
-        context.prompt.display(&mut context.stdout);
+        prompt::ps1(&mut context.stdout);
 
-        if let Some(history_text) = context.history.get_up() {
+        if let Some(history_text) = context.runtime.history.get_up() {
             *context.text = history_text;
             print!("{}", context.text);
         }
@@ -178,9 +163,9 @@ impl Action {
         print!("{}{}",
                termion::cursor::Left(1000),  // XXX
                termion::clear::CurrentLine);
-        context.prompt.display(&mut context.stdout);
+        prompt::ps1(&mut context.stdout);
 
-        if let Some(history_text) = context.history.get_down() {
+        if let Some(history_text) = context.runtime.history.get_down() {
             *context.text = history_text;
             print!("{}", context.text);
             context.stdout.flush().unwrap();
@@ -191,20 +176,23 @@ impl Action {
 
     #[cfg(feature = "completion")]
     pub fn complete(context: &mut ActionContext) {
-        match complete(&context.text) {
+        match complete(context.text) {
             Completion::Partial(possibilities) => {
-                if possibilities.len() > 25 {
-                    print!("\n\r");
-                    for possibility in possibilities {
-                        print!("{}\n\r", possibility);
-                    }
-                    print!("\n\r");
-                } else {
-                    print!("\n\r{}\n\r", possibilities.join("\t"));
-                }
+                println!();
+                print!("{}{}",
+                       termion::cursor::Left(1000),  // XXX
+                       termion::clear::CurrentLine);
+                context.stdout.flush().unwrap();
+                context.stdout.suspend_raw_mode().unwrap();
+                completion::write_table(&mut context.stdout, &possibilities);
+                context.stdout.activate_raw_mode().unwrap();
+                print!("{}{}",
+                       termion::cursor::Left(1000),  // XXX
+                       termion::clear::CurrentLine);
                 prompt::ps1(&mut context.stdout);
                 print!("{}", context.text);
                 context.stdout.flush().unwrap();
+
             },
             Completion::Complete(t) => {
                 *context.text = t;

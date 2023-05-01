@@ -20,7 +20,7 @@ maintenance = { status = "experimental" }
 travis-ci = { repository = "https://github.com/nixpulvis/oursh" }
 
 [features]
-default = ["raw", "shebang-block"]
+default = ["raw", "history", "completion", "shebang-block"]
 
 # TODO: Justify and explain features.
 
@@ -33,13 +33,13 @@ shebang-block = []
 # things like arrow keys for history, and cursor editing.
 raw = []
 
-# # Save the history of commands (entered) for quick recall.
-# # TODO: Stop depending on raw if this ever interacts with anything beside the
-# # RELP input.
-# history = ["raw"]
+# Save the history of commands (entered) for quick recall.
+# TODO: Stop depending on raw if this ever interacts with anything beside the
+# RELP input.
+history = ["raw"]
 
-# # REPL tab completion.
-# completion = ["raw"]
+# REPL tab completion.
+completion = ["raw", "tabwriter"]
 
 [dependencies]
 docopt = "1.1"
@@ -54,6 +54,8 @@ ctrlc = "3.1"
 # Option 2: http://ticki.github.io/blog/making-terminal-applications-in-rust-with-termion/
 termion = "1.5"
 rustyline = "8"
+tabwriter = { version = "1.2", optional = true }
+
 
 [build-dependencies]
 lalrpop = "0.19"

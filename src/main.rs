@@ -76,21 +76,20 @@ fn main() -> MainResult {
     // TODO: From sh docs:
     //     "with an extension for support of a
     //      leading  <plus-sign> ('+') as noted below."
-    let mut args = Docopt::new(USAGE)
-                      .and_then(|d|
-                          d.version(Some(VERSION.into()))
-                           .argv(env::args().into_iter())
-                           .parse())
-                      .unwrap_or_else(|e| e.exit());
+    let args = Docopt::new(USAGE).and_then(|d|
+        d.version(Some(VERSION.into()))
+            .argv(env::args())
+            .parse())
+        .unwrap_or_else(|e| e.exit());
 
+    // Default inputs and outputs for the processes.
+    let io = IO::default();
     // Elementary job management.
     let mut jobs: Jobs = Rc::new(RefCell::new(vec![]));
 
-    // Default inputs and outputs.
-    let mut io = IO::default();
-
     #[cfg(feature = "history")]
     let mut history = History::load();
+
     let mut runtime = Runtime {
         io,
         jobs: &mut jobs,
@@ -141,7 +140,7 @@ fn main() -> MainResult {
             // Trap SIGINT.
             ctrlc::set_handler(move || println!()).unwrap();
 
-            let result = repl::start(stdin, stdout, &mut io, &mut jobs, &mut args);
+            let result = repl::start(stdin, stdout, &mut runtime);
             MainResult(result)
         } else {
             // Fill a string buffer from STDIN.
