@@ -50,7 +50,7 @@
 //! ```
 //!
 //! Variables are loaded from the environment (often simply called `ENV`) as
-//! well. For more information on the enviroment read
+//! well. For more information on the environment read
 //! [section 8.1](http://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html).
 //!
 //! ```sh

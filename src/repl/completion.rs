@@ -1,4 +1,4 @@
-//! User text completion for REPL interations.
+//! User text completion for REPL inputs.
 //!
 //! Simple use cases for this module should be as easy as the following
 //! example taken from the current REPL.
@@ -62,7 +62,7 @@ impl Completion {
         }
     }
 
-    /// Return a list of all the possibile complete matches.
+    /// Return a list of all the possible complete matches.
     pub fn possibilities(&self) -> Vec<String> {
         match *self {
             Completion::None => vec![],
