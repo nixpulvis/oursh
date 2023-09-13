@@ -30,7 +30,7 @@ fn main() {
             // types. By default the underlying file is line buffered. This
             // will allow us to process history, syntax, and more!
 
-            // Read what's avalible to us.
+            // Read what's available to us.
             stdin.read(&mut input).expect("error reading STDIN");
 
             // Once we've read a complete "program" (§2.10.2) we handle it,

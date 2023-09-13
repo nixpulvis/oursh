@@ -66,7 +66,7 @@ fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &m
     let mut stdout = stdout.into_raw_mode()
         .expect("error opening raw mode");
 
-    // Display the inital prompt.
+    // Display the initial prompt.
     prompt::ps1(&mut stdout);
 
     // XXX: Hack to get the prompt length.
@@ -113,7 +113,7 @@ fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &m
 
 #[cfg(not(feature = "raw"))]
 fn buffered_loop(stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
-    // Display the inital prompt.
+    // Display the initial prompt.
     prompt::ps1(&mut stdout);
 
     for line in stdin.lock().lines() {
