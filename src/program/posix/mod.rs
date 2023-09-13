@@ -182,7 +182,7 @@ impl super::Program for Program {
                         eprintln!("unexpected token {:?} found at {}-{}, expecting one of: {}",
                                   t, s, e, expected.join(", "));
                     },
-                    ParseError::UnrecognizedEOF { location, expected } => {
+                    ParseError::UnrecognizedEof { location, expected } => {
                         if location == 0 {
                             return Ok(Program(vec![]))
                         } else {

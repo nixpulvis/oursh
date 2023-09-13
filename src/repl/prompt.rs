@@ -36,8 +36,7 @@ fn expand_prompt(prompt: String) -> String {
             // TODO: https://ss64.com/bash/syntax-prompt.html
             result += &match c {
                 'h' => {
-                    let mut buf = [0u8; 64];
-                    let cstr = unistd::gethostname(&mut buf).expect("error getting hostname");
+                    let cstr = unistd::gethostname().expect("error getting hostname");
                     cstr.to_str().expect("error invalid UTF-8").into()
                 }
                 'e' => (0x1b as char).into(),
