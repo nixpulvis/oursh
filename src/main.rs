@@ -34,9 +34,9 @@ The oursh utility is a command language interpreter that shall execute commands
 read from a command line string, the standard input, or a specified file.
 
 Usage:
-    oursh    [options] [<command_file> [<arguments>...]]
-    oursh -s [options] [<arguments>...]
     oursh -c [options] <command_string> [<command_name> [<arguments>...]]
+    oursh -s [options] [<arguments>...]
+    oursh    [options] [<command_file> [<arguments>...]]
 
 By default our will read commands from the command_file operand. If there are no
 operands and the -c option is not specified, the -s option shall be assumed.
