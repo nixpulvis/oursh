@@ -66,6 +66,13 @@ macro_rules! oursh {
 }
 
 #[macro_export]
+macro_rules! sh {
+    ($text:expr) => {{
+        shell!("sh", &["--noprofile"], $text)
+    }};
+}
+
+#[macro_export]
 macro_rules! assert_oursh {
     (! $text:expr) => {{
         use std::process::Output;
@@ -140,5 +147,46 @@ macro_rules! assert_oursh {
         assert!(status.success());
         assert_eq!($stdout, stdout);
         assert_eq!($stderr, stderr);
+    }};
+}
+
+#[macro_export]
+macro_rules! assert_posix {
+    (! $text:expr) => {{
+        use std::process::Output;
+
+        let Output { status: oursh_status, .. } = oursh!($text);
+        let Output { status: sh_status, .. } = sh!($text);
+        assert_eq!(sh_status, oursh_status);
+    }};
+    ($text:expr) => {{
+        use std::process::Output;
+
+        let Output { status: oursh_status, stdout: oursh_stdout, stderr: oursh_stderr } = oursh!($text);
+        let oursh_stdout = String::from_utf8_lossy(&oursh_stdout);
+        let oursh_stderr = String::from_utf8_lossy(&oursh_stderr);
+        let Output { status: sh_status, stdout: sh_stdout, stderr: sh_stderr } = sh!($text);
+        let sh_stdout = String::from_utf8_lossy(&sh_stdout);
+        let sh_stderr = String::from_utf8_lossy(&sh_stderr);
+        assert!(oursh_status.success());
+        assert_eq!(sh_status, oursh_status);
+        assert_eq!(sh_stdout, oursh_stdout);
+        assert_eq!(sh_stderr, oursh_stderr);
+    }};
+    ($text:expr, $stdout:expr) => {{
+        use std::process::Output;
+
+        let Output { status: oursh_status, stdout: oursh_stdout, stderr: oursh_stderr } = oursh!($text);
+        let oursh_stdout = String::from_utf8_lossy(&oursh_stdout);
+        let oursh_stderr = String::from_utf8_lossy(&oursh_stderr);
+        let Output { status: sh_status, stdout: sh_stdout, stderr: sh_stderr } = sh!($text);
+        let sh_stdout = String::from_utf8_lossy(&sh_stdout);
+        let sh_stderr = String::from_utf8_lossy(&sh_stderr);
+        println!("oursh_stdout: {}\noursh_stderr: {}", oursh_stdout, oursh_stderr);
+        println!("sh_stdout: {}\nsh_stderr: {}", sh_stdout, sh_stderr);
+        assert_eq!(sh_status, oursh_status);
+        assert_eq!(sh_stdout, oursh_stdout);
+        assert_eq!(sh_stderr, oursh_stderr);
+        assert_eq!($stdout, oursh_stdout);
     }};
 }
