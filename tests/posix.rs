@@ -122,9 +122,13 @@ fn assignment_command() {
 
 #[test]
 fn variable_command() {
-    assert_posix!("X=1; echo $X", "1\n");  // This is wrong. $X should expand outside the
-    // environment where it's set.
+    assert_posix!("X=1; echo $X", "1\n");
+    assert_posix!("X=1 echo $X", "\n");
+    assert_posix!("X=1; printenv X", "\n");
+    assert_posix!("X=1 printenv X", "1\n");
+
     assert_posix!("export FOO=1 BAR=$FOO; echo $BAR", "1\n");
+
     assert_posix!("echo $BAR", "\n");
     assert_posix!("echo $", "$\n");
     assert_posix!("echo ' $ '", " $ \n");
