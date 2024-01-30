@@ -141,3 +141,8 @@ fn background_command() {
     // TODO: How to test the output with a PID in it?
     // assert_posix!("sleep 1 & echo 1", "1\n", "[1]\t(\d*)\n");
 }
+
+#[test]
+fn equal_sign() {
+    assert_posix!("echo =", "=\n");
+}
