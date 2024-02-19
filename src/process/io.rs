@@ -1,7 +1,5 @@
+use nix::unistd::{close, dup2};
 use std::os::unix::io::RawFd;
-use nix::{
-    unistd::{dup2, close},
-};
 
 /// File descriptors for use in processes and threads
 #[derive(Debug, Copy, Clone)]

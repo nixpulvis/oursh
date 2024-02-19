@@ -1,16 +1,9 @@
-use std::{
-    io::Read,
-    fs::File,
-    ffi::CString,
-};
-use nix::{
-    unistd::Pid,
-    sys::wait::WaitStatus,
-};
 use crate::{
     program::posix::builtin::Builtin,
-    program::{Result, Runtime, parse_and_run},
+    program::{parse_and_run, Result, Runtime},
 };
+use nix::{sys::wait::WaitStatus, unistd::Pid};
+use std::{ffi::CString, fs::File, io::Read};
 
 /// Execute commands from `file` in the current environment
 ///
@@ -43,9 +36,8 @@ impl Builtin for Dot {
                 } else {
                     Ok(WaitStatus::Exited(Pid::this(), 1))
                 }
-            },
+            }
             _ => unreachable!(),
-
         }
     }
 }

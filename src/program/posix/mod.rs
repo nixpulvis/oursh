@@ -114,40 +114,34 @@
 //!
 //! [1]: http://pubs.opengroup.org/onlinepubs/9699919799/
 
-use std::{
-    ffi::CString,
-    io::{Write, BufRead},
-    process::{self, Stdio},
-    fs::File,
-    os::unix::io::IntoRawFd,
-    env::{var, set_var}
+use self::ast::{Assignment, Redirect};
+use crate::{
+    process::{Process, ProcessGroup, Wait},
+    program::{Error, Result, Runtime},
 };
+use dirs::home_dir;
 use lalrpop_util::ParseError;
-use nix::{
-    sys::wait::WaitStatus,
-    unistd::Pid,
+use nix::{sys::wait::WaitStatus, unistd::Pid};
+use std::{
+    env::{set_var, var},
+    ffi::CString,
+    fs::File,
+    io::{BufRead, Write},
+    os::unix::io::IntoRawFd,
+    process::{self, Stdio},
 };
 #[cfg(feature = "raw")]
 use uuid::Uuid;
-use dirs::home_dir;
-use crate::{
-    process::{ProcessGroup, Process, Wait},
-    program::{Runtime, Result, Error},
-};
-use self::ast::{Assignment, Redirect};
 
 #[cfg(feature = "shebang-block")]
 use {
-    std::io,
+    self::ast::Interpreter, std::fs, std::io, std::os::unix::fs::PermissionsExt,
     std::process::ExitStatus,
-    std::fs,
-    std::os::unix::fs::PermissionsExt,
-    self::ast::Interpreter,
 };
 
 // Re-exports.
-pub use self::ast::Program;
 pub use self::ast::Command;
+pub use self::ast::Program;
 pub use self::builtin::Builtin;
 
 /// The syntax and semantics of a single POSIX command.
@@ -176,18 +170,26 @@ impl super::Program for Program {
                 match e {
                     ParseError::InvalidToken { location } => {
                         eprintln!("invalid token found at {}", location);
-                    },
+                    }
                     ParseError::UnrecognizedToken { token, expected } => {
                         let (s, t, e) = token;
-                        eprintln!("unexpected token {:?} found at {}-{}, expecting one of: {}",
-                                  t, s, e, expected.join(", "));
-                    },
+                        eprintln!(
+                            "unexpected token {:?} found at {}-{}, expecting one of: {}",
+                            t,
+                            s,
+                            e,
+                            expected.join(", ")
+                        );
+                    }
                     ParseError::UnrecognizedEof { location, expected } => {
                         if location == 0 {
-                            return Ok(Program(vec![]))
+                            return Ok(Program(vec![]));
                         } else {
-                            eprintln!("unexpected EOF found at {}, expecting one of: {}",
-                                      location, expected.join(", "));
+                            eprintln!(
+                                "unexpected EOF found at {}, expecting one of: {}",
+                                location,
+                                expected.join(", ")
+                            );
                         }
                     }
                     ParseError::ExtraToken { token: (i, t, _) } => {
@@ -196,7 +198,7 @@ impl super::Program for Program {
                     ParseError::User { error } => {
                         let lex::Error::UnrecognizedChar(s, c, e) = error;
                         eprintln!("unexpected character {} found at {}-{}", c, s, e);
-                    },
+                    }
                 }
                 Err(Error::Parse)
             }
@@ -224,32 +226,40 @@ impl super::Run for Command {
                     match r {
                         Redirect::RW { n, filename, .. } => {
                             let file = File::options()
-                                            .create(true)
-                                            .read(true)
-                                            .write(true)
-                                            .open(filename).unwrap();
+                                .create(true)
+                                .read(true)
+                                .write(true)
+                                .open(filename)
+                                .unwrap();
                             let fd = file.into_raw_fd();
                             runtime.io.0[*n as usize] = fd;
-                        },
+                        }
                         Redirect::Read { n, filename, .. } => {
                             let file = File::options()
-                                            .read(true)
-                                            .write(false)
-                                            .open(filename).unwrap();
+                                .read(true)
+                                .write(false)
+                                .open(filename)
+                                .unwrap();
                             let fd = file.into_raw_fd();
                             runtime.io.0[*n as usize] = fd;
-                        },
-                        Redirect::Write { n, filename, append, .. } => {
+                        }
+                        Redirect::Write {
+                            n,
+                            filename,
+                            append,
+                            ..
+                        } => {
                             // TODO: Clobber
                             let file = File::options()
-                                            .create(true)
-                                            .read(false)
-                                            .write(true)
-                                            .append(*append)
-                                            .open(filename).unwrap();
+                                .create(true)
+                                .read(false)
+                                .write(true)
+                                .append(*append)
+                                .open(filename)
+                                .unwrap();
                             let fd = file.into_raw_fd();
                             runtime.io.0[*n as usize] = fd;
-                        },
+                        }
                     };
                 }
 
@@ -257,27 +267,31 @@ impl super::Run for Command {
                 // $ FOO=~
                 // $ echo $FOO
                 // /home/nixpulvis
-                let argv: Vec<CString> = words.iter().map(|word| {
-                    CString::new(&expand_home(&expand_vars(&word.0)) as &str)
-                        .expect("error in word UTF-8")
-                }).collect();
+                let argv: Vec<CString> = words
+                    .iter()
+                    .map(|word| {
+                        CString::new(&expand_home(&expand_vars(&word.0)) as &str)
+                            .expect("error in word UTF-8")
+                    })
+                    .collect();
 
                 if let Some(command) = argv.clone().first() {
                     match command.to_string_lossy().as_ref() {
-                        "."       => builtin::Dot.run(argv, runtime),
-                        ":"       => builtin::Return(0).run(argv, runtime),
-                        "cd"      => builtin::Cd.run(argv, runtime),
+                        "." => builtin::Dot.run(argv, runtime),
+                        ":" => builtin::Return(0).run(argv, runtime),
+                        "cd" => builtin::Cd.run(argv, runtime),
                         "command" => builtin::Command.run(argv, runtime),
-                        "exit"    => builtin::Exit.run(argv, runtime),
-                        "export"  => builtin::Export.run(argv, runtime),
-                        "false"   => builtin::Return(1).run(argv, runtime),
-                        "jobs"    => builtin::Jobs.run(argv, runtime),
-                        "true"    => builtin::Return(0).run(argv, runtime),
-                        "wait"    => builtin::Wait.run(argv, runtime),
+                        "exit" => builtin::Exit.run(argv, runtime),
+                        "export" => builtin::Export.run(argv, runtime),
+                        "false" => builtin::Return(1).run(argv, runtime),
+                        "jobs" => builtin::Jobs.run(argv, runtime),
+                        "true" => builtin::Return(0).run(argv, runtime),
+                        "wait" => builtin::Wait.run(argv, runtime),
                         _ => {
                             let id = (runtime.jobs.borrow().len() + 1).to_string();
                             let name = argv[0].to_string_lossy().to_string();
-                            let process = Process::fork(argv, runtime.io).map_err(|_| Error::Runtime)?;
+                            let process =
+                                Process::fork(argv, runtime.io).map_err(|_| Error::Runtime)?;
                             if runtime.background {
                                 let status = process.status();
                                 eprintln!("[{}]\t{}", id, process.pid());
@@ -290,12 +304,12 @@ impl super::Run for Command {
                                 }
                                 status
                             }
-                        },
+                        }
                     }
                 } else {
                     Ok(WaitStatus::Exited(Pid::this(), 0))
                 }
-            },
+            }
             // { sleep 3; date; }&
             // { sleep 3; date; }& ls
             Command::Compound(ref commands) => {
@@ -306,38 +320,30 @@ impl super::Run for Command {
                     last = command.run(runtime)?;
                 }
                 Ok(last)
+            }
+            Command::Not(ref command) => match command.run(runtime) {
+                Ok(WaitStatus::Exited(p, c)) => Ok(WaitStatus::Exited(p, (c == 0) as i32)),
+                Ok(s) => Ok(s),
+                Err(_) => Err(Error::Runtime),
             },
-            Command::Not(ref command) => {
-                match command.run(runtime) {
-                    Ok(WaitStatus::Exited(p, c)) => {
-                        Ok(WaitStatus::Exited(p, (c == 0) as i32))
-                    }
-                    Ok(s) => Ok(s),
-                    Err(_) => Err(Error::Runtime),
+            Command::And(ref left, ref right) => match left.run(runtime) {
+                Ok(WaitStatus::Exited(_, c)) if c == 0 => {
+                    right.run(runtime).map_err(|_| Error::Runtime)
                 }
+                Ok(s) => Ok(s),
+                Err(_) => Err(Error::Runtime),
             },
-            Command::And(ref left, ref right) => {
-                match left.run(runtime) {
-                    Ok(WaitStatus::Exited(_, c)) if c == 0 => {
-                        right.run(runtime).map_err(|_| Error::Runtime)
-                    },
-                    Ok(s) => Ok(s),
-                    Err(_) => Err(Error::Runtime),
+            Command::Or(ref left, ref right) => match left.run(runtime) {
+                Ok(WaitStatus::Exited(_, c)) if c != 0 => {
+                    right.run(runtime).map_err(|_| Error::Runtime)
                 }
-            },
-            Command::Or(ref left, ref right) => {
-                match left.run(runtime) {
-                    Ok(WaitStatus::Exited(_, c)) if c != 0 => {
-                        right.run(runtime).map_err(|_| Error::Runtime)
-                    },
-                    Ok(s) => Ok(s),
-                    Err(_) => Err(Error::Runtime),
-                }
+                Ok(s) => Ok(s),
+                Err(_) => Err(Error::Runtime),
             },
             Command::Subshell(ref program) => {
                 // TODO #4: Run in a *subshell* ffs.
                 program.run(runtime)
-            },
+            }
             Command::Pipeline(ref left, ref right) => {
                 // TODO: This is obviously a temporary hack.
                 if let box Command::Simple(_assigns, lwords, _redirs) = left {
@@ -347,8 +353,7 @@ impl super::Run for Command {
                         .spawn()
                         .expect("error swawning pipeline process");
 
-                    let output = child.wait_with_output()
-                        .expect("error reading stdout");
+                    let output = child.wait_with_output().expect("error reading stdout");
 
                     if let box Command::Simple(_assigns, rwords, _redirs) = right {
                         let mut child = process::Command::new(&rwords[0].0)
@@ -358,22 +363,21 @@ impl super::Run for Command {
                             .expect("error swawning pipeline process");
 
                         {
-                            let stdin = child.stdin.as_mut()
-                                .expect("error opening stdin");
-                            stdin.write_all(&output.stdout)
+                            let stdin = child.stdin.as_mut().expect("error opening stdin");
+                            stdin
+                                .write_all(&output.stdout)
                                 .expect("error writing to stdin");
                         }
 
-                        child.wait()
-                            .expect("error waiting for piped command");
+                        child.wait().expect("error waiting for piped command");
                     }
                 }
                 Ok(WaitStatus::Exited(Pid::this(), 0))
-            },
+            }
             Command::Background(ref command) => {
                 runtime.background = true;
                 command.run(runtime)
-            },
+            }
             #[cfg(feature = "shebang-block")]
             Command::Lang(ref interpreter, ref text) => {
                 fn bridge(interpreter: &str, text: &str) -> io::Result<ExitStatus> {
@@ -385,16 +389,13 @@ impl super::Run for Command {
                         // fucking files... The shebang isn't even a real
                         // POSIX standard.
                         let mut file = File::create(&bridgefile)?;
-                        let mut interpreter = interpreter.chars()
-                                                         .map(|c| c as u8)
-                                                         .collect::<Vec<u8>>();
+                        let mut interpreter =
+                            interpreter.chars().map(|c| c as u8).collect::<Vec<u8>>();
                         interpreter.insert(0, b'!');
                         interpreter.insert(0, b'#');
                         file.write_all(&interpreter)?;
                         file.write_all(b"\n")?;
-                        let text = text.chars()
-                                       .map(|c| c as u8)
-                                       .collect::<Vec<u8>>();
+                        let text = text.chars().map(|c| c as u8).collect::<Vec<u8>>();
                         file.write_all(&text)?;
 
                         let mut perms = fs::metadata(&bridgefile)?.permissions();
@@ -408,30 +409,24 @@ impl super::Run for Command {
                     Interpreter::Primary => {
                         unimplemented!()
                     }
-                    Interpreter::Alternate => {
-                        "/bin/sh"
+                    Interpreter::Alternate => "/bin/sh",
+                    Interpreter::HashLang(ref language) => match language.as_str() {
+                        "ruby" => "/usr/bin/env ruby",
+                        "node" => "/usr/bin/env node",
+                        "python" => "/usr/bin/env python",
+                        "racket" => "/usr/bin/env racket",
+                        _ => return Err(Error::Read),
                     },
-                    Interpreter::HashLang(ref language) => {
-                        match language.as_str() {
-                            "ruby"   => "/usr/bin/env ruby",
-                            "node"   => "/usr/bin/env node",
-                            "python" => "/usr/bin/env python",
-                            "racket" => "/usr/bin/env racket",
-                            _        => return Err(Error::Read),
-                        }
-                    },
-                    Interpreter::Shebang(ref interpreter) => {
-                        interpreter
-                    },
+                    Interpreter::Shebang(ref interpreter) => interpreter,
                 };
 
                 bridge(interpreter, text).map_err(|_| Error::Read)?;
                 Ok(WaitStatus::Exited(Pid::this(), 0))
-            },
+            }
             #[cfg(not(feature = "shebang-block"))]
-            Command::Lang(_,_) => {
+            Command::Lang(_, _) => {
                 unimplemented!();
-            },
+            }
         }
     }
 }
@@ -477,7 +472,7 @@ fn expand_vars(string: &str) -> String {
             result.push(c);
         } else if variable_start > -1 {
             if variable.is_empty() {
-                result.pop();  // remove the leading '$'.
+                result.pop(); // remove the leading '$'.
             }
             variable.push(c);
         } else {
@@ -512,8 +507,8 @@ lalrpop_mod!(
 
 #[cfg(test)]
 mod tests {
-    use crate::program::Program as ProgramTrait;
     use super::*;
+    use crate::program::Program as ProgramTrait;
 
     #[test]
     fn program_parse_empty() {

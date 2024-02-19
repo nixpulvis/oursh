@@ -1,29 +1,28 @@
 #![feature(exclusive_range_pattern)]
 
+extern crate dirs;
 extern crate docopt;
 extern crate nix;
 extern crate oursh;
 extern crate termion;
-extern crate dirs;
 
+use docopt::{Docopt, Value};
+use nix::sys::wait::WaitStatus;
+use oursh::{
+    invocation::source_profile,
+    process::{Jobs, IO},
+    program::{parse_and_run, Error, Result, Runtime},
+    repl, VERSION,
+};
 use std::{
+    cell::RefCell,
     env,
-    process::{Termination, ExitCode},
     fs::File,
     io::{self, Read},
-    cell::RefCell,
+    process::{ExitCode, Termination},
     rc::Rc,
 };
-use nix::sys::wait::WaitStatus;
-use docopt::{Docopt, Value};
 use termion::is_tty;
-use oursh::{
-    VERSION,
-    repl,
-    invocation::source_profile,
-    program::{parse_and_run, Runtime, Result, Error},
-    process::{Jobs, IO},
-};
 
 #[cfg(feature = "history")]
 use oursh::repl::history::History;
@@ -77,11 +76,12 @@ fn main() -> MainResult {
     //     "with an extension for support of a
     //      leading  <plus-sign> ('+') as noted below."
     let mut args = Docopt::new(USAGE)
-                      .and_then(|d|
-                          d.version(Some(VERSION.into()))
-                           .argv(env::args().into_iter())
-                           .parse())
-                      .unwrap_or_else(|e| e.exit());
+        .and_then(|d| {
+            d.version(Some(VERSION.into()))
+                .argv(env::args().into_iter())
+                .parse()
+        })
+        .unwrap_or_else(|e| e.exit());
 
     // Elementary job management.
     let mut jobs: Jobs = Rc::new(RefCell::new(vec![]));
@@ -112,13 +112,12 @@ fn main() -> MainResult {
     if let Some(Value::Plain(Some(ref c))) = args.find("<command_string>") {
         MainResult(parse_and_run(c, &mut runtime))
     } else if let Some(Value::Plain(Some(ref filename))) = args.find("<command_file>") {
-        let mut file = File::open(filename)
-            .unwrap_or_else(|_| panic!("error opening file: {}", filename));
+        let mut file =
+            File::open(filename).unwrap_or_else(|_| panic!("error opening file: {}", filename));
 
         // Fill a string buffer from the file.
         let mut text = String::new();
-        file.read_to_string(&mut text)
-            .expect("error reading file");
+        file.read_to_string(&mut text).expect("error reading file");
 
         // Run the program.
         MainResult(parse_and_run(&text, &mut runtime))
@@ -161,7 +160,7 @@ impl Termination for MainResult {
         match self.0 {
             Ok(WaitStatus::Exited(_pid, code)) => ExitCode::from(code as u8),
             Ok(WaitStatus::Signaled(_pid, _signal, _coredump)) => ExitCode::from(128),
-            Ok(_) => ExitCode::from(0),  // TODO: Is this even remotely correct?
+            Ok(_) => ExitCode::from(0), // TODO: Is this even remotely correct?
             Err(Error::Read) => ExitCode::from(1),
             Err(Error::Parse) => ExitCode::from(2),
             Err(Error::Runtime) => ExitCode::from(127),

@@ -111,7 +111,10 @@ pub struct Word(pub String);
 pub enum Redirect {
     // Redirecting Input and Output
     // [n]<>word
-    RW { n: RawFd, filename: String },
+    RW {
+        n: RawFd,
+        filename: String,
+    },
     // Redirecting Input
     // [n]<word  (duplicate = false)
     // [n]<&word (duplicate = true)
@@ -162,7 +165,7 @@ impl Command {
         match self {
             Command::Compound(ref mut c) => {
                 c.push(command.clone());
-            },
+            }
             c => return Command::Compound(vec![c, command.clone()]),
         }
 
@@ -173,7 +176,7 @@ impl Command {
         match self {
             Command::Compound(ref mut c) => {
                 c.insert(0, command.clone());
-            },
+            }
             c => return Command::Compound(vec![command.clone(), c]),
         }
 
@@ -210,19 +213,16 @@ impl Program {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use lalrpop_util::ParseError;
-    use crate::program::posix::{
-        parse::{ProgramParser, CommandParser},
-        lex::{Lexer, Token, Error},
-    };
     use super::*;
+    use crate::program::posix::{
+        lex::{Error, Lexer, Token},
+        parse::{CommandParser, ProgramParser},
+    };
+    use lalrpop_util::ParseError;
 
-    fn parse_program<'a>(text: &'a str)
-        -> Result<Program, ParseError<usize, Token<'a>, Error>>
-    {
+    fn parse_program<'a>(text: &'a str) -> Result<Program, ParseError<usize, Token<'a>, Error>> {
         let lexer = Lexer::new(text);
         let parser = ProgramParser::new();
         parser.parse(text, lexer)
@@ -238,9 +238,7 @@ mod tests {
         assert_eq!(3, parse_program("git s; ls -la; true;").unwrap().0.len());
     }
 
-    fn parse_command<'a>(text: &'a str)
-        -> Result<Command, ParseError<usize, Token<'a>, Error>>
-    {
+    fn parse_command<'a>(text: &'a str) -> Result<Command, ParseError<usize, Token<'a>, Error>> {
         let lexer = Lexer::new(text);
         let parser = CommandParser::new();
         parser.parse(text, lexer)
@@ -276,23 +274,23 @@ mod tests {
         let command = parse_command("! true").unwrap();
         assert_matches!(command, Command::Not(_));
         let command = parse_command("! true || false").unwrap();
-        assert_matches!(command, Command::Or(box Command::Not(_),_));
+        assert_matches!(command, Command::Or(box Command::Not(_), _));
     }
 
     #[test]
     fn and_command() {
         let command = parse_command("true && false").unwrap();
-        assert_matches!(command, Command::And(_,_));
+        assert_matches!(command, Command::And(_, _));
         let command = parse_command("true || false && true").unwrap();
-        assert_matches!(command, Command::And(_,_));
+        assert_matches!(command, Command::And(_, _));
     }
 
     #[test]
     fn or_command() {
         let command = parse_command("true || false").unwrap();
-        assert_matches!(command, Command::Or(_,_));
+        assert_matches!(command, Command::Or(_, _));
         let command = parse_command("true && false || true").unwrap();
-        assert_matches!(command, Command::Or(_,_));
+        assert_matches!(command, Command::Or(_, _));
     }
 
     #[test]

@@ -1,7 +1,7 @@
+use crate::{NAME, VERSION};
+use nix::unistd;
 use std::env;
 use std::io::Write;
-use nix::unistd;
-use crate::{NAME, VERSION};
 
 /// TODO: docs
 pub fn ps1(stdout: &mut impl Write) {
@@ -15,9 +15,11 @@ fn expand_prompt(prompt: String) -> String {
     let mut command = false;
     let mut octal = vec![];
     for c in prompt.chars() {
-        let o = octal.iter().map(|c: &char| c.to_string())
-                     .collect::<Vec<_>>()
-                     .join("");
+        let o = octal
+            .iter()
+            .map(|c: &char| c.to_string())
+            .collect::<Vec<_>>()
+            .join("");
         if !octal.is_empty() && octal.len() < 3 {
             if ('0'..'8').contains(&c) {
                 octal.push(c);
@@ -44,7 +46,10 @@ fn expand_prompt(prompt: String) -> String {
                 'w' => env::var("PWD").unwrap_or_else(|_| "".into()),
                 's' => NAME.into(),
                 'v' => VERSION[0..(VERSION.len() - 2)].into(),
-                '0' => { octal.push(c); "".into() },
+                '0' => {
+                    octal.push(c);
+                    "".into()
+                }
                 '\\' => "".into(),
                 c => c.into(),
             };

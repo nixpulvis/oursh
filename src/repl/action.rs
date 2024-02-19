@@ -1,22 +1,18 @@
 //! Actions to be bound to input methods.
-use std::io::{Write, Stdout};
+use std::io::{Stdout, Write};
 
-use std::process::exit;
-use termion::{
-    cursor::DetectCursorPos,
-    raw::RawTerminal,
-};
-use docopt::ArgvMap;
-use crate::program::{Runtime, parse_and_run};
-use crate::process::{IO, Jobs};
+use crate::process::{Jobs, IO};
+use crate::program::{parse_and_run, Runtime};
 use crate::repl::prompt;
+use docopt::ArgvMap;
+use std::process::exit;
+use termion::{cursor::DetectCursorPos, raw::RawTerminal};
 
 #[cfg(feature = "history")]
 use super::history::History;
 
 #[cfg(feature = "completion")]
 use super::completion::*;
-
 
 pub struct Action;
 
@@ -69,9 +65,7 @@ impl Action {
         if let Ok((x, y)) = context.stdout.cursor_pos() {
             let i = (x - context.prompt_length) as usize;
             context.text.insert(i, c);
-            print!("{}{}",
-                   &context.text[i..],
-                   termion::cursor::Goto(x + 1, y));
+            print!("{}{}", &context.text[i..], termion::cursor::Goto(x + 1, y));
         } else {
             context.text.push(c);
             print!("{}", c);
@@ -84,11 +78,13 @@ impl Action {
             if x > context.prompt_length {
                 let i = x - context.prompt_length;
                 context.text.remove((i - 1) as usize);
-                print!("{}{}{}{}",
-                       termion::cursor::Goto(context.prompt_length, y),
-                       termion::clear::UntilNewline,
-                       context.text,
-                       termion::cursor::Goto(x - 1, y));
+                print!(
+                    "{}{}{}{}",
+                    termion::cursor::Goto(context.prompt_length, y),
+                    termion::clear::UntilNewline,
+                    context.text,
+                    termion::cursor::Goto(x - 1, y)
+                );
                 context.stdout.flush().unwrap();
             }
         }
@@ -153,17 +149,17 @@ impl Action {
     }
 
     pub fn clear(context: &mut ActionContext) {
-        print!("{}{}",
-               termion::clear::All,
-               termion::cursor::Goto(1, 1));
+        print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
         prompt::ps1(&mut context.stdout);
     }
 
     #[cfg(feature = "history")]
     pub fn history_up(context: &mut ActionContext) {
-        print!("{}{}",
-               termion::cursor::Left(1000),  // XXX
-               termion::clear::CurrentLine);
+        print!(
+            "{}{}",
+            termion::cursor::Left(1000), // XXX
+            termion::clear::CurrentLine
+        );
         context.prompt.display(&mut context.stdout);
 
         if let Some(history_text) = context.history.get_up() {
@@ -175,9 +171,11 @@ impl Action {
 
     #[cfg(feature = "history")]
     pub fn history_down(context: &mut ActionContext) {
-        print!("{}{}",
-               termion::cursor::Left(1000),  // XXX
-               termion::clear::CurrentLine);
+        print!(
+            "{}{}",
+            termion::cursor::Left(1000), // XXX
+            termion::clear::CurrentLine
+        );
         context.prompt.display(&mut context.stdout);
 
         if let Some(history_text) = context.history.get_down() {
@@ -205,18 +203,20 @@ impl Action {
                 prompt::ps1(&mut context.stdout);
                 print!("{}", context.text);
                 context.stdout.flush().unwrap();
-            },
+            }
             Completion::Complete(t) => {
                 *context.text = t;
-                print!("{}{}",
-                       termion::cursor::Left(1000),  // XXX
-                       termion::clear::CurrentLine);
+                print!(
+                    "{}{}",
+                    termion::cursor::Left(1000), // XXX
+                    termion::clear::CurrentLine
+                );
                 context.stdout.flush().unwrap();
                 prompt::ps1(&mut context.stdout);
                 print!("{}", context.text);
                 context.stdout.flush().unwrap();
-            },
-            Completion::None => {},
+            }
+            Completion::None => {}
         }
     }
 }

@@ -130,8 +130,8 @@ impl<'input> Iterator for Lexer<'input> {
         while let Some((s, c, e)) = self.advance() {
             let tok = match c {
                 '\n' => Some(Ok((s, Token::Linefeed, e))),
-                ';'  => Some(Ok((s, Token::Semi, e))),
-                '#'  => {
+                ';' => Some(Ok((s, Token::Semi, e))),
+                '#' => {
                     while let Some((_, c, _)) = self.lookahead {
                         match c {
                             '\n' => break,
@@ -140,52 +140,48 @@ impl<'input> Iterator for Lexer<'input> {
                     }
                     self.next()
                 }
-                ')'  => Some(Ok((s, Token::RParen, e))),
-                '('  => Some(Ok((s, Token::LParen, e))),
-                '`'  => Some(Ok((s, Token::Backtick, e))),
-                '!'  => Some(Ok((s, Token::Bang, e))),
-                '='  => Some(Ok((s, Token::Equals, e))),
+                ')' => Some(Ok((s, Token::RParen, e))),
+                '(' => Some(Ok((s, Token::LParen, e))),
+                '`' => Some(Ok((s, Token::Backtick, e))),
+                '!' => Some(Ok((s, Token::Bang, e))),
+                '=' => Some(Ok((s, Token::Equals, e))),
                 '\\' => Some(Ok((s, Token::Backslash, e))),
                 '\'' => Some(self.single_quote(s, e)),
-                '"'  => Some(self.double_quote(s, e)),
-                '>'  => {
-                    match self.lookahead {
-                        Some((_, '>', e)) => {
-                            self.advance();
-                            Some(Ok((s, Token::DGreat, e)))
-                        },
-                        Some((_, '&', e)) => {
-                            self.advance();
-                            Some(Ok((s, Token::GreatAnd, e)))
-                        },
-                        Some((_, '|', e)) => {
-                            self.advance();
-                            Some(Ok((s, Token::Clobber, e)))
-                        },
-                        _ => Some(Ok((s, Token::Great, e))),
+                '"' => Some(self.double_quote(s, e)),
+                '>' => match self.lookahead {
+                    Some((_, '>', e)) => {
+                        self.advance();
+                        Some(Ok((s, Token::DGreat, e)))
                     }
+                    Some((_, '&', e)) => {
+                        self.advance();
+                        Some(Ok((s, Token::GreatAnd, e)))
+                    }
+                    Some((_, '|', e)) => {
+                        self.advance();
+                        Some(Ok((s, Token::Clobber, e)))
+                    }
+                    _ => Some(Ok((s, Token::Great, e))),
                 },
-                '<'  => {
-                    match self.lookahead {
-                        Some((_, '&', e)) => {
-                            self.advance();
-                            Some(Ok((s, Token::LessAnd, e)))
-                        },
-                        Some((_, '<', e)) => {
-                            self.advance();
-                            if let Some((_, '-', e)) = self.lookahead {
-                                self.advance();
-                                Some(Ok((s, Token::DLessDash, e)))
-                            } else {
-                                Some(Ok((s, Token::DLess, e)))
-                            }
-                        },
-                        Some((_, '>', e)) => {
-                            self.advance();
-                            Some(Ok((s, Token::LessGreat, e)))
-                        },
-                        _ => Some(Ok((s, Token::Less, e))),
+                '<' => match self.lookahead {
+                    Some((_, '&', e)) => {
+                        self.advance();
+                        Some(Ok((s, Token::LessAnd, e)))
                     }
+                    Some((_, '<', e)) => {
+                        self.advance();
+                        if let Some((_, '-', e)) = self.lookahead {
+                            self.advance();
+                            Some(Ok((s, Token::DLessDash, e)))
+                        } else {
+                            Some(Ok((s, Token::DLess, e)))
+                        }
+                    }
+                    Some((_, '>', e)) => {
+                        self.advance();
+                        Some(Ok((s, Token::LessGreat, e)))
+                    }
+                    _ => Some(Ok((s, Token::Less, e))),
                 },
                 '&' => {
                     if let Some((_, '&', e)) = self.lookahead {
@@ -194,7 +190,7 @@ impl<'input> Iterator for Lexer<'input> {
                     } else {
                         Some(Ok((s, Token::Amper, e)))
                     }
-                },
+                }
                 '|' => {
                     if let Some((_, '|', e)) = self.lookahead {
                         self.advance();
@@ -202,15 +198,12 @@ impl<'input> Iterator for Lexer<'input> {
                     } else {
                         Some(Ok((s, Token::Pipe, e)))
                     }
+                }
+                '$' => match self.lookahead {
+                    Some((_, '{', e)) | Some((_, '(', e)) => Some(Ok((s, Token::Dollar, e))),
+                    _ => Some(self.word(s, e)),
                 },
-                '$' => {
-                    match self.lookahead {
-                        Some((_, '{', e)) |
-                        Some((_, '(', e)) => Some(Ok((s, Token::Dollar, e))),
-                        _ => Some(self.word(s, e)),
-                    }
-                },
-                '{' => Some(self.block(s, s+e)),
+                '{' => Some(self.block(s, s + e)),
                 '}' => Some(Ok((s, Token::RBrace, e))),
                 c if is_word_start(c) => Some(self.word(s, e)),
                 c if c.is_whitespace() => continue,
@@ -235,15 +228,20 @@ impl<'input> Lexer<'input> {
                 let next = self.chars.next();
                 self.lookahead = next.map(|n| (n.0, n.1, n.0 + n.1.len_utf8()));
                 Some((s, c, e))
-            },
+            }
             None => None,
         }
     }
 
     // TODO: start and end arguments aren't quite right here.
-    fn take_until<F>(&mut self, start: usize, mut end: usize,  mut terminate: F)
-        -> (&'input str, usize)
-        where F: FnMut(char) -> bool
+    fn take_until<F>(
+        &mut self,
+        start: usize,
+        mut end: usize,
+        mut terminate: F,
+    ) -> (&'input str, usize)
+    where
+        F: FnMut(char) -> bool,
     {
         while let Some((_, c, _)) = self.lookahead {
             if terminate(c) {
@@ -255,52 +253,54 @@ impl<'input> Lexer<'input> {
         (&self.input[start..end], end)
     }
 
-    fn take_while<F>(&mut self, start: usize, end: usize, mut keep_going: F)
-        -> (&'input str, usize)
-        where F: FnMut(char) -> bool,
+    fn take_while<F>(&mut self, start: usize, end: usize, mut keep_going: F) -> (&'input str, usize)
+    where
+        F: FnMut(char) -> bool,
     {
         self.take_until(start, end, |c| !keep_going(c))
     }
 
-    fn single_quote(&mut self, start: usize, end: usize)
-        -> Result<(usize, Token<'input>, usize), Error>
-    {
+    fn single_quote(
+        &mut self,
+        start: usize,
+        end: usize,
+    ) -> Result<(usize, Token<'input>, usize), Error> {
         // TODO: This quietly stops at EOF.
         let (_, end) = self.take_while(start, end, |c| c != '\'');
-        self.advance();  // Consume the ending single quote.
-        Ok((start, Token::Word(&self.input[start+1..end]), end))
+        self.advance(); // Consume the ending single quote.
+        Ok((start, Token::Word(&self.input[start + 1..end]), end))
     }
 
     // TODO: Escapes
     // TODO: Honestly, I think this needs to be handled in the .lalrpop file.
-    fn double_quote(&mut self, start: usize, end: usize)
-        -> Result<(usize, Token<'input>, usize), Error>
-    {
+    fn double_quote(
+        &mut self,
+        start: usize,
+        end: usize,
+    ) -> Result<(usize, Token<'input>, usize), Error> {
         // TODO: This quietly stops at EOF.
         let (input, end) = self.take_while(start, end, |c| c != '"');
-        self.advance();  // Consume the ending double quote.
+        self.advance(); // Consume the ending double quote.
         Ok((start, Token::Word(&input[1..]), end))
     }
 
-    fn word(&mut self, start: usize, end: usize)
-        -> Result<(usize, Token<'input>, usize), Error>
-    {
+    fn word(&mut self, start: usize, end: usize) -> Result<(usize, Token<'input>, usize), Error> {
         let (word, end) = self.take_while(start, end, is_word_continue);
         let tok = match word {
-            "if"     => Token::If,
-            "then"   => Token::Then,
-            "else"   => Token::Else,
-            "elif"   => Token::Elif,
-            "fi"     => Token::Fi,
+            "if" => Token::If,
+            "then" => Token::Then,
+            "else" => Token::Else,
+            "elif" => Token::Elif,
+            "fi" => Token::Fi,
             "export" => Token::Export,
-            "do"     => Token::Do,
-            "done"   => Token::Done,
-            "case"   => Token::Case,
-            "esac"   => Token::Esac,
-            "while"  => Token::While,
-            "until"  => Token::Until,
-            "for"    => Token::For,
-            word     => self.io_number(word),
+            "do" => Token::Do,
+            "done" => Token::Done,
+            "case" => Token::Case,
+            "esac" => Token::Esac,
+            "while" => Token::While,
+            "until" => Token::Until,
+            "for" => Token::For,
+            word => self.io_number(word),
         };
         Ok((start, tok, end))
     }
@@ -317,16 +317,14 @@ impl<'input> Lexer<'input> {
         Token::Word(word)
     }
 
-    fn block(&mut self, start: usize, end: usize)
-        -> Result<(usize, Token<'input>, usize), Error>
-    {
+    fn block(&mut self, start: usize, end: usize) -> Result<(usize, Token<'input>, usize), Error> {
         #[cfg(feature = "shebang-block")]
         {
             if let Some((_, '#', s)) = self.lookahead {
-                self.advance();  // Consume the '#'.
+                self.advance(); // Consume the '#'.
                 if let Some((_, '!', s)) = self.lookahead {
                     let (_, end) = self.take_until(s, end, |c| c == ';');
-                    self.advance();  // Consume the ';' delimiter.
+                    self.advance(); // Consume the ';' delimiter.
                     self.take_while(end, end, |c| c.is_whitespace());
                     self.in_shebang = true;
 
@@ -347,9 +345,7 @@ impl<'input> Lexer<'input> {
     }
 
     #[cfg(feature = "shebang-block")]
-    fn text(&mut self, start: usize, end: usize)
-        -> Result<(usize, Token<'input>, usize), Error>
-    {
+    fn text(&mut self, start: usize, end: usize) -> Result<(usize, Token<'input>, usize), Error> {
         // TODO: Count matching braces in TEXT.
         let (_, end) = self.take_until(start, end, |d| d == '}');
         self.in_shebang = false;
@@ -361,9 +357,7 @@ fn is_word_start(ch: char) -> bool {
     match ch {
         // Ignore C0 and C1 control character words.
         // TODO: Test
-        '\u{007F}' |
-        '\u{0000}'..='\u{001F}' |
-        '\u{0080}'..='\u{009F}' => false,
+        '\u{007F}' | '\u{0000}'..='\u{001F}' | '\u{0080}'..='\u{009F}' => false,
         _ => is_word_continue(ch),
     }
 }
@@ -372,10 +366,9 @@ fn is_word_continue(ch: char) -> bool {
     match ch {
         // List of syntax from above.
         // TODO: Make this list generated.
-        ';' | ')' | '(' | '`' | '!' | '=' | '\\' | '\'' | '"'
-            | '>' | '<' | '&' | '|' | '{' | '}' | '*'
-          => false,
-        _ => !ch.is_whitespace()
+        ';' | ')' | '(' | '`' | '!' | '=' | '\\' | '\'' | '"' | '>' | '<' | '&' | '|' | '{'
+        | '}' | '*' => false,
+        _ => !ch.is_whitespace(),
     }
 }
 
@@ -392,136 +385,102 @@ mod tests {
     #[test]
     fn error() {
         let mut lexer = Lexer::new("*");
-        assert_matches!(lexer.next(),
-                        Some(Err(Error::UnrecognizedChar(_, '*', _))));
+        assert_matches!(lexer.next(), Some(Err(Error::UnrecognizedChar(_, '*', _))));
     }
 
     #[test]
     fn linefeed() {
         let mut lexer = Lexer::new("\n");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Linefeed, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Linefeed, _))));
     }
 
     #[test]
     fn words() {
         let mut lexer = Lexer::new("ls -la");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("ls"), _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("-la"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("ls"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("-la"), _))));
         // Numbers are still words on their own.
         let mut lexer = Lexer::new("123");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("123"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("123"), _))));
         let mut lexer = Lexer::new("$PATH");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("$PATH"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("$PATH"), _))));
     }
 
     #[test]
     fn redirects() {
         let mut lexer = Lexer::new(">");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Great, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Great, _))));
         let mut lexer = Lexer::new(">>");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::DGreat, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::DGreat, _))));
         let mut lexer = Lexer::new(">&");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::GreatAnd, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::GreatAnd, _))));
         let mut lexer = Lexer::new(">|");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Clobber, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Clobber, _))));
 
         let mut lexer = Lexer::new("<");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Less, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Less, _))));
         let mut lexer = Lexer::new("<<");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::DLess, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::DLess, _))));
         let mut lexer = Lexer::new("<<-");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::DLessDash, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::DLessDash, _))));
         let mut lexer = Lexer::new("<&");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::LessAnd, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::LessAnd, _))));
         let mut lexer = Lexer::new("<>");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::LessGreat, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::LessGreat, _))));
     }
 
     #[test]
     fn io_number() {
         let mut lexer = Lexer::new("ls -la 1> /dev/null");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("ls"), _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("-la"), _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::IoNumber(1), _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Great, _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("/dev/null"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("ls"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("-la"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::IoNumber(1), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Great, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("/dev/null"), _))));
     }
 
     #[test]
     fn whitespace_words() {
         let mut lexer = Lexer::new("ls\n");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("ls"), _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Linefeed, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("ls"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Linefeed, _))));
     }
 
     #[test]
     fn unicode_words() {
         let mut lexer = Lexer::new("😀 -🧪");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("😀"), _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("-🧪"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("😀"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("-🧪"), _))));
 
         let mut lexer = Lexer::new("😀 -🧪💀");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("😀"), _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("-🧪💀"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("😀"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("-🧪💀"), _))));
     }
 
     #[test]
     fn keywords() {
         let mut lexer = Lexer::new("if ls done");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::If, _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("ls"), _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Done, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::If, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("ls"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Done, _))));
     }
 
     #[test]
     fn comments() {
         let mut lexer = Lexer::new("word # comment");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("word"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("word"), _))));
         assert!(lexer.next().is_none());
 
         let mut lexer = Lexer::new("word1 # comment1\nword2 # comment2");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("word1"), _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Linefeed, _))));
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("word2"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("word1"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Linefeed, _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("word2"), _))));
         assert!(lexer.next().is_none());
 
         let mut lexer = Lexer::new("#word");
         assert!(lexer.next().is_none());
         let mut lexer = Lexer::new("word#word");
-        assert_matches!(lexer.next(),
-                        Some(Ok((_, Token::Word("word#word"), _))));
+        assert_matches!(lexer.next(), Some(Ok((_, Token::Word("word#word"), _))));
         assert!(lexer.next().is_none());
     }
 

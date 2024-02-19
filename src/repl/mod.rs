@@ -3,25 +3,25 @@
 //! There will be *absolutely no* blocking STDIN/OUT/ERR on things like tab
 //! completion or other potentially slow, or user defined behavior.
 
-use std::io::{Stdin, Stdout};
+use crate::process::{Jobs, IO};
 use docopt::ArgvMap;
 use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
-use crate::process::{Jobs, IO};
+use std::io::{Stdin, Stdout};
 
 #[cfg(feature = "raw")]
 use {
+    crate::repl::action::{Action, ActionContext},
     termion::cursor::DetectCursorPos,
     termion::event::Key,
     termion::input::TermRead,
     termion::raw::IntoRawMode,
-    crate::repl::action::{Action, ActionContext},
 };
 
 #[cfg(not(feature = "raw"))]
 use {
-    std::io::BufRead,
     crate::program::{parse_and_run, Runtime},
+    std::io::BufRead,
 };
 
 #[cfg(feature = "history")]
@@ -45,9 +45,13 @@ use self::history::History;
 /// ```
 // TODO: Partial syntax, completion.
 #[allow(unused_mut)]
-pub fn start(mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap)
-    -> crate::program::Result<WaitStatus>
-{
+pub fn start(
+    mut stdin: Stdin,
+    mut stdout: Stdout,
+    io: &mut IO,
+    jobs: &mut Jobs,
+    args: &mut ArgvMap,
+) -> crate::program::Result<WaitStatus> {
     // Load history from file in $HOME.
     #[cfg(feature = "history")]
     let mut history = History::load();
@@ -63,8 +67,7 @@ pub fn start(mut stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs,
 #[cfg(feature = "raw")]
 fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
     // Convert the tty's stdout into raw mode.
-    let mut stdout = stdout.into_raw_mode()
-        .expect("error opening raw mode");
+    let mut stdout = stdout.into_raw_mode().expect("error opening raw mode");
 
     // Display the initial prompt.
     prompt::ps1(&mut stdout);
@@ -112,30 +115,36 @@ fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &m
 }
 
 #[cfg(not(feature = "raw"))]
-fn buffered_loop(stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
+fn buffered_loop(
+    stdin: Stdin,
+    mut stdout: Stdout,
+    io: &mut IO,
+    jobs: &mut Jobs,
+    args: &mut ArgvMap,
+) {
     // Display the initial prompt.
     prompt::ps1(&mut stdout);
 
     for line in stdin.lock().lines() {
-        let line = line.unwrap();  // TODO: Exit codes
-        //     let readline = runtime.rl.as_mut().unwrap().readline(&prompt);
-        //     match readline {
-        //         Ok(line) => {
-        //         },
-        //         // Err(ReadlineError::Interrupted) => {
-        //         //     println!("^C");
-        //         //     continue;
-        //         // },
-        //         // Err(ReadlineError::Eof) => {
-        //         //     println!("exit");
-        //         //     code = 0;
-        //         //     break;
-        //         // },
-        //         Err(err) => {
-        //             println!("error: {:?}", err);
-        //             code = 130;
-        //             break;
-        //         }
+        let line = line.unwrap(); // TODO: Exit codes
+                                  //     let readline = runtime.rl.as_mut().unwrap().readline(&prompt);
+                                  //     match readline {
+                                  //         Ok(line) => {
+                                  //         },
+                                  //         // Err(ReadlineError::Interrupted) => {
+                                  //         //     println!("^C");
+                                  //         //     continue;
+                                  //         // },
+                                  //         // Err(ReadlineError::Eof) => {
+                                  //         //     println!("exit");
+                                  //         //     code = 0;
+                                  //         //     break;
+                                  //         // },
+                                  //         Err(err) => {
+                                  //             println!("error: {:?}", err);
+                                  //             code = 130;
+                                  //             break;
+                                  //         }
         let mut runtime = Runtime {
             background: false,
             io: io.clone(),
@@ -158,10 +167,10 @@ fn buffered_loop(stdin: Stdin, mut stdout: Stdout, io: &mut IO, jobs: &mut Jobs,
 }
 
 // pub mod display;
-pub mod prompt;
 #[cfg(feature = "raw")]
 pub mod action;
 #[cfg(feature = "completion")]
 pub mod completion;
 #[cfg(feature = "history")]
 pub mod history;
+pub mod prompt;

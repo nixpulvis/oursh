@@ -3,9 +3,9 @@
 //!
 //! These commands take precedence over any executables with the same name
 //! in the `$PATH`.
-use std::ffi::CString;
-use nix::sys::wait::WaitStatus;
 use crate::program::{Result, Runtime};
+use nix::sys::wait::WaitStatus;
+use std::ffi::CString;
 
 /// A builtin is a custom shell command, often changing the state of the
 /// shell in some way.

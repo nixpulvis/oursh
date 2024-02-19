@@ -12,16 +12,12 @@
 //! More resources from the source at:
 //! [www.win.tue.nl/~aeb/linux/lk/lk-10](https://www.win.tue.nl/~aeb/linux/lk/lk-10.html).
 
-use std::{
-    borrow::Cow,
-    process::exit,
-    ffi::CString,
-};
 use nix::{
     errno::Errno,
-    unistd::{self, execvp, getpid, Pid, ForkResult},
-    sys::wait::{waitpid, WaitStatus, WaitPidFlag},
+    sys::wait::{waitpid, WaitPidFlag, WaitStatus},
+    unistd::{self, execvp, getpid, ForkResult, Pid},
 };
+use std::{borrow::Cow, ffi::CString, process::exit};
 
 mod io;
 pub use self::io::IO;
@@ -30,7 +26,6 @@ pub use self::jobs::Jobs;
 mod session;
 mod signal;
 mod thread;
-
 
 /// A process to be executed by various means
 ///
@@ -57,9 +52,11 @@ impl Process {
     }
 
     pub fn body(&self) -> String {
-        self.argv.iter().map(|a| {
-            a.to_string_lossy()
-        }).collect::<Vec<Cow<str>>>().join(" ")
+        self.argv
+            .iter()
+            .map(|a| a.to_string_lossy())
+            .collect::<Vec<Cow<str>>>()
+            .join(" ")
     }
 
     pub fn pid(&self) -> Pid {
@@ -69,12 +66,7 @@ impl Process {
     /// Run a shell job in the background.
     pub fn fork(argv: Vec<CString>, io: IO) -> Result<Self, nix::Error> {
         match unsafe { unistd::fork() } {
-            Ok(ForkResult::Parent { child }) => {
-                Ok(Process {
-                    argv,
-                    pid: child,
-                })
-            },
+            Ok(ForkResult::Parent { child }) => Ok(Process { argv, pid: child }),
             Ok(ForkResult::Child) => {
                 let process = Process {
                     argv,
@@ -87,21 +79,23 @@ impl Process {
                             let name = process.argv[0].to_string_lossy();
                             eprintln!("oursh: {}: command not found", name);
                             exit(127);
-                        },
+                        }
                         _ => exit(128),
                     }
                 } else {
                     unreachable!()
                 }
-            },
+            }
             Err(e) => Err(e),
         }
     }
 
     fn exec(&self) -> Result<(), nix::Error> {
-        execvp(&self.argv[0], &self.argv.iter()
-                                        .map(|a| a.as_c_str())
-                                        .collect::<Vec<_>>()[..]).map(|_| ())
+        execvp(
+            &self.argv[0],
+            &self.argv.iter().map(|a| a.as_c_str()).collect::<Vec<_>>()[..],
+        )
+        .map(|_| ())
     }
 }
 
@@ -129,7 +123,6 @@ impl Wait for Process {
         self.pid.status()
     }
 }
-
 
 /// Processes groups are used for things like pipelines and background jobs
 ///

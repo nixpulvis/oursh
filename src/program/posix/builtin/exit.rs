@@ -1,15 +1,9 @@
-use std::{
-    process,
-    ffi::CString,
-};
-use nix::{
-    unistd::Pid,
-    sys::wait::WaitStatus,
-};
 use crate::{
     program::posix::builtin::Builtin,
     program::{Result, Runtime},
 };
+use nix::{sys::wait::WaitStatus, unistd::Pid};
+use std::{ffi::CString, process};
 
 /// Exit builtin, alternative to ctrl-d.
 pub struct Exit;
@@ -25,17 +19,15 @@ impl Builtin for Exit {
         match argv.len() {
             0 => {
                 panic!("command name not passed in argv[0]");
-            },
-            1 => {
-                process::exit(0)
-            },
+            }
+            1 => process::exit(0),
             2 => {
                 if let Ok(n) = str::parse(argv[1].to_str().unwrap()) {
                     process::exit(n)
                 } else {
                     process::exit(2)
                 }
-            },
+            }
             _ => {
                 eprintln!("too many arguments");
                 Ok(WaitStatus::Exited(Pid::this(), 1))

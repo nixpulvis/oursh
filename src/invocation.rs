@@ -2,11 +2,11 @@
 //!
 //!
 //!
-use std::ffi::CString;
 use crate::program::{
-    Runtime,
     posix::builtin::{self, Builtin},
+    Runtime,
 };
+use std::ffi::CString;
 
 /// Sourcing profile startup scripts
 ///

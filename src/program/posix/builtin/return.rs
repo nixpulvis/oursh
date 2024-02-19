@@ -1,12 +1,9 @@
-use std::ffi::CString;
-use nix::{
-    unistd::Pid,
-    sys::wait::WaitStatus,
-};
 use crate::{
     program::posix::builtin::Builtin,
     program::{Result, Runtime},
 };
+use nix::{sys::wait::WaitStatus, unistd::Pid};
+use std::ffi::CString;
 
 /// Noop builtin, same idea as `true`.
 pub struct Return(pub i32);

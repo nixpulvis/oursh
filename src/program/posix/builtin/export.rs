@@ -1,15 +1,9 @@
-use std::{
-    env,
-    ffi::CString,
-};
-use nix::{
-    unistd::Pid,
-    sys::wait::WaitStatus,
-};
 use crate::{
     program::posix::builtin::Builtin,
     program::{Result, Runtime},
 };
+use nix::{sys::wait::WaitStatus, unistd::Pid};
+use std::{env, ffi::CString};
 
 /// Export builtin, used to set global variables.
 pub struct Export;
@@ -30,7 +24,7 @@ impl Builtin for Export {
                     }
                 }
                 Ok(WaitStatus::Exited(Pid::this(), 0))
-            },
+            }
         }
     }
 }

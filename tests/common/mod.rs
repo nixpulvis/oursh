@@ -13,14 +13,13 @@ macro_rules! shell {
             .expect("error swawning oursh process");
 
         {
-            let stdin = child.stdin.as_mut()
-                .expect("error opening stdin");
-            stdin.write_all($text.as_bytes())
+            let stdin = child.stdin.as_mut().expect("error opening stdin");
+            stdin
+                .write_all($text.as_bytes())
                 .expect("error writing to stdin");
         }
 
-        let output = child.wait_with_output()
-            .expect("error reading stdout");
+        let output = child.wait_with_output().expect("error reading stdout");
 
         output
     }};
@@ -35,8 +34,7 @@ macro_rules! shell {
             .spawn()
             .expect("error swawning oursh process");
 
-        let output = child.wait_with_output()
-            .expect("error reading stdout");
+        let output = child.wait_with_output().expect("error reading stdout");
 
         output
     }};
@@ -155,17 +153,30 @@ macro_rules! assert_posix {
     (! $text:expr) => {{
         use std::process::Output;
 
-        let Output { status: oursh_status, .. } = oursh!($text);
-        let Output { status: sh_status, .. } = sh!($text);
+        let Output {
+            status: oursh_status,
+            ..
+        } = oursh!($text);
+        let Output {
+            status: sh_status, ..
+        } = sh!($text);
         assert_eq!(sh_status, oursh_status);
     }};
     ($text:expr) => {{
         use std::process::Output;
 
-        let Output { status: oursh_status, stdout: oursh_stdout, stderr: oursh_stderr } = oursh!($text);
+        let Output {
+            status: oursh_status,
+            stdout: oursh_stdout,
+            stderr: oursh_stderr,
+        } = oursh!($text);
         let oursh_stdout = String::from_utf8_lossy(&oursh_stdout);
         let oursh_stderr = String::from_utf8_lossy(&oursh_stderr);
-        let Output { status: sh_status, stdout: sh_stdout, stderr: sh_stderr } = sh!($text);
+        let Output {
+            status: sh_status,
+            stdout: sh_stdout,
+            stderr: sh_stderr,
+        } = sh!($text);
         let sh_stdout = String::from_utf8_lossy(&sh_stdout);
         let sh_stderr = String::from_utf8_lossy(&sh_stderr);
         assert!(oursh_status.success());
@@ -176,13 +187,24 @@ macro_rules! assert_posix {
     ($text:expr, $stdout:expr) => {{
         use std::process::Output;
 
-        let Output { status: oursh_status, stdout: oursh_stdout, stderr: oursh_stderr } = oursh!($text);
+        let Output {
+            status: oursh_status,
+            stdout: oursh_stdout,
+            stderr: oursh_stderr,
+        } = oursh!($text);
         let oursh_stdout = String::from_utf8_lossy(&oursh_stdout);
         let oursh_stderr = String::from_utf8_lossy(&oursh_stderr);
-        let Output { status: sh_status, stdout: sh_stdout, stderr: sh_stderr } = sh!($text);
+        let Output {
+            status: sh_status,
+            stdout: sh_stdout,
+            stderr: sh_stderr,
+        } = sh!($text);
         let sh_stdout = String::from_utf8_lossy(&sh_stdout);
         let sh_stderr = String::from_utf8_lossy(&sh_stderr);
-        println!("oursh_stdout: {}\noursh_stderr: {}", oursh_stdout, oursh_stderr);
+        println!(
+            "oursh_stdout: {}\noursh_stderr: {}",
+            oursh_stdout, oursh_stderr
+        );
         println!("sh_stdout: {}\nsh_stderr: {}", sh_stdout, sh_stderr);
         assert_eq!(sh_status, oursh_status);
         assert_eq!(sh_stdout, oursh_stdout);

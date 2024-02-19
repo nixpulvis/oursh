@@ -106,7 +106,6 @@ pub mod program;
 
 pub mod repl;
 
-
 #[macro_use]
 #[cfg(test)]
 extern crate assert_matches;
@@ -119,7 +118,7 @@ mod tests {
         debug!(1);
         debug!(1 + 2);
         debug!("addition: {}", 1 + 2);
-        debug!("{}", vec![1,2,3,4][2]);
+        debug!("{}", vec![1, 2, 3, 4][2]);
         debug!("{} = {} * {}", 15, 3, 5);
     }
 }

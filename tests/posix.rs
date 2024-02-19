@@ -16,7 +16,7 @@ fn builtin_cd() {
 #[test]
 fn builtin_exit() {
     assert_posix!("exit");
-    assert_posix!(! "exit 1");
+    assert_posix!(!"exit 1");
 }
 
 #[test]
@@ -50,8 +50,8 @@ fn chained_command() {
 #[test]
 fn single_compound_command() {
     assert_posix!("{ echo pi; }", "pi\n");
-    assert_posix!("{echo pi; }");  // NOTE: Fails in sh
-    // assert_posix!("{echo pi}");    // NOTE: Allowed in zsh
+    assert_posix!("{echo pi; }"); // NOTE: Fails in sh
+                                  // assert_posix!("{echo pi}");    // NOTE: Allowed in zsh
 }
 
 #[test]
@@ -69,14 +69,14 @@ fn multiple_tee_command() {
 
 #[test]
 fn not_command() {
-    assert_posix!(! "! true");
-    assert_posix!(! "! true && echo 1");
+    assert_posix!(!"! true");
+    assert_posix!(!"! true && echo 1");
 }
 
 #[test]
 fn and_command() {
     assert_posix!("true && echo 1", "1\n");
-    assert_posix!( !"false && echo 1");
+    assert_posix!(!"false && echo 1");
 }
 
 #[test]
@@ -89,8 +89,14 @@ fn or_command() {
 fn cond_command() {
     assert_posix!("if true; then echo 1; else echo 2; fi", "1\n");
     assert_posix!("if false; then echo 1; else echo 2; fi", "2\n");
-    assert_posix!("if false; then echo 1; elif false; then echo 2; else echo 3; fi", "3\n");
-    assert_posix!("if false; then echo 1; elif true; then echo 2; else echo 3; fi", "2\n");
+    assert_posix!(
+        "if false; then echo 1; elif false; then echo 2; else echo 3; fi",
+        "3\n"
+    );
+    assert_posix!(
+        "if false; then echo 1; elif true; then echo 2; else echo 3; fi",
+        "2\n"
+    );
 }
 
 #[test]

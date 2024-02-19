@@ -1,9 +1,6 @@
-use std::{
-    rc::Rc,
-    cell::RefCell,
-};
+use crate::process::{ProcessGroup, Wait};
 use nix::sys::wait::WaitStatus;
-use crate::process::{Wait, ProcessGroup};
+use std::{cell::RefCell, rc::Rc};
 
 /// Shared job handling structure
 ///
@@ -17,21 +14,19 @@ pub fn retain_alive(jobs: &mut Jobs) {
         let id = job.0.clone();
         let body = job.1.leader().body();
         match job.1.leader().status() {
-            Ok(WaitStatus::StillAlive) => {
-                true
-            },
+            Ok(WaitStatus::StillAlive) => true,
             Ok(WaitStatus::Exited(pid, code)) => {
                 println!("[{}]+\tExit({})\t{}\t{}", id, code, pid, body);
                 false
-            },
+            }
             Ok(WaitStatus::Signaled(pid, signal, _)) => {
                 println!("[{}]+\t{}\t{}\t{}", id, signal, pid, body);
                 false
-            },
+            }
             Ok(_) => {
                 println!("unhandled");
                 true
-            },
+            }
             Err(e) => {
                 if nix::errno::Errno::ECHILD != e {
                     println!("err: {:?}", e);

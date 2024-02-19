@@ -16,12 +16,7 @@
 //! assert_eq!("cargo", &text);
 //! ```
 
-use std::{
-    env,
-    fs,
-    cmp::Ordering::Equal,
-    os::unix::fs::PermissionsExt,
-};
+use std::{cmp::Ordering::Equal, env, fs, os::unix::fs::PermissionsExt};
 
 /// The result of a query for text completion.
 ///
@@ -41,8 +36,7 @@ impl Completion {
     /// Returns true if this completion is a single option.
     pub fn is_complete(&self) -> bool {
         match *self {
-            Completion::None |
-            Completion::Partial(_) => false,
+            Completion::None | Completion::Partial(_) => false,
             Completion::Complete(_) => true,
         }
     }
@@ -52,11 +46,9 @@ impl Completion {
     pub fn first(&self) -> String {
         match *self {
             Completion::None => "".to_owned(),
-            Completion::Partial(ref p) => {
-                match p.first() {
-                    Some(t) => t.to_owned(),
-                    None => "".to_owned(),
-                }
+            Completion::Partial(ref p) => match p.first() {
+                Some(t) => t.to_owned(),
+                None => "".to_owned(),
             },
             Completion::Complete(ref s) => s.to_owned(),
         }
@@ -86,8 +78,7 @@ impl Completion {
 /// ```
 pub fn complete(text: &str) -> Completion {
     match executable_completions(text) {
-        c @ Completion::Partial(_) |
-        c @ Completion::Complete(_) => c,
+        c @ Completion::Partial(_) | c @ Completion::Complete(_) => c,
         Completion::None => path_complete(text),
     }
 }
@@ -110,16 +101,16 @@ pub fn executable_completions(text: &str) -> Completion {
             let mut matches = vec![];
             for dir in env::split_paths(&paths) {
                 if let Ok(executables) = fs::read_dir(dir) {
-                    let paths = executables.filter_map(|e| {
-                        match e { Ok(p) => Some(p.path()), _ => None }
+                    let paths = executables.filter_map(|e| match e {
+                        Ok(p) => Some(p.path()),
+                        _ => None,
                     });
 
                     for path in paths {
                         if let Some(filename) = path.file_name() {
                             let filename = filename.to_string_lossy();
                             if let Ok(metadata) = fs::metadata(&path) {
-                                if (metadata.permissions()
-                                            .mode() & 0o111 != 0)
+                                if (metadata.permissions().mode() & 0o111 != 0)
                                     && filename.starts_with(text)
                                 {
                                     matches.push(filename.into());
@@ -134,16 +125,13 @@ pub fn executable_completions(text: &str) -> Completion {
                 0 => Completion::None,
                 1 => Completion::Complete(matches.remove(0)),
                 _ => {
-                    matches.sort_by(|a, b| {
-                        match a.len().cmp(&b.len()) {
-                            Equal => b.cmp(&a),
-                            o => o
-                        }
+                    matches.sort_by(|a, b| match a.len().cmp(&b.len()) {
+                        Equal => b.cmp(&a),
+                        o => o,
                     });
                     Completion::Partial(matches)
                 }
             }
-
         }
         None => panic!("PATH is undefined"),
     }

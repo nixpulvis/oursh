@@ -3,17 +3,13 @@ extern crate criterion;
 
 use criterion::Criterion;
 
-#[path="../tests/common/mod.rs"]
+#[path = "../tests/common/mod.rs"]
 mod common;
 
 fn piped_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("oursh");
 
-    group.bench_function("empty", |b| {
-        b.iter(|| {
-            oursh_release!("")
-        })
-    });
+    group.bench_function("empty", |b| b.iter(|| oursh_release!("")));
 
     group.bench_function("parse_error", |b| {
         b.iter(|| {

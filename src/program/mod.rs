@@ -58,17 +58,9 @@
 //! - TODO #5: Parse sequence of programs from stream.
 //! - TODO #5: Partial parses for readline-ish / syntax highlighting.
 
-use std::{
-    result,
-    ffi::CString,
-    fmt::Debug,
-    io::BufRead,
-};
-use nix::{
-    unistd::Pid,
-    sys::wait::WaitStatus,
-};
 use crate::process::jobs;
+use nix::{sys::wait::WaitStatus, unistd::Pid};
+use std::{ffi::CString, fmt::Debug, io::BufRead, result};
 
 /// Convenience type for results with program errors.
 pub type Result<T> = result::Result<T, Error>;
@@ -138,11 +130,9 @@ pub trait Command: Sized + Debug + Run {
     /// the running [`Process`](crate::process::Process).
     // TODO: Ids?
     fn name(&self) -> CString {
-        CString::new(format!("{:?}", self))
-            .expect("error in UTF-8 of format")
+        CString::new(format!("{:?}", self)).expect("error in UTF-8 of format")
     }
 }
-
 
 /// The primary program type, used for unannotated blocks.
 // TODO: This should be `ModernProgram`.
@@ -208,9 +198,7 @@ pub mod modern;
 pub use self::modern::Program as ModernProgram;
 
 // TODO: Replace program::Result
-pub fn parse_and_run(text: &str, runtime: &mut Runtime)
-    -> crate::program::Result<WaitStatus>
-{
+pub fn parse_and_run(text: &str, runtime: &mut Runtime) -> crate::program::Result<WaitStatus> {
     // Parse with the primary grammar and run each command in order.
     let program = match parse_primary(text.as_bytes()) {
         Ok(program) => program,

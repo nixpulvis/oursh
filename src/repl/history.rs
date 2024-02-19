@@ -1,10 +1,5 @@
 //! Keeps a record of previous commands, used for completion and archeology.
-use std::{
-    env,
-    io::prelude::*,
-    fs::File,
-    path::Path,
-};
+use std::{env, fs::File, io::prelude::*, path::Path};
 
 /// The history of a user's provided commands.
 #[derive(Debug)]
@@ -22,10 +17,16 @@ impl History {
 
         // HACK: There's got to be a cleaner way.
         let mut index = 0;
-        if self.1.iter().enumerate().find(|(i, (t, _))| {
-            index = *i;
-            text == t
-        }).is_some() {
+        if self
+            .1
+            .iter()
+            .enumerate()
+            .find(|(i, (t, _))| {
+                index = *i;
+                text == t
+            })
+            .is_some()
+        {
             self.1[index].1 += count;
             let text = self.1.remove(index);
             self.1.insert(0, text);
@@ -41,9 +42,8 @@ impl History {
         if text_len > 0 {
             match self.0 {
                 Some(i) => {
-                    self.0 = Some(i.saturating_add(1)
-                                   .min(text_len - 1));
-                },
+                    self.0 = Some(i.saturating_add(1).min(text_len - 1));
+                }
                 None => self.0 = Some(0),
             }
         } else {
@@ -60,7 +60,7 @@ impl History {
         match self.0 {
             Some(i) if i == 0 => self.0 = None,
             Some(i) => self.0 = Some(i.saturating_sub(1)),
-            None => {},
+            None => {}
         };
 
         match self.0 {
@@ -74,8 +74,7 @@ impl History {
         let home = env::var("HOME").expect("HOME variable not set.");
         let history_path = format!("{}/.oursh_history", home);
         if Path::new(&history_path).exists() {
-            let mut f = File::open(&history_path)
-                .expect("error cannot find history");
+            let mut f = File::open(&history_path).expect("error cannot find history");
             let mut contents = String::new();
             f.read_to_string(&mut contents)
                 .expect("error reading history");
@@ -86,9 +85,7 @@ impl History {
             //         println!("{:?}", s);
             //     })
             // }).collect::<Vec<String, usize>>();
-            let hist = contents.split("\n").map(|s| {
-                (String::from(s), 0)
-            });
+            let hist = contents.split("\n").map(|s| (String::from(s), 0));
 
             // Add each entry to the history in order.
             for (text, index) in hist {
@@ -105,13 +102,10 @@ impl History {
     pub fn save(&self) -> Result<(), ()> {
         let home = env::var("HOME").expect("HOME variable not set.");
         let history_path = format!("{}/.oursh_history", home);
-        let mut f = File::create(&history_path)
-            .expect("error cannot find history");
+        let mut f = File::create(&history_path).expect("error cannot find history");
         for (text, _) in self.1.iter() {
-            f.write_all(text.as_bytes())
-                .expect("error writing history");
-            f.write_all(b"\n")
-                .expect("error writing history");
+            f.write_all(text.as_bytes()).expect("error writing history");
+            f.write_all(b"\n").expect("error writing history");
         }
 
         Ok(())

@@ -1,7 +1,7 @@
-use docopt::ArgvMap;
 use crate::process::{Jobs, IO};
 #[cfg(feature = "history")]
 use crate::repl::history::History;
+use docopt::ArgvMap;
 
 #[derive(Debug)]
 pub struct Runtime<'a> {
