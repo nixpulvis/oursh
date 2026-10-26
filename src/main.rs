@@ -1,5 +1,3 @@
-#![feature(exclusive_range_pattern)]
-
 extern crate dirs;
 extern crate docopt;
 extern crate nix;
@@ -23,9 +21,6 @@ use std::{
     rc::Rc,
 };
 use termion::is_tty;
-
-#[cfg(feature = "history")]
-use oursh::repl::history::History;
 
 // Write the Docopt usage string.
 const USAGE: &str = "
@@ -89,15 +84,13 @@ fn main() -> MainResult {
     // Default inputs and outputs.
     let mut io = IO::default();
 
-    #[cfg(feature = "history")]
-    let mut history = History::load();
     let mut runtime = Runtime {
         io,
         jobs: &mut jobs,
         args: &args,
         background: false,
         #[cfg(feature = "history")]
-        history: &mut history,
+        history: None,
     };
 
     // Run the profile before anything else.

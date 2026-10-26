@@ -3,7 +3,7 @@
 //! Simple use cases for this module should be as easy as the following
 //! example taken from the current REPL.
 //!
-//! ```
+//! ```no_run
 //! use oursh::repl::completion::complete;
 //!
 //! // String holding the user's input.
@@ -16,7 +16,7 @@
 //! assert_eq!("cargo", &text);
 //! ```
 
-use std::{cmp::Ordering::Equal, env, fs, os::unix::fs::PermissionsExt};
+use std::{cmp::Ordering::Equal, env, fs, os::unix::fs::PermissionsExt, path::PathBuf};
 
 /// The result of a query for text completion.
 ///
@@ -71,7 +71,7 @@ impl Completion {
 ///
 /// ### Examples
 ///
-/// ```
+/// ```no_run
 /// use oursh::repl::completion::complete;
 ///
 /// assert_eq!("pwd", complete("pw").first());
@@ -87,7 +87,7 @@ pub fn complete(text: &str) -> Completion {
 ///
 /// ### Examples
 ///
-/// ```
+/// ```no_run
 /// use oursh::repl::completion::executable_completions;
 ///
 /// assert!(executable_completions("ru").possibilities()
@@ -97,43 +97,46 @@ pub fn complete(text: &str) -> Completion {
 /// ```
 pub fn executable_completions(text: &str) -> Completion {
     match env::var_os("PATH") {
-        Some(paths) => {
-            let mut matches = vec![];
-            for dir in env::split_paths(&paths) {
-                if let Ok(executables) = fs::read_dir(dir) {
-                    let paths = executables.filter_map(|e| match e {
-                        Ok(p) => Some(p.path()),
-                        _ => None,
-                    });
+        Some(paths) => executables_in(env::split_paths(&paths), text),
+        None => panic!("PATH is undefined"),
+    }
+}
 
-                    for path in paths {
-                        if let Some(filename) = path.file_name() {
-                            let filename = filename.to_string_lossy();
-                            if let Ok(metadata) = fs::metadata(&path) {
-                                if (metadata.permissions().mode() & 0o111 != 0)
-                                    && filename.starts_with(text)
-                                {
-                                    matches.push(filename.into());
-                                }
-                            }
+/// Match executables in the given directories against the partial text.
+fn executables_in(dirs: impl IntoIterator<Item = PathBuf>, text: &str) -> Completion {
+    let mut matches = vec![];
+    for dir in dirs {
+        if let Ok(executables) = fs::read_dir(dir) {
+            let paths = executables.filter_map(|e| match e {
+                Ok(p) => Some(p.path()),
+                _ => None,
+            });
+
+            for path in paths {
+                if let Some(filename) = path.file_name() {
+                    let filename = filename.to_string_lossy();
+                    if let Ok(metadata) = fs::metadata(&path) {
+                        if (metadata.permissions().mode() & 0o111 != 0)
+                            && filename.starts_with(text)
+                        {
+                            matches.push(filename.into());
                         }
                     }
                 }
             }
-
-            match matches.len() {
-                0 => Completion::None,
-                1 => Completion::Complete(matches.remove(0)),
-                _ => {
-                    matches.sort_by(|a, b| match a.len().cmp(&b.len()) {
-                        Equal => b.cmp(&a),
-                        o => o,
-                    });
-                    Completion::Partial(matches)
-                }
-            }
         }
-        None => panic!("PATH is undefined"),
+    }
+
+    match matches.len() {
+        0 => Completion::None,
+        1 => Completion::Complete(matches.remove(0)),
+        _ => {
+            matches.sort_by(|a, b| match a.len().cmp(&b.len()) {
+                Equal => b.cmp(&a),
+                o => o,
+            });
+            Completion::Partial(matches)
+        }
     }
 }
 
@@ -159,12 +162,52 @@ pub fn path_complete(text: &str) -> Completion {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{fs::File, process};
 
-    // TODO: Mock PATH to make deterministic.
+    /// Create a fresh temporary directory holding the given files, each
+    /// marked executable or not.
+    fn bin_dir(name: &str, files: &[(&str, bool)]) -> PathBuf {
+        let dir = env::temp_dir().join(format!("oursh-completion-{}-{}", process::id(), name));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        for (file, executable) in files {
+            let path = dir.join(file);
+            File::create(&path).unwrap();
+            let mode = if *executable { 0o755 } else { 0o644 };
+            fs::set_permissions(&path, fs::Permissions::from_mode(mode)).unwrap();
+        }
+        dir
+    }
 
     #[test]
-    fn lexicographical_order() {
-        assert_eq!("cargo", complete("car").first());
+    fn shortest_executable_first_across_dirs() {
+        let a = bin_dir("shortest-a", &[("cargo-fmt", true), ("carton", false)]);
+        let b = bin_dir("shortest-b", &[("cargo", true), ("ls", true)]);
+        let completion = executables_in(vec![a.clone(), b.clone()], "car");
+        fs::remove_dir_all(a).unwrap();
+        fs::remove_dir_all(b).unwrap();
+
+        assert!(!completion.is_complete());
+        assert_eq!(vec!["cargo", "cargo-fmt"], completion.possibilities());
+    }
+
+    #[test]
+    fn single_match_is_complete() {
+        let dir = bin_dir("single", &[("whoami", true), ("who", false)]);
+        let completion = executables_in(vec![dir.clone()], "who");
+        fs::remove_dir_all(dir).unwrap();
+
+        assert!(completion.is_complete());
+        assert_eq!("whoami", completion.first());
+    }
+
+    #[test]
+    fn no_match() {
+        let dir = bin_dir("none", &[("ls", true)]);
+        let completion = executables_in(vec![dir.clone()], "zz");
+        fs::remove_dir_all(dir).unwrap();
+
+        assert!(completion.possibilities().is_empty());
     }
 
     #[test]

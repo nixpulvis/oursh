@@ -45,7 +45,7 @@ impl Action {
             jobs: context.jobs,
             args: context.args,
             #[cfg(feature = "history")]
-            history: context.history,
+            history: Some(&mut *context.history),
         };
         if parse_and_run(context.text, &mut runtime).is_ok() {
             #[cfg(feature = "history")]
@@ -104,7 +104,7 @@ impl Action {
 
             // Save history to file in $HOME.
             #[cfg(feature = "history")]
-            context.history.save();
+            context.history.save().unwrap();
 
             // Manually drop the raw terminal.
             // TODO: Needed?
@@ -160,7 +160,7 @@ impl Action {
             termion::cursor::Left(1000), // XXX
             termion::clear::CurrentLine
         );
-        context.prompt.display(&mut context.stdout);
+        prompt::ps1(&mut context.stdout);
 
         if let Some(history_text) = context.history.get_up() {
             *context.text = history_text;
@@ -176,7 +176,7 @@ impl Action {
             termion::cursor::Left(1000), // XXX
             termion::clear::CurrentLine
         );
-        context.prompt.display(&mut context.stdout);
+        prompt::ps1(&mut context.stdout);
 
         if let Some(history_text) = context.history.get_down() {
             *context.text = history_text;

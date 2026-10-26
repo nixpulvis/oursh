@@ -274,7 +274,7 @@ mod tests {
         let command = parse_command("! true").unwrap();
         assert_matches!(command, Command::Not(_));
         let command = parse_command("! true || false").unwrap();
-        assert_matches!(command, Command::Or(box Command::Not(_), _));
+        assert_matches!(command, Command::Or(left, _) => assert_matches!(*left, Command::Not(_)));
     }
 
     #[test]

@@ -12,8 +12,10 @@ impl Builtin for Exit {
     #[allow(unused_variables)]
     fn run(self, argv: Vec<CString>, runtime: &mut Runtime) -> Result<WaitStatus> {
         #[cfg(feature = "history")]
-        if argv.len() == 1 || argv.len() == 2 {
-            runtime.history.save().unwrap();
+        if let Some(history) = &runtime.history {
+            if argv.len() == 1 || argv.len() == 2 {
+                history.save().unwrap();
+            }
         }
 
         match argv.len() {

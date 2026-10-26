@@ -9,6 +9,7 @@ pub struct Runtime<'a> {
     pub io: IO,
     pub jobs: &'a mut Jobs,
     pub args: &'a ArgvMap,
+    /// The REPL's history, `None` when not running interactively.
     #[cfg(feature = "history")]
-    pub history: &'a mut History,
+    pub history: Option<&'a mut History>,
 }

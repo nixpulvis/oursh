@@ -52,10 +52,6 @@ pub fn start(
     jobs: &mut Jobs,
     args: &mut ArgvMap,
 ) -> crate::program::Result<WaitStatus> {
-    // Load history from file in $HOME.
-    #[cfg(feature = "history")]
-    let mut history = History::load();
-
     #[cfg(feature = "raw")]
     raw_loop(stdin, stdout, io, jobs, args);
     #[cfg(not(feature = "raw"))]
@@ -66,6 +62,10 @@ pub fn start(
 
 #[cfg(feature = "raw")]
 fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &mut ArgvMap) {
+    // Load history from file in $HOME.
+    #[cfg(feature = "history")]
+    let mut history = History::load();
+
     // Convert the tty's stdout into raw mode.
     let mut stdout = stdout.into_raw_mode().expect("error opening raw mode");
 
@@ -150,17 +150,8 @@ fn buffered_loop(
             io: io.clone(),
             jobs: jobs,
             args: args,
-            #[cfg(feature = "history")]
-            history: history,
         };
-        if parse_and_run(&line, &mut runtime).is_ok() {
-            #[cfg(feature = "history")]
-            history.add(&line, 1);
-        }
-        #[cfg(feature = "history")]
-        history.add(&line, 1);
-        #[cfg(feature = "history")]
-        history.reset_index();
+        let _ = parse_and_run(&line, &mut runtime);
 
         prompt::ps1(&mut stdout);
     }

@@ -208,9 +208,6 @@ pub fn parse_and_run(text: &str, runtime: &mut Runtime) -> crate::program::Resul
         }
     };
 
-    #[cfg(feature = "history")]
-    runtime.history.add(text, 1);
-
     // Print the program if the flag is given.
     if runtime.args.get_bool("--ast") {
         eprintln!("{:#?}", program);

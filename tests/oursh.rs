@@ -8,7 +8,7 @@ fn shebang_block_sh_command() {
         r#"{#!/bin/sh;
     for i in 1 2 3 4 5
     do
-        echo -n $i
+        printf %s $i
     done
 }"#,
         "12345"
@@ -24,10 +24,10 @@ fn shebang_block_ruby_command() {
 #[test]
 #[cfg(feature = "shebang-block")]
 fn shebang_block_python_command() {
-    assert_oursh!("{#!/usr/bin/env python; print(1)}", "1\n");
-    assert_oursh!("{#!/usr/bin/env python  ;    print(1)}", "1\n");
+    assert_oursh!("{#!/usr/bin/env python3; print(1)}", "1\n");
+    assert_oursh!("{#!/usr/bin/env python3  ;    print(1)}", "1\n");
     assert_oursh!(
-        r#"{#!/usr/bin/env python;
+        r#"{#!/usr/bin/env python3;
 print("hello world")
 }"#,
         "hello world\n"

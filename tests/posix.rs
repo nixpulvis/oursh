@@ -38,7 +38,7 @@ fn hello_world_quoted() {
 
 #[test]
 fn simple_command() {
-    assert_posix!("head README.md -n 1", "# oursh\n");
+    assert_posix!("head -n 1 README.md", "# oursh\n");
 }
 
 #[test]
@@ -109,7 +109,8 @@ fn subshell_command() {
 
 #[test]
 fn single_pipeline_command() {
-    assert_posix!("echo pi | wc -c", "3\n");
+    // `wc` pads its count on some platforms, so compare against `sh` only.
+    assert_posix!("echo pi | wc -c");
 }
 
 #[test]

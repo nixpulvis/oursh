@@ -66,7 +66,7 @@ macro_rules! oursh {
 #[macro_export]
 macro_rules! sh {
     ($text:expr) => {{
-        shell!("sh", &["--noprofile"], $text)
+        shell!("sh", &[] as &[&str], $text)
     }};
 }
 

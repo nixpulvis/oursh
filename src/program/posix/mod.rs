@@ -130,13 +130,10 @@ use std::{
     os::unix::io::IntoRawFd,
     process::{self, Stdio},
 };
-#[cfg(feature = "raw")]
-use uuid::Uuid;
-
 #[cfg(feature = "shebang-block")]
 use {
     self::ast::Interpreter, std::fs, std::io, std::os::unix::fs::PermissionsExt,
-    std::process::ExitStatus,
+    std::process::ExitStatus, uuid::Uuid,
 };
 
 // Re-exports.
@@ -289,7 +286,6 @@ impl super::Run for Command {
                         "wait" => builtin::Wait.run(argv, runtime),
                         _ => {
                             let id = (runtime.jobs.borrow().len() + 1).to_string();
-                            let name = argv[0].to_string_lossy().to_string();
                             let process =
                                 Process::fork(argv, runtime.io).map_err(|_| Error::Runtime)?;
                             if runtime.background {
@@ -298,11 +294,7 @@ impl super::Run for Command {
                                 runtime.jobs.borrow_mut().push((id, ProcessGroup(process)));
                                 status.map_err(|_| Error::Runtime)
                             } else {
-                                let status = process.wait().map_err(|_| Error::Runtime);
-                                if let Ok(WaitStatus::Exited(_, 127)) = status {
-                                    eprintln!("oursh: {}: command not found", name);
-                                }
-                                status
+                                process.wait().map_err(|_| Error::Runtime)
                             }
                         }
                     }
@@ -346,7 +338,7 @@ impl super::Run for Command {
             }
             Command::Pipeline(ref left, ref right) => {
                 // TODO: This is obviously a temporary hack.
-                if let box Command::Simple(_assigns, lwords, _redirs) = left {
+                if let Command::Simple(_assigns, lwords, _redirs) = &**left {
                     let child = process::Command::new(&lwords[0].0)
                         .args(lwords.iter().skip(1).map(|w| &w.0))
                         .stdout(Stdio::piped())
@@ -355,7 +347,7 @@ impl super::Run for Command {
 
                     let output = child.wait_with_output().expect("error reading stdout");
 
-                    if let box Command::Simple(_assigns, rwords, _redirs) = right {
+                    if let Command::Simple(_assigns, rwords, _redirs) = &**right {
                         let mut child = process::Command::new(&rwords[0].0)
                             .args(rwords.iter().skip(1).map(|w| &w.0))
                             .stdin(Stdio::piped())
@@ -413,7 +405,7 @@ impl super::Run for Command {
                     Interpreter::HashLang(ref language) => match language.as_str() {
                         "ruby" => "/usr/bin/env ruby",
                         "node" => "/usr/bin/env node",
-                        "python" => "/usr/bin/env python",
+                        "python" => "/usr/bin/env python3",
                         "racket" => "/usr/bin/env racket",
                         _ => return Err(Error::Read),
                     },
