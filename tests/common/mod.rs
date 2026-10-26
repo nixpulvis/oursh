@@ -63,10 +63,12 @@ macro_rules! oursh {
     }};
 }
 
+/// Run the reference shell, `bash` in POSIX mode, so every platform compares
+/// against the same shell regardless of what `/bin/sh` is.
 #[macro_export]
 macro_rules! sh {
     ($text:expr) => {{
-        shell!("sh", &[] as &[&str], $text)
+        shell!("bash", &["--posix"], $text)
     }};
 }
 

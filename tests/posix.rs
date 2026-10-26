@@ -50,6 +50,9 @@ fn chained_command() {
 #[test]
 fn single_compound_command() {
     assert_posix!("{ echo pi; }", "pi\n");
+    // TODO #70: `{` is only a reserved word when it stands alone, so sh
+    // rejects this (exit 2) while oursh lexes `{` as a token and runs it.
+    // This should compare exit status only, since sh fails.
     assert_posix!("{echo pi; }"); // NOTE: Fails in sh
                                   // assert_posix!("{echo pi}");    // NOTE: Allowed in zsh
 }
@@ -102,6 +105,9 @@ fn cond_command() {
 #[test]
 fn subshell_command() {
     assert_posix!("$( true )");
+    // TODO #58: `$(...)` should substitute its output as the command, so sh
+    // runs `1` and exits 127. oursh runs it as a subshell command instead, and
+    // these expectations are wrong.
     assert_posix!("$(echo 1)", "1\n");
     assert_posix!("$(false; echo 1)", "1\n");
     // TODO: Test some actual subshell usage.
@@ -130,20 +136,31 @@ fn assignment_command() {
 #[test]
 fn variable_command() {
     assert_posix!("X=1; echo $X", "1\n");
+    // TODO #27: The prefix assignment must apply only to the command's
+    // environment, after `$X` is expanded.
     assert_posix!("X=1 echo $X", "\n");
+    // TODO #27: `X` isn't exported, so sh prints nothing and exits 1; oursh
+    // exports every variable. The expected "\n" is also wrong.
     assert_posix!("X=1; printenv X", "\n");
     assert_posix!("X=1 printenv X", "1\n");
 
+    // TODO #27: sh expands every argument before `export` runs, so `BAR` is
+    // empty. The expected "1\n" is wrong.
     assert_posix!("export FOO=1 BAR=$FOO; echo $BAR", "1\n");
 
     assert_posix!("echo $BAR", "\n");
     assert_posix!("echo $", "$\n");
     assert_posix!("echo ' $ '", " $ \n");
+    // TODO #54: `$$` should expand to the shell's PID, which also differs from
+    // sh's, so this needs a different assertion once `$$` is supported.
     assert_posix!("echo \" $$ $ \"", " $$ $ \n");
 }
 
 #[test]
 fn background_command() {
+    // TODO #6: `runtime.background` is never reset after `&`, so `echo 1` is
+    // backgrounded too.
+    // TODO #46: Job notices (`[1]\t<pid>`) should only print when interactive.
     assert_posix!("sleep 1 & echo 1", "1\n");
     // TODO: How to test the output with a PID in it?
     // assert_posix!("sleep 1 & echo 1", "1\n", "[1]\t(\d*)\n");
@@ -151,5 +168,6 @@ fn background_command() {
 
 #[test]
 fn equal_sign() {
+    // TODO #70: The lexer always makes `=` its own token, so it can't be a word.
     assert_posix!("echo =", "=\n");
 }
