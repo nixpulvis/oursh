@@ -224,6 +224,7 @@ impl super::Run for Command {
                         Redirect::RW { n, filename, .. } => {
                             let file = File::options()
                                 .create(true)
+                                .truncate(false)
                                 .read(true)
                                 .write(true)
                                 .open(filename)
@@ -319,7 +320,7 @@ impl super::Run for Command {
                 Err(_) => Err(Error::Runtime),
             },
             Command::And(ref left, ref right) => match left.run(runtime) {
-                Ok(WaitStatus::Exited(_, c)) if c == 0 => {
+                Ok(WaitStatus::Exited(_, 0)) => {
                     right.run(runtime).map_err(|_| Error::Runtime)
                 }
                 Ok(s) => Ok(s),
@@ -425,7 +426,7 @@ impl super::Run for Command {
 fn expand_home(word: &str) -> String {
     if let Some(w) = word.strip_prefix('~') {
         if let Some(path) = home_dir() {
-            format!("{}{}", &path.to_str().expect("error: home not set"), w)
+            format!("{}{}", path.to_str().expect("error: home not set"), w)
         } else {
             "~".into()
         }

@@ -81,10 +81,10 @@ fn raw_loop(stdin: Stdin, stdout: Stdout, io: &mut IO, jobs: &mut Jobs, args: &m
     // Create an context to pass to the actions.
     let mut context = ActionContext {
         stdout: &mut stdout,
-        io: io,
-        jobs: jobs,
-        args: args,
-        prompt_length: prompt_length,
+        io,
+        jobs,
+        args,
+        prompt_length,
         text: &mut text,
         #[cfg(feature = "history")]
         history: &mut history,
@@ -147,9 +147,9 @@ fn buffered_loop(
                                   //         }
         let mut runtime = Runtime {
             background: false,
-            io: io.clone(),
-            jobs: jobs,
-            args: args,
+            io: *io,
+            jobs,
+            args,
         };
         let _ = parse_and_run(&line, &mut runtime);
 

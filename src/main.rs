@@ -73,7 +73,7 @@ fn main() -> MainResult {
     let mut args = Docopt::new(USAGE)
         .and_then(|d| {
             d.version(Some(VERSION.into()))
-                .argv(env::args().into_iter())
+                .argv(env::args())
                 .parse()
         })
         .unwrap_or_else(|e| e.exit());

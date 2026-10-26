@@ -1,5 +1,5 @@
 //! Keeps a record of previous commands, used for completion and archeology.
-use std::{env, fs::File, io::prelude::*, path::Path};
+use std::{env, fs::File, io, io::prelude::*, path::Path};
 
 /// The history of a user's provided commands.
 #[derive(Debug)]
@@ -58,7 +58,7 @@ impl History {
 
     pub fn get_down(&mut self) -> Option<String> {
         match self.0 {
-            Some(i) if i == 0 => self.0 = None,
+            Some(0) => self.0 = None,
             Some(i) => self.0 = Some(i.saturating_sub(1)),
             None => {}
         };
@@ -99,13 +99,13 @@ impl History {
         history
     }
 
-    pub fn save(&self) -> Result<(), ()> {
+    pub fn save(&self) -> io::Result<()> {
         let home = env::var("HOME").expect("HOME variable not set.");
         let history_path = format!("{}/.oursh_history", home);
-        let mut f = File::create(&history_path).expect("error cannot find history");
+        let mut f = File::create(history_path)?;
         for (text, _) in self.1.iter() {
-            f.write_all(text.as_bytes()).expect("error writing history");
-            f.write_all(b"\n").expect("error writing history");
+            f.write_all(text.as_bytes())?;
+            f.write_all(b"\n")?;
         }
 
         Ok(())

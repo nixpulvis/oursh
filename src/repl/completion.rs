@@ -132,7 +132,7 @@ fn executables_in(dirs: impl IntoIterator<Item = PathBuf>, text: &str) -> Comple
         1 => Completion::Complete(matches.remove(0)),
         _ => {
             matches.sort_by(|a, b| match a.len().cmp(&b.len()) {
-                Equal => b.cmp(&a),
+                Equal => b.cmp(a),
                 o => o,
             });
             Completion::Partial(matches)

@@ -41,7 +41,7 @@ impl Action {
         context.stdout.suspend_raw_mode().unwrap();
         let mut runtime = Runtime {
             background: false,
-            io: context.io.clone(),
+            io: *context.io,
             jobs: context.jobs,
             args: context.args,
             #[cfg(feature = "history")]
@@ -49,7 +49,7 @@ impl Action {
         };
         if parse_and_run(context.text, &mut runtime).is_ok() {
             #[cfg(feature = "history")]
-            context.history.add(&context.text, 1);
+            context.history.add(context.text, 1);
         }
         context.stdout.activate_raw_mode().unwrap();
 
@@ -189,7 +189,7 @@ impl Action {
 
     #[cfg(feature = "completion")]
     pub fn complete(context: &mut ActionContext) {
-        match complete(&context.text) {
+        match complete(context.text) {
             Completion::Partial(possibilities) => {
                 if possibilities.len() > 25 {
                     print!("\n\r");
